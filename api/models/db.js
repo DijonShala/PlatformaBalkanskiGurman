@@ -1,0 +1,60 @@
+import dotenv from "dotenv";
+import pg from "pg";
+import { Sequelize } from 'sequelize';
+
+dotenv.config();
+
+const { Pool } = pg;
+
+const pool = new Pool({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_DATABASE,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+});
+
+const sequelize = new Sequelize(process.env.DB_DATABASE, process.env.DB_USER, process.env.DB_PASSWORD, {
+    host: process.env.DB_HOST,
+    dialect: 'postgres',
+    port: process.env.DB_PORT,
+    logging: false,
+});
+
+pool.on("connect", () => {
+    console.log("Connection pool established with Database");
+})
+
+pool.on("error", (err, client) => {
+  console.error("Unexpected error on idle client", err);
+  process.exit(-1);
+});
+
+pool.on("remove", () => {
+  console.log("Client removed from pool");
+});
+
+const gracefulShutdown = async (msg, callback) => {
+  try {
+    await pool.end();
+    console.log(`PostgreSQL pool disconnected through ${msg}.`);
+    callback();
+  } catch (err) {
+    console.error("Error during pool shutdown", err);
+    callback(err);
+  }
+};
+
+process.once("SIGUSR2", () => {
+  gracefulShutdown("nodemon restart", () => process.kill(process.pid, "SIGUSR2"));
+});
+
+process.on("SIGINT", () => {
+  gracefulShutdown("app termination", () => process.exit(0));
+});
+
+process.on("SIGTERM", () => {
+  gracefulShutdown("Cloud-based app shutdown", () => process.exit(0));
+});
+
+export { pool, sequelize };

@@ -1,0 +1,37 @@
+{
+  "name": "PlatformaBalkanskiGurman",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Projekt za diplomsko nalogo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DijonShala/PlatformaBalkanskiGurman.git"
+  },
+  "author": "Dijon Shala",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DijonShala/PlatformaBalkanskiGurman"
+  },
+  "homepage": "https://github.com/DijonShala/PlatformaBalkanskiGurman#readme",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "express-jwt": "^8.5.1",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.16",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0",
+    "pg": "^8.16.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
