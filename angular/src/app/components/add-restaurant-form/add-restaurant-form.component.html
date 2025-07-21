@@ -1,0 +1,165 @@
+<div class="p-6">
+<h2 class="text-2xl font-bold mb-6 text-gray-800">Add Your Restaurant</h2>
+
+<form
+  [formGroup]="restaurantForm"
+  (ngSubmit)="submit()"
+  class="space-y-5 max-w-md"
+  novalidate
+>
+  <div>
+    <label class="block mb-1 font-semibold text-gray-700" for="name">
+      Name <span class="text-red-500">*</span>
+    </label>
+    <input
+      id="name"
+      formControlName="name"
+      required
+      type="text"
+      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
+      [class.border-red-500]="
+        restaurantForm.get('name')?.invalid && restaurantForm.get('name')?.touched
+      "
+    />
+    <small
+      *ngIf="
+        restaurantForm.get('name')?.invalid && restaurantForm.get('name')?.touched
+      "
+      class="text-red-500"
+    >
+      Name is required.
+    </small>
+  </div>
+
+  <div>
+    <label class="block mb-1 font-semibold text-gray-700" for="category">
+      Category
+    </label>
+    <input
+      id="category"
+      formControlName="category"
+      type="text"
+      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
+    />
+  </div>
+
+  <div>
+    <label class="block mb-1 font-semibold text-gray-700" for="foodType">
+      Food Type
+    </label>
+    <input
+      id="foodType"
+      formControlName="foodType"
+      type="text"
+      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
+    />
+  </div>
+
+  <div>
+    <label class="block mb-1 font-semibold text-gray-700" for="description">
+      Description
+    </label>
+    <textarea
+      id="description"
+      formControlName="description"
+      rows="4"
+      class="w-full rounded border border-gray-300 px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
+    ></textarea>
+  </div>
+
+  <div>
+    <label class="block mb-1 font-semibold text-gray-700" for="address">
+      Address
+    </label>
+    <input
+      id="address"
+      formControlName="address"
+      type="text"
+      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
+    />
+  </div>
+
+  <div>
+    <label class="block mb-1 font-semibold text-gray-700" for="postalCode">
+      Postal Code <span class="text-red-500">*</span>
+    </label>
+    <input
+      id="postalCode"
+      formControlName="postalCode"
+      type="number"
+      required
+      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
+      [class.border-red-500]="
+        restaurantForm.get('postalCode')?.invalid &&
+        restaurantForm.get('postalCode')?.touched
+      "
+    />
+    <small
+      *ngIf="
+        restaurantForm.get('postalCode')?.invalid &&
+        restaurantForm.get('postalCode')?.touched
+      "
+      class="text-red-500"
+    >
+      Postal Code is required.
+    </small>
+  </div>
+
+  <div>
+    <label class="block mb-1 font-semibold text-gray-700" for="city">
+      City
+    </label>
+    <input
+      id="city"
+      formControlName="city"
+      type="text"
+      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
+    />
+  </div>
+
+  <div>
+    <label class="block mb-1 font-semibold text-gray-700" for="country">
+      Country
+    </label>
+    <input
+      id="country"
+      formControlName="country"
+      type="text"
+      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
+    />
+  </div>
+
+ <div>
+  <label class="block mb-1 font-semibold text-gray-700" for="photos">
+    Upload Photos
+  </label>
+  <input
+    type="file"
+    id="photos"
+    (change)="onFilesSelected($event)"
+    multiple
+    accept="image/*"
+    class="w-full"
+  />
+</div>
+
+
+
+  <div class="flex justify-end gap-4 mt-6">
+    <button
+      type="button"
+      (click)="cancel()"
+      class="px-5 py-2 rounded-md border border-gray-400 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      [disabled]="restaurantForm.invalid"
+      class="px-5 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-400"
+    >
+      Submit
+    </button>
+  </div>
+</form>
+</div>

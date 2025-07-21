@@ -1,0 +1,48 @@
+<div class="p-4 border rounded-lg shadow space-y-4 bg-white">
+  <h3 class="text-lg font-semibold">Search & Filters</h3>
+
+  <input
+    [(ngModel)]="searchName"
+    (keyup.enter)="applyFilters()"
+    class="w-full border px-3 py-2 rounded"
+    placeholder="Search by name"
+  />
+
+  <select [(ngModel)]="selectedCategory" (change)="applyFilters()" class="w-full border px-3 py-2 rounded">
+    <option value="">All Categories</option>
+    <option *ngFor="let cat of categoryList" [value]="cat">{{ cat }}</option>
+  </select>
+
+  <select [(ngModel)]="selectedFoodType" (change)="applyFilters()" class="w-full border px-3 py-2 rounded">
+    <option value="">All Food Types</option>
+    <option *ngFor="let ft of foodTypeList" [value]="ft">{{ ft }}</option>
+  </select>
+
+  <select [(ngModel)]="selectedCity" (change)="applyFilters()" class="w-full border px-3 py-2 rounded">
+    <option value="">All Cities</option>
+    <option *ngFor="let city of cityList" [value]="city">{{ city }}</option>
+  </select>
+
+  <select [(ngModel)]="selectedCountry" (change)="applyFilters()" class="w-full border px-3 py-2 rounded">
+    <option value="">All Countries</option>
+    <option *ngFor="let c of countryList" [value]="c">{{ c }}</option>
+  </select>
+
+  <input
+  type="number"
+  [(ngModel)]="maxDistance"
+  min="100"
+  class="w-full border px-3 py-2 rounded"
+  placeholder="Max distance (meters)"
+/>
+  <button (click)="onFindNearbyClick()">
+  Find Restaurants Near Me
+</button>
+
+<button class="btn btn-secondary w-full mt-2" (click)="clearFilters()">Reset</button>
+
+<div *ngIf="error" class="text-red-500 text-sm">
+  {{ error }}
+</div>
+
+</div>

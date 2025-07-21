@@ -1,0 +1,64 @@
+<header class="bg-white shadow-md">
+  <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
+    <!-- Logo and Name -->
+    <div class="flex items-center gap-2">
+      <img src="../../../../public/assets/food.png" alt="Logo" class="h-8 w-8" />
+      <a routerLink="/" class="text-xl font-bold text-gray-800 hover:underline cursor-pointer">
+        Balkanski Gurman
+      </a>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-4">
+      <!-- Map Toggle -->
+      <button 
+        class="text-sm text-white bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+        (click)="toggleMap()"
+      >
+        Show Map
+      </button>
+
+      <!-- Add Restaurant -->
+      <button
+        class="text-sm text-white bg-green-600 px-4 py-2 rounded hover:bg-green-700"
+        (click)="openAddRestaurantModal()"
+      >
+        Add Your Restaurant
+      </button>
+
+      <!-- Auth Links -->
+      <nav class="space-x-4" *ngIf="!authService.isLoggedIn()">
+        <a routerLink="/login" routerLinkActive="underline" class="text-blue-600 hover:underline">Login</a>
+        <a routerLink="/register" routerLinkActive="underline" class="text-blue-600 hover:underline">Register</a>
+      </nav>
+
+      <!-- Avatar Dropdown Menu -->
+      <div *ngIf="authService.isLoggedIn()" class="relative group">
+        <button class="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full">
+          <img src="../../../../public/assets/avatar.png" alt="Avatar" class="w-8 h-8 rounded-full" />
+          <span class="hidden md:inline text-sm font-medium text-gray-700">
+            {{ authService.getCurrentUser()?.firstname || 'User' }}
+          </span>
+        </button>
+
+        <!-- Dropdown -->
+        <div
+          class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg opacity-0 group-hover:opacity-100 group-hover:visible invisible transition duration-200"
+        >
+          <a
+            (click)="goToProfile()"
+            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+          >
+            Dashboard
+          </a>
+          <a
+            (click)="logout()"
+            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+          >
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

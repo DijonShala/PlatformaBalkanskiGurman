@@ -2,24 +2,151 @@ import Restaurant from "../models/Restaurant.js";
 import { Op, fn, col, literal } from "sequelize";
 import { sequelize } from "../models/db.js";
 import Review from "../models/Review.js";
+import { createRestaurantSchema, updateRestaurantSchema } from "../middleware/joivalidate.js";
+import axios from "axios";
+import streamifier from "streamifier";
+import cloudinary from "./cloudinary.js";
 
 /**
  * @openapi
  * /restaurants:
  *  get:
- *   summary: Get all restaurants
- *   description: Retrieve a list of all restaurants from the database.
+ *   summary: Get paginated list of restaurants
+ *   description: Retrieve a paginated list of restaurants from the database. Use query parameters to control page and limit.
  *   tags: [Restaurants]
+ *   parameters:
+ *    - in: query
+ *      name: page
+ *      schema:
+ *        type: integer
+ *        default: 1
+ *      description: Page number (1-based index)
+ *    - in: query
+ *      name: limit
+ *      schema:
+ *        type: integer
+ *        default: 10
+ *      description: Number of items per page
  *   responses:
  *    '200':
  *     description: <b>OK</b>, restaurants fetched successfully.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         currentPage:
+ *          type: integer
+ *          example: 1
+ *         totalPages:
+ *          type: integer
+ *          example: 5
+ *         totalItems:
+ *          type: integer
+ *          example: 50
+ *         restaurants:
+ *          type: array
+ *          items:
+ *           $ref: '#/components/schemas/Restaurant'
  *    '500':
  *     description: <b>Internal Server Error</b>, failed to retrieve restaurants.
  */
+
 const allRestaurants = async (req, res) => {
   try {
-    const restaurants = await Restaurant.findAll();
-    res.status(200).json(restaurants);
+    const page = parseInt(req.query.page) || 1; // Default page 1
+    const limit = parseInt(req.query.limit) || 10; // Default 10 items per page
+    const offset = (page - 1) * limit;
+
+    const { count, rows: restaurants } = await Restaurant.findAndCountAll({
+      offset,
+      limit,
+      order: [['createdAt', 'DESC']], // Optional: order by newest first
+    });
+
+    res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+      data: restaurants,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/**
+ * @openapi
+ * /restaurants/user/{id}:
+ *  get:
+ *   summary: Get paginated list of restaurants created by a specific user
+ *   description: Retrieve a paginated list of restaurants created by the user with the given ID.
+ *   tags: [Restaurants]
+ *   parameters:
+ *    - in: path
+ *      name: id
+ *      schema:
+ *        type: string
+ *      required: true
+ *      description: User ID to filter restaurants by
+ *    - in: query
+ *      name: page
+ *      schema:
+ *        type: integer
+ *        default: 1
+ *      description: Page number (1-based index)
+ *    - in: query
+ *      name: limit
+ *      schema:
+ *        type: integer
+ *        default: 10
+ *      description: Number of items per page
+ *   responses:
+ *    '200':
+ *     description: <b>OK</b>, restaurants fetched successfully.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         currentPage:
+ *          type: integer
+ *          example: 1
+ *         totalPages:
+ *          type: integer
+ *          example: 5
+ *         totalItems:
+ *          type: integer
+ *          example: 50
+ *         data:
+ *          type: array
+ *          items:
+ *           $ref: '#/components/schemas/Restaurant'
+ *    '403':
+ *     description: <b>Forbidden</b>, user not authorized to access this data.
+ *    '500':
+ *     description: <b>Internal Server Error</b>, failed to retrieve restaurants.
+ */
+const restaurantsByUserId = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const { count, rows: restaurants } = await Restaurant.findAndCountAll({
+      where: { userId },
+      offset,
+      limit,
+      order: [['createdAt', 'DESC']],
+    });
+
+    res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+      data: restaurants,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -66,7 +193,10 @@ const oneRestaurant = async (req, res) => {
  * /restaurants:
  *   post:
  *     summary: Create a new restaurant
- *     description: Add a new restaurant with all necessary information. Authentication required. The userId is obtained from the JWT.
+ *     description: >
+ *       Add a new restaurant with all necessary information.
+ *       Authentication required. The userId is obtained from the JWT.
+ *       Latitude and longitude are obtained automatically by geocoding the address fields.
  *     tags:
  *       - Restaurants
  *     security:
@@ -79,8 +209,6 @@ const oneRestaurant = async (req, res) => {
  *             type: object
  *             required:
  *               - name
- *               - latitude
- *               - longitude
  *               - address
  *               - city
  *               - country
@@ -97,22 +225,15 @@ const oneRestaurant = async (req, res) => {
  *               description:
  *                 type: string
  *                 example: "Modern Mediterranean cuisine with Slovenian flair and local wines."
- *               latitude:
- *                 type: number
- *                 format: double
- *                 example: 46.298262
- *                 description: Latitude in WGS-84.
- *               longitude:
- *                 type: number
- *                 format: double
- *                 example: 14.485361
- *                 description: Longitude in WGS-84.
  *               address:
  *                 type: string
- *                 example: "Predoslje 22, 4000 Kranj"
+ *                 example: "Predoslje 22"
+ *               postalCode:
+ *                 type: string
+ *                 example: "4000"
  *               city:
  *                 type: string
- *                 example: "Ljubljana"
+ *                 example: "Kranj"
  *               country:
  *                 type: string
  *                 example: "Slovenia"
@@ -137,7 +258,7 @@ const oneRestaurant = async (req, res) => {
  *                 data:
  *                   $ref: '#/components/schemas/Restaurant'
  *       '400':
- *         description: <b>Bad Request</b>, validation error or missing input.
+ *         description: <b>Bad Request</b>, validation error or unable to geocode address.
  *       '401':
  *         description: <b>Unauthorized</b>, authentication required.
  *       '500':
@@ -145,29 +266,67 @@ const oneRestaurant = async (req, res) => {
  */
 const createRestaurant = async (req, res) => {
   try {
+    const { error, value } = createRestaurantSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
     const {
       name,
       category,
       foodType,
       description,
-      latitude,
-      longitude,
       address,
+      postalCode,
       city,
       country,
-      photos,
-    } = req.body;
+    } = value;
 
-    if (!req.auth.id || !name || !latitude || !longitude || !address || !city || !country) {
+    if (!req.auth?.id) {
+      return res.status(401).json({ message: "Authentication required." });
+    }
+
+    const fullQuery = [address, postalCode, city, country].filter(Boolean).join(", ");
+
+    const geoRes = await axios.get("https://geocode.maps.co/search", {
+      params: {
+        q: fullQuery,
+        api_key: process.env.GEOCODE_API_KEY,
+      },
+    });
+
+    if (!geoRes.data || geoRes.data.length === 0) {
       return res.status(400).json({
-        message: "Missing required fields: userId, name, latitude, longitude, address, or country.",
+        message: "Unable to geocode address. Please check the provided location.",
       });
     }
 
+    const { lat, lon } = geoRes.data[0];
+
     const location = {
       type: "Point",
-      coordinates: [parseFloat(longitude), parseFloat(latitude)],
+      coordinates: [parseFloat(lon), parseFloat(lat)],
     };
+
+    let photoUrls = [];
+    if (req.files && req.files.length > 0) {
+      console.log("FILES RECEIVED:", req.files.length);
+      const uploads = req.files.map(file => {
+        return new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "restaurant_photos" },
+            (error, result) => {
+              if (result) resolve(result.secure_url);
+              else reject(error);
+            }
+          );
+          streamifier.createReadStream(file.buffer).pipe(uploadStream);
+        });
+      });
+
+      photoUrls = await Promise.all(uploads);
+    }
+
 
     const newRestaurant = await Restaurant.create({
       userId: req.auth.id,
@@ -175,26 +334,32 @@ const createRestaurant = async (req, res) => {
       category: category || null,
       foodType: foodType || null,
       description: description || null,
-      latitude: parseFloat(latitude),
-      longitude: parseFloat(longitude),
       location,
       address,
+      postalCode,
       city,
       country,
-      photos: photos || null,
+      photos: photoUrls,
     });
 
-    res.status(201).json(newRestaurant);
+    res.status(201).json({
+      status: "Created",
+      data: newRestaurant,
+    });
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
+
 /**
  * @openapi
  * /restaurants/{id}:
  *   put:
  *     summary: Update a restaurant
- *     description: Update one or more fields of a restaurant. Authentication required.
+ *     description: >
+ *       Update one or more fields of a restaurant. Authentication required.
+ *       If address fields are updated, latitude and longitude are automatically
+ *       re-obtained by geocoding the new address.
  *     tags:
  *       - Restaurants
  *     security:
@@ -218,29 +383,25 @@ const createRestaurant = async (req, res) => {
  *                 example: "Updated Hippo Diner"
  *               address:
  *                 type: string
- *                 example: "100 Safari Drive, Nairobi"
- *               latitude:
- *                 type: number
- *                 format: double
- *                 example: -1.3000
- *                 description: Latitude in WGS-84
- *               longitude:
- *                 type: number
- *                 format: double
- *                 example: 36.8000
- *                 description: Longitude in WGS-84
+ *                 example: "100 Safari Drive"
+ *               postalCode:
+ *                 type: string
+ *                 example: "00100"
+ *               city:
+ *                 type: string
+ *                 example: "Nairobi"
+ *               country:
+ *                 type: string
+ *                 example: "Kenya"
  *               category:
  *                 type: string
  *                 example: "Fine Dining"
  *               foodType:
  *                 type: string
  *                 example: "Fusion"
- *               country:
+ *               description:
  *                 type: string
- *                 example: "Kenya"
- *               city:
- *                 type: string
- *                 example: "Nairobi"
+ *                 example: "Delicious fusion food with local flavors."
  *               photos:
  *                 type: array
  *                 items:
@@ -264,7 +425,7 @@ const createRestaurant = async (req, res) => {
  *                 data:
  *                   $ref: '#/components/schemas/Restaurant'
  *       '400':
- *         description: <b>Bad Request</b>, invalid or missing input.
+ *         description: <b>Bad Request</b>, invalid or missing input or unable to geocode updated address.
  *       '401':
  *         description: <b>Unauthorized</b>, authentication required.
  *       '404':
@@ -274,49 +435,111 @@ const createRestaurant = async (req, res) => {
  */
 const updateRestaurant = async (req, res) => {
   try {
+    if (req.body.postalCode) {
+      req.body.postalCode = parseInt(req.body.postalCode, 10);
+    }
+
+    const { error, value } = updateRestaurantSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ message: error.details[0].message });
+    }
+
     const { id } = req.params;
-    const {
-      name,
-      category,
-      foodType,
-      description,
-      latitude,
-      longitude,
-      address,
-      city,
-      country,
-      photos,
-    } = req.body;
 
     const restaurant = await Restaurant.findByPk(id);
     if (!restaurant) {
       return res.status(404).json({ message: "Restaurant not found" });
     }
 
+    const {
+      name,
+      category,
+      foodType,
+      description,
+      address,
+      postalCode,
+      city,
+      country,
+      photos, // optional field from frontend
+    } = value;
+
     const updatedFields = {};
 
-    if (req.auth.id !== undefined) updatedFields.userId = req.auth.id;
     if (name !== undefined) updatedFields.name = name;
     if (category !== undefined) updatedFields.category = category;
     if (foodType !== undefined) updatedFields.foodType = foodType;
     if (description !== undefined) updatedFields.description = description;
-    if (latitude !== undefined) updatedFields.latitude = parseFloat(latitude);
-    if (longitude !== undefined) updatedFields.longitude = parseFloat(longitude);
     if (address !== undefined) updatedFields.address = address;
+    if (postalCode !== undefined) updatedFields.postalCode = postalCode;
     if (city !== undefined) updatedFields.city = city;
     if (country !== undefined) updatedFields.country = country;
-    if (photos !== undefined) updatedFields.photos = photos;
 
-    if (latitude !== undefined && longitude !== undefined) {
+    // Optional: Replace existing photos if new ones are uploaded
+    let newPhotoUrls = [];
+
+    if (req.files && req.files.length >= 0) {
+      const uploads = req.files.map(file => {
+        return new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "restaurant_photos" },
+            (error, result) => {
+              if (result) resolve(result.secure_url);
+              else reject(error);
+            }
+          );
+          streamifier.createReadStream(file.buffer).pipe(uploadStream);
+        });
+      });
+
+      newPhotoUrls = await Promise.all(uploads);
+      updatedFields.photos = newPhotoUrls; // fully replace
+    } else if (photos !== undefined) {
+      updatedFields.photos = photos; // could be empty array from frontend
+    }
+
+    // Recalculate geolocation if address fields changed
+    if (
+      address !== undefined ||
+      postalCode !== undefined ||
+      city !== undefined ||
+      country !== undefined
+    ) {
+      const addressParts = [
+        address !== undefined ? address : restaurant.address,
+        postalCode !== undefined ? postalCode : restaurant.postalCode,
+        city !== undefined ? city : restaurant.city,
+        country !== undefined ? country : restaurant.country,
+      ].filter(Boolean);
+
+      const fullQuery = addressParts.join(", ");
+
+      const geoRes = await axios.get("https://geocode.maps.co/search", {
+        params: {
+          q: fullQuery,
+          api_key: process.env.GEOCODE_API_KEY,
+        },
+      });
+
+      if (!geoRes.data || geoRes.data.length === 0) {
+        return res.status(400).json({
+          message: "Unable to geocode address. Please check the provided location.",
+        });
+      }
+
+      const { lat, lon } = geoRes.data[0];
+
       updatedFields.location = {
         type: "Point",
-        coordinates: [parseFloat(longitude), parseFloat(latitude)],
+        coordinates: [parseFloat(lon), parseFloat(lat)],
       };
     }
 
     await restaurant.update(updatedFields);
 
-    res.status(200).json({ message: "Restaurant updated", restaurant });
+    res.status(200).json({
+      status: "Updated",
+      data: restaurant,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -388,8 +611,8 @@ const deleteAllRestaurants = async (req, res) => {
  * @openapi
  * /restaurants/filter:
  *  get:
- *   summary: Filter restaurants
- *   description: Filter restaurants by category, food type, country, tags, or name.
+ *   summary: Filter restaurants with pagination
+ *   description: Filter restaurants by category, food type, country, city, or name with pagination support.
  *   tags: [Restaurants]
  *   parameters:
  *    - in: query
@@ -413,12 +636,38 @@ const deleteAllRestaurants = async (req, res) => {
  *      schema:
  *       type: string
  *    - in: query
- *      name: nResults
+ *      name: page
  *      schema:
  *       type: integer
+ *       default: 1
+ *      description: Page number (1-based)
+ *    - in: query
+ *      name: limit
+ *      schema:
+ *       type: integer
+ *       default: 10
+ *      description: Number of items per page
  *   responses:
  *    '200':
  *     description: <b>OK</b>, filtered restaurants returned.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         currentPage:
+ *          type: integer
+ *          example: 1
+ *         totalPages:
+ *          type: integer
+ *          example: 3
+ *         totalItems:
+ *          type: integer
+ *          example: 25
+ *         data:
+ *          type: array
+ *          items:
+ *           $ref: '#/components/schemas/Restaurant'
  *    '404':
  *     description: <b>Not Found</b>, no matching restaurants.
  *    '500':
@@ -427,8 +676,9 @@ const deleteAllRestaurants = async (req, res) => {
 const filterRestaurants = async (req, res) => {
   try {
     const { category, foodType, country, city, name } = req.query;
-    let nResults = parseInt(req.query.nResults);
-    nResults = isNaN(nResults) ? 10 : nResults;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
 
     let whereClause = {};
     if (category) whereClause.category = category;
@@ -437,10 +687,10 @@ const filterRestaurants = async (req, res) => {
     if (city) whereClause.city = city;
     if (name) whereClause.name = { [Op.iLike]: `%${name}%` };
 
-
-    const results = await Restaurant.findAll({
+    const { count, rows: results } = await Restaurant.findAndCountAll({
       where: whereClause,
-      limit: nResults,
+      limit,
+      offset,
       order: [["createdAt", "DESC"]],
     });
 
@@ -448,7 +698,12 @@ const filterRestaurants = async (req, res) => {
       return res.status(404).json({ message: "No restaurants found." });
     }
 
-    res.status(200).json({ status: "OK", data: results });
+    res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+      data: results,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -505,8 +760,8 @@ const listCodelistValues = async (req, res) => {
  * @openapi
  * /restaurants/distance:
  *  get:
- *   summary: Get nearby restaurants
- *   description: Find restaurants near a specific latitude and longitude.
+ *   summary: Get nearby restaurants with pagination
+ *   description: Find restaurants near a specific latitude and longitude with pagination support.
  *   tags: [Restaurants]
  *   parameters:
  *    - in: query
@@ -523,13 +778,45 @@ const listCodelistValues = async (req, res) => {
  *      name: maxDistance
  *      schema:
  *       type: number
+ *       description: Maximum distance in meters (default 5000)
  *    - in: query
- *      name: nResults
+ *      name: page
  *      schema:
  *       type: integer
+ *       default: 1
+ *      description: Page number (1-based)
+ *    - in: query
+ *      name: limit
+ *      schema:
+ *       type: integer
+ *       default: 10
+ *      description: Number of items per page
  *   responses:
  *    '200':
- *     description: <b>OK</b>, nearby restaurants retrieved.
+ *     description: <b>OK</b>, nearby restaurants retrieved with pagination.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         currentPage:
+ *          type: integer
+ *         totalPages:
+ *          type: integer
+ *         totalItems:
+ *          type: integer
+ *         data:
+ *          type: array
+ *          items:
+ *           type: object
+ *           properties:
+ *            id:
+ *             type: integer
+ *            name:
+ *             type: string
+ *            rawDistance:
+ *             type: number
+ *             description: Distance in meters (raw, unformatted)
  *    '400':
  *     description: <b>Bad Request</b>, missing or invalid location input.
  *    '404':
@@ -537,17 +824,13 @@ const listCodelistValues = async (req, res) => {
  *    '500':
  *     description: <b>Internal Server Error</b>, failed to process.
  */
-function formatDistance(meters) {
-  return meters < 1000
-    ? `${Math.round(meters)} m`
-    : `${(meters / 1000).toFixed(1)} km`;
-}
-
 const getRestaurantsByDistance = async (req, res) => {
   const lat = parseFloat(req.query.lat);
   const lng = parseFloat(req.query.lng);
   const maxDistance = parseFloat(req.query.maxDistance);
-  const nResults = parseInt(req.query.nResults);
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
 
   if (isNaN(lat) || isNaN(lng)) {
     return res.status(400).json({
@@ -555,15 +838,28 @@ const getRestaurantsByDistance = async (req, res) => {
     });
   }
 
-  const distance = isNaN(maxDistance) ? 5000 : maxDistance; // default 5 km
-  const limit = isNaN(nResults) ? 10 : nResults;
+  const distance = isNaN(maxDistance) ? 5000 : maxDistance;
 
   try {
+    // Count total matching restaurants for pagination
+    const count = await Restaurant.count({
+      where: sequelize.where(
+        sequelize.literal(`
+          ST_DWithin(
+            location,
+            ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326),
+            ${distance}
+          )
+        `),
+        true
+      ),
+    });
+
     const restaurants = await Restaurant.findAll({
       attributes: {
         include: [
           [
-            literal(`
+            sequelize.literal(`
               ST_Distance(
                 location,
                 ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
@@ -574,7 +870,7 @@ const getRestaurantsByDistance = async (req, res) => {
         ],
       },
       where: sequelize.where(
-        literal(`
+        sequelize.literal(`
           ST_DWithin(
             location,
             ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326),
@@ -583,23 +879,20 @@ const getRestaurantsByDistance = async (req, res) => {
         `),
         true
       ),
-      order: literal(`
+      order: sequelize.literal(`
         location <-> ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
       `),
       limit,
+      offset,
       raw: true,
     });
 
-    if (!restaurants.length) {
-      return res.status(404).json({ message: "No restaurants found nearby." });
-    }
-
-    const formatted = restaurants.map((r) => ({
-      ...r,
-      distance: formatDistance(r.rawDistance),
-    }));
-
-    return res.status(200).json({ status: "OK", data: formatted });
+    return res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+      data: restaurants,
+    });
   } catch (err) {
     console.error("Error fetching restaurants by distance:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -632,8 +925,122 @@ export const updateAverageRating = async (restaurantId) => {
   }
 };
 
+/**
+ * @openapi
+ * /restaurants/search:
+ *  get:
+ *   summary: Search for restaurants by name with pagination
+ *   description: Retrieve a paginated list of restaurants whose names match the provided query (case-insensitive).
+ *   tags: [Restaurants]
+ *   parameters:
+ *    - in: query
+ *      name: name
+ *      required: true
+ *      schema:
+ *       type: string
+ *      description: Name or partial name of the restaurant to search for.
+ *    - in: query
+ *      name: page
+ *      schema:
+ *       type: integer
+ *       default: 1
+ *      description: Page number (1-based)
+ *    - in: query
+ *      name: limit
+ *      schema:
+ *       type: integer
+ *       default: 10
+ *      description: Number of items per page
+ *   responses:
+ *    '200':
+ *     description: A paginated list of matching restaurants.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         currentPage:
+ *          type: integer
+ *         totalPages:
+ *          type: integer
+ *         totalItems:
+ *          type: integer
+ *         data:
+ *          type: array
+ *          items:
+ *           $ref: '#/components/schemas/Restaurant'
+ *    '400':
+ *     description: Missing required query parameter 'name'.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: "Query parameter 'name' is required."
+ *    '404':
+ *     description: No restaurants found with that name.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: "No restaurants found with that name."
+ *    '500':
+ *     description: Internal server error.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: "Server error."
+ */
+const searchRestaurantByName = async (req, res) => {
+  try {
+    const { name } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    if (!name) {
+      return res.status(400).json({ message: "Query parameter 'name' is required." });
+    }
+
+    const { count, rows: restaurants } = await Restaurant.findAndCountAll({
+      where: {
+        name: {
+          [Op.iLike]: `%${name}%`
+        }
+      },
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']],
+    });
+
+    if (restaurants.length === 0) {
+      return res.status(404).json({ message: "No restaurants found with that name." });
+    }
+
+    return res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+      data: restaurants,
+    });
+  } catch (error) {
+    console.error("Search error:", error);
+    return res.status(500).json({ message: "Server error." });
+  }
+};
+
 export default {
   allRestaurants,
+  restaurantsByUserId,
   oneRestaurant,
   createRestaurant,
   updateRestaurant,
@@ -642,4 +1049,6 @@ export default {
   filterRestaurants,
   getRestaurantsByDistance,
   listCodelistValues,
+  updateAverageRating,
+  searchRestaurantByName
 };

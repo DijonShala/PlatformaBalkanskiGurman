@@ -1,0 +1,34 @@
+<app-header (mapToggle)="toggleMap()"></app-header>
+
+<main class="max-w-screen-xl mx-auto p-4 grid grid-cols-1 md:grid-cols-[3fr_1fr] gap-4">
+  <!-- Restaurant Cards Section -->
+  <section class="p-6 overflow-y-auto">
+    <ng-container *ngIf="showSidebar; else routedContent">
+      <app-restaurant-list></app-restaurant-list>
+    </ng-container>
+    <ng-template #routedContent>
+      <router-outlet></router-outlet>
+    </ng-template>
+  </section>
+
+  <!-- Sidebar -->
+  <app-sidebar *ngIf="showSidebar"></app-sidebar>
+</main>
+
+<!-- Footer -->
+<app-footer></app-footer>
+
+<!-- Map Modal -->
+<div *ngIf="showMap" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg w-full max-w-4xl h-[80vh] relative">
+    <button 
+      class="absolute top-2 right-2 text-gray-600 hover:text-black" 
+      (click)="toggleMap()"
+    >
+      ✕
+    </button>
+    <div class="h-full flex items-center justify-center text-gray-500">
+      Map would be displayed here.
+    </div>
+  </div>
+</div>

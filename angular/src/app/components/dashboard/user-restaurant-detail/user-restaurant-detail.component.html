@@ -1,0 +1,82 @@
+<div *ngIf="form; else noSelection">
+  <h2>Edit Restaurant Details</h2>
+
+  <form [formGroup]="form" (ngSubmit)="updateRestaurant()">
+    <div>
+      <label>Name *</label><br />
+      <input formControlName="name" />
+      <div *ngIf="form.controls['name'].invalid && form.controls['name'].touched" style="color:red;">
+        Name is required.
+      </div>
+    </div>
+
+    <div>
+      <label>Category</label><br />
+      <input formControlName="category" />
+    </div>
+
+    <div>
+      <label>Food Type</label><br />
+      <input formControlName="foodType" />
+    </div>
+
+    <div>
+      <label>Description</label><br />
+      <textarea formControlName="description"></textarea>
+    </div>
+
+    <div>
+      <label>Address</label><br />
+      <input formControlName="address" />
+    </div>
+
+    <div>
+      <label>Postal Code</label><br />
+      <input formControlName="postalCode" />
+    </div>
+
+    <div>
+      <label>City</label><br />
+      <input formControlName="city" />
+    </div>
+
+    <div>
+      <label>Country</label><br />
+      <input formControlName="country" />
+    </div>
+
+   <div>
+  <label>Photos</label><br />
+
+  <button type="button" (click)="clearAllPhotos()">Delete All Photos</button>
+
+  <input
+    type="file"
+    (change)="onFilesSelected($event)"
+    multiple
+    accept="image/*"
+  />
+
+  <div *ngIf="form.value.photos?.length">
+    <h4>Preview:</h4>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <img
+        *ngFor="let photo of form.value.photos"
+        [src]="photo"
+        alt="Photo preview"
+        style="width: 100px; height: auto; object-fit: cover; border-radius: 4px;"
+      />
+    </div>
+  </div>
+</div>
+
+    <div *ngIf="error" style="color:red;">{{ error }}</div>
+
+    <button type="submit" [disabled]="loading">Update</button>
+    <button type="button" (click)="deleteRestaurant()" [disabled]="loading">Delete</button>
+  </form>
+</div>
+
+<ng-template #noSelection>
+  <p>Please select a restaurant to view details.</p>
+</ng-template>

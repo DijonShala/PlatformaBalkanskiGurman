@@ -1,27 +1,45 @@
 import User from "../models/User.js";
 import Restaurant from "../models/Restaurant.js";
 import Review from "../models/Review.js";
-
+import jwt from "jsonwebtoken";
+import { updateAverageRating } from "./restaurant.js";
+import { updateUserSchema, changePasswordSchema } from "../middleware/joivalidate.js";
 /**
  * @openapi
  * /users:
  *  get:
- *   summary: Get all users
- *   description: Retrieve all users. Admin access required.
+ *   summary: Get paginated users
+ *   description: Retrieve paginated list of users. Admin access required.
  *   tags: [Users]
  *   security:
  *    - jwt: []
+ *   parameters:
+ *    - in: query
+ *      name: page
+ *      schema:
+ *       type: integer
+ *       default: 1
+ *      description: Page number (1-based)
+ *    - in: query
+ *      name: limit
+ *      schema:
+ *       type: integer
+ *       default: 10
+ *      description: Number of users per page
  *   responses:
  *    '200':
- *     description: <b>OK</b>, list of users.
+ *     description: <b>OK</b>, paginated list of users.
  *     content:
  *      application/json:
  *       schema:
  *        type: object
  *        properties:
- *         status:
- *          type: string
- *          example: OK
+ *         currentPage:
+ *          type: integer
+ *         totalPages:
+ *          type: integer
+ *         totalItems:
+ *          type: integer
  *         data:
  *          type: array
  *          items:
@@ -30,11 +48,24 @@ import Review from "../models/Review.js";
  *     description: <b>Internal Server Error</b>, failed to fetch users.
  */
 const getAllUsers = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+
   try {
-    const users = await User.findAll({
+    const { count, rows: users } = await User.findAndCountAll({
       attributes: { exclude: ["hash", "salt"] },
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
     });
-    res.status(200).json({ status: "OK", data: users });
+
+    res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+      data: users,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -146,11 +177,19 @@ const updateProfile = async (req, res) => {
   const isAdmin = req.auth?.role === "admin";
   const id = isAdmin ? req.params.id : req.auth?.id;
 
-   if (!id) {
+  if (!id) {
     return res.status(400).json({ message: "User ID is missing." });
   }
 
-  const { username, firstname, lastname, email, role } = req.body;
+  const { error, value } = updateUserSchema.validate(req.body, { abortEarly: false });
+  if (error) {
+    return res.status(400).json({
+      message: "Validation error.",
+      details: error.details.map((detail) => detail.message),
+    });
+  }
+
+  const { username, firstname, lastname, email, role } = value;
 
   try {
     const user = await User.findByPk(id);
@@ -163,16 +202,29 @@ const updateProfile = async (req, res) => {
     if (lastname !== undefined) updateFields.lastname = lastname;
     if (email !== undefined) updateFields.email = email;
 
-    if (req.auth?.role === 'admin' && role !== undefined) {
+    if (isAdmin && role !== undefined) {
       updateFields.role = role;
+    } else if (!isAdmin && role !== undefined) {
+      return res.status(403).json({ message: "Only admin can change roles." });
     }
 
     if (Object.keys(updateFields).length === 0) {
       return res.status(400).json({ message: "No fields provided to update." });
     }
+
     await user.update(updateFields);
 
-    res.status(200).json({ message: "Profile updated successfully." });
+    const token = jwt.sign(
+            {
+              id: user.id,
+              username: user.username,
+              firstname: user.firstname,
+              role: user.role
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+    );
+    res.status(200).json({ message: "Profile updated successfully." , token});
   } catch (err) {
     if (err.name === 'SequelizeUniqueConstraintError') {
       return res.status(400).json({ message: "Username or email already in use." });
@@ -229,19 +281,20 @@ const updateProfile = async (req, res) => {
 const changePassword = async (req, res) => {
   const isAdmin = req.auth?.role === "admin";
   const id = isAdmin ? req.params.id : req.auth.id;
-   if (!id) {
+
+  if (!id) {
     return res.status(400).json({ message: "User ID is missing." });
   }
 
-  const { oldPassword, newPassword } = req.body;
-
-  if (!oldPassword || !newPassword) {
-    return res.status(400).json({ message: "Old and new passwords are required." });
+  const { error, value } = changePasswordSchema.validate(req.body, { abortEarly: false });
+  if (error) {
+    return res.status(400).json({
+      message: "Validation error.",
+      details: error.details.map((detail) => detail.message),
+    });
   }
 
-  if (newPassword.length < 6) {
-    return res.status(400).json({ message: "New password must be at least 6 characters long." });
-  }
+  const { oldPassword, newPassword } = value;
 
   try {
     const user = await User.findByPk(id);
@@ -257,12 +310,24 @@ const changePassword = async (req, res) => {
     user.setPassword(newPassword);
     await user.save();
 
-    return res.status(200).json({ message: "Password updated successfully." });
+      const token = jwt.sign(
+            {
+              id: user.id,
+              username: user.username,
+              firstname: user.firstname,
+              role: user.role,
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+          );
+
+    return res.status(200).json({ message: "Password updated successfully." , token });
   } catch (err) {
     console.error("Error changing password:", err);
     return res.status(500).json({ message: "Internal server error." });
   }
 };
+
 
 /**
  * @openapi
@@ -292,25 +357,36 @@ const changePassword = async (req, res) => {
 const deleteProfile = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id, {
-      include: [Restaurant, Review]
+      include: [
+        {
+          model: Restaurant,
+          as: 'restaurants'
+        },
+        {
+          model: Review,
+          as: 'reviews'
+        }
+      ]
     });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if ((user.Restaurants && user.Restaurants.length > 0) || (user.Reviews && user.Reviews.length > 0)) {
-      return res.status(400).json({
-        message: "Cannot delete user. User has associated restaurants."
-      });
+    // Update average rating for each of user's restaurants before deleting them
+    for (const restaurant of user.restaurants) {
+      await updateAverageRating(restaurant.id);
     }
 
-    await user.destroy();
-    res.status(200).json({ message: "User deleted successfully" });
+    await user.destroy(); // Assuming cascade delete is configured for related models
+    return res.status(200).json({ message: "User deleted successfully" });
+
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Error deleting user:", err);
+    return res.status(500).json({ message: err.message });
   }
 };
+
 
 
 export default {

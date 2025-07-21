@@ -2,13 +2,16 @@ import Review from "../models/Review.js";
 import User from "../models/User.js";
 import Restaurant from "../models/Restaurant.js";
 import { updateAverageRating } from "./restaurant.js";
+import { reviewCreateSchema, reviewUpdateSchema } from "../middleware/joivalidate.js";
+import streamifier from "streamifier";
+import cloudinary from "./cloudinary.js";
 
 /**
  * @openapi
  * /restaurants/{idrest}/reviews:
  *  get:
- *   summary: Get all reviews for a restaurant
- *   description: Retrieve all reviews for a specific restaurant by its ID.
+ *   summary: Get paginated reviews for a restaurant
+ *   description: Retrieve paginated reviews for a specific restaurant by its ID.
  *   tags: [Reviews]
  *   parameters:
  *    - in: path
@@ -17,29 +20,60 @@ import { updateAverageRating } from "./restaurant.js";
  *      schema:
  *       type: integer
  *      description: Restaurant ID
+ *    - in: query
+ *      name: page
+ *      schema:
+ *       type: integer
+ *       default: 1
+ *      description: Page number (1-based)
+ *    - in: query
+ *      name: limit
+ *      schema:
+ *       type: integer
+ *       default: 10
+ *      description: Number of reviews per page
  *   responses:
  *    '200':
- *     description: <b>OK</b>, list of reviews.
+ *     description: <b>OK</b>, paginated list of reviews.
  *     content:
  *      application/json:
  *       schema:
- *        type: array
- *        items:
- *         $ref: '#/components/schemas/Review'
+ *        type: object
+ *        properties:
+ *         currentPage:
+ *          type: integer
+ *         totalPages:
+ *          type: integer
+ *         totalItems:
+ *          type: integer
+ *         data:
+ *          type: array
+ *          items:
+ *           $ref: '#/components/schemas/Review'
  *    '500':
  *     description: <b>Internal Server Error</b>, unable to fetch reviews.
  */
-// GET all reviews for a restaurant
 const getReviews = async (req, res) => {
   const { idrest } = req.params;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = (page - 1) * limit;
+
   try {
-    const reviews = await Review.findAll({
+    const { count, rows: reviews } = await Review.findAndCountAll({
       where: { restaurantId: idrest },
-      include: [{ model: User, attributes: ["id", "username"] }],
+      include: [{ model: User, as: 'user', attributes: ["id", "username"] }],
       order: [["createdAt", "DESC"]],
+      limit,
+      offset,
     });
 
-    res.status(200).json({ status: "OK", data: reviews });
+    res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+      data: reviews,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -77,13 +111,12 @@ const getReviews = async (req, res) => {
  *    '500':
  *     description: <b>Internal Server Error</b>, failed to retrieve review.
  */
-// GET one review for a restaurant
 const getReview = async (req, res) => {
   const { idrest, id } = req.params;
   try {
     const review = await Review.findOne({
       where: { id, restaurantId: idrest },
-      include: [{ model: User, attributes: ["id", "username"] }],
+      include: [{ model: User, as: 'user', attributes: ["id", "username"] }],
     });
 
     if (!review) {
@@ -156,14 +189,18 @@ const getReview = async (req, res) => {
  *    '500':
  *     description: <b>Internal Server Error</b>, could not create review.
  */
-// POST new review
 const postReview = async (req, res) => {
   const { idrest } = req.params;
-  const { rating, comment, photos } = req.body;
 
-  if (rating < 1 || rating > 5) {
-    return res.status(400).json({ message: "Rating must be between 1 and 5." });
+  const { error, value } = reviewCreateSchema.validate(req.body, { abortEarly: false });
+  if (error) {
+    return res.status(400).json({
+      message: "Validation error.",
+      details: error.details.map((detail) => detail.message),
+    });
   }
+
+  const { rating, comment } = value;
 
   try {
     const restaurant = await Restaurant.findByPk(idrest);
@@ -171,17 +208,40 @@ const postReview = async (req, res) => {
       return res.status(404).json({ message: "Restaurant not found." });
     }
 
+     let photoUrl = null;
+    if (req.file) {
+      const uploaded = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: 'review_photos' },
+          (error, result) => {
+            if (result) resolve(result.secure_url);
+            else reject(error);
+          }
+        );
+        streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+      });
+      photoUrl = uploaded;
+    }
+
     const newReview = await Review.create({
       restaurantId: idrest,
       userId: req.auth.id,
       rating,
       comment,
-      photos: photos || null,
+      photo: photoUrl,
     });
-    
+
     await updateAverageRating(idrest);
 
-    res.status(201).json({ status: "Created", data: newReview });
+    const createdWithUser = await Review.findByPk(newReview.id, {
+      include: {
+        model: User,
+        as: 'user',
+        attributes: ['id', 'username']
+      }
+    });
+
+    res.status(201).json({ status: "Created", data: createdWithUser });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -239,9 +299,19 @@ const postReview = async (req, res) => {
  *    '500':
  *     description: <b>Internal Server Error</b>, update failed.
  */
+
 const updateReview = async (req, res) => {
   const { idrest, id } = req.params;
-  const { rating, comment, photos } = req.body;
+
+  const { error, value } = reviewUpdateSchema.validate(req.body, { abortEarly: false });
+  if (error) {
+    return res.status(400).json({
+      message: "Validation error.",
+      details: error.details.map((detail) => detail.message),
+    });
+  }
+
+  const { rating, comment, photos } = value;
 
   if (rating !== undefined && (rating < 1 || rating > 5)) {
     return res.status(400).json({ message: "Rating must be between 1 and 5." });

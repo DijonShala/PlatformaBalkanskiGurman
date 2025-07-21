@@ -1,0 +1,31 @@
+<div *ngIf="authService.getCurrentUser()?.role === 'admin'" class="admin-select">
+  <label for="userSelect">Select User:</label>
+ <select [(ngModel)]="selectedUserId" (change)="fetchRestaurants()" *ngIf="users.length > 0">
+  <option [ngValue]="null">-- Select a user --</option>
+  <option *ngFor="let user of users" [ngValue]="user.id">{{ user.username }}</option>
+</select>
+</div>
+
+<div *ngIf="loading">Loading restaurants...</div>
+
+<div *ngIf="!loading && restaurants.length === 0">
+  <p>No restaurants found for selected user.</p>
+</div>
+
+<div class="card-container" *ngIf="!loading && restaurants.length > 0">
+  <a
+    class="card"
+    *ngFor="let restaurant of restaurants"
+    [routerLink]="[baseRoute, restaurant.id]"
+    routerLinkActive="selected"
+  >
+    <h3>{{ restaurant.name }}</h3>
+  </a>
+</div>
+
+<div *ngIf="selectedRestaurant">
+  <app-user-restaurant-detail
+    [restaurant]="selectedRestaurant"
+    (updated)="refreshList()"
+  ></app-user-restaurant-detail>
+</div>

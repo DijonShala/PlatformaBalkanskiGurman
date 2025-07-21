@@ -28,7 +28,7 @@ class User extends Model {
       {
         id: this.id,
         username: this.username,
-        name: this.name,
+        firstname: this.firstname,
         role: this.role,
         exp: Math.floor(expiry.getTime() / 1000),
       },

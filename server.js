@@ -8,7 +8,8 @@ import apiRouter from "./api/routes/api.js";
 import bodyParser from "body-parser";
 import passport from "passport";
 import { Op } from "sequelize";
-//import { createServer } from "https";
+import { readFileSync } from "fs";
+import { createServer } from "https";
 dotenv.config();
 /**
  * Swagger and OpenAPI
@@ -113,6 +114,7 @@ import "./api/config/passport.js";
  * Database synchronization
  */
 import initDB from "./api/models/init.js";
+import initializedb from "./api/controllers/initdb.js";
 
 /**
  * Create server
@@ -125,6 +127,17 @@ const app = express();
  */
 app.use(express.json());
 app.use(cors());
+
+/**
+ * Odprava varnostnih pomanjkljivosti
+ */
+app.disable("x-powered-by");
+app.use((req, res, next) => {
+  res.header("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  next();
+});
 
 /**
  * CORS
@@ -202,14 +215,31 @@ async function createAdminUser() {
 
 await initDB();
 await createAdminUser();
+await initializedb.addInitialData();
 
 /**
  * Start server
  */
-app.listen(port, () => {
-  console.log(
-    `App started in ${
-      process.env.NODE_ENV || "development"
-    } mode listening on port ${port}!`
-  );
-});
+if (process.env.HTTPS == "true") {
+  createServer(
+    {
+      key: readFileSync("cert/localhost-key.pem"),
+      cert: readFileSync("cert/localhost.pem"),
+    },
+    app
+  ).listen(port, () => {
+    console.log(
+      `Secure app started in '${
+        process.env.NODE_ENV || "development"
+      } mode' listening on port ${port}!`
+    );
+  });
+} else {
+  app.listen(port, () => {
+    console.log(
+      `App started in ${
+        process.env.NODE_ENV || "development"
+      } mode listening on port ${port}!`
+    );
+  });
+}

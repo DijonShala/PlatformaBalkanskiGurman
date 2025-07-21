@@ -1,4 +1,4 @@
-import { DataTypes } from "sequelize";
+import { Model, DataTypes } from "sequelize";
 import { sequelize } from "./db.js";
 import Restaurant from "./Restaurant.js";
 import User from "./User.js";
@@ -57,45 +57,50 @@ import User from "./User.js";
  *         - restaurantId
  *         - rating
  */
-const Review = sequelize.define("Review", {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    },
-    userId: {
+
+class Review extends Model {}
+
+Review.init({
+  id: {
     type: DataTypes.INTEGER,
-        allowNull: false,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  restaurantId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  rating: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      min: 1,
+      max: 5,
     },
-    restaurantId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    rating: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-            min: 1,
-            max: 5,
-        }
-    },
-    comment: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    },
-    photos: {
-        type: DataTypes.JSONB,
-        allowNull: true,
-    }
+  },
+  comment: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  photo: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, {
-    tableName: "reviews",
-    timestamps: true,
-})
+  sequelize,
+  modelName: "Review",
+  tableName: "reviews",
+  timestamps: true,
+});
 
-Review.belongsTo(User, { foreignKey: 'userId', onDelete: "CASCADE" });
-User.hasMany(Review, { foreignKey: 'userId', onDelete: "CASCADE" });
+Review.belongsTo(User, { foreignKey: 'userId', as: 'user', onDelete: "CASCADE"});
+User.hasMany(Review, { foreignKey: 'userId', as: 'reviews', onDelete: "CASCADE" });
 
-Review.belongsTo(Restaurant, { foreignKey: 'restaurantId', onDelete: "CASCADE" });
-Restaurant.hasMany(Review, { foreignKey: 'restaurantId', onDelete: "CASCADE" });
+Review.belongsTo(Restaurant, { foreignKey: 'restaurantId', as: 'restaurants', onDelete: "CASCADE" });
+Restaurant.hasMany(Review, { foreignKey: 'restaurantId', as: 'reviews', onDelete: "CASCADE" });
 
 export default Review;

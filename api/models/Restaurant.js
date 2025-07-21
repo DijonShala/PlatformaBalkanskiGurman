@@ -1,14 +1,11 @@
-import { DataTypes } from "sequelize";
+import { Model, DataTypes } from "sequelize";
 import { sequelize } from "./db.js";
 import User from "./User.js";
 
-const FOOD_TYPES = [
-  "African", "American", "Asian", "Bakery", "Barbecue", "Cajun", "Caribbean",
-  "Chinese", "Continental", "French", "Fusion", "Greek", "Indian", "Italian",
-  "Japanese", "Korean", "Latin American", "Lebanese", "Mediterranean", "Mexican",
-  "Middle Eastern", "Pizza", "Seafood", "Southern", "Spanish", "Steakhouse",
-  "Sushi", "Thai", "Turkish", "Vegan", "Vegetarian", "Vietnamese"
-];
+const FOOD_TYPES = ["Slovenian", "Croatian", "Bosnian", "Serbian", "Montenegrin", "Macedonian", "Kosovar",
+    "Balkan", "Yugoslav Fusion", "Bakery", "Barbecue", "Pizza", "Seafood", "Grill", "Mediterranean",
+    "Middle Eastern", "Greek", "Turkish", "Italian", "Fusion", "Vegan", "Vegetarian", "Asian", "American",
+    "French", "Chinese", "Indian", "Mexican"];
 
 const CATEGORIES = [
   "Cafe", "Casual Dining", "Fast Food", "Fine Dining", "Food Truck", "Bakery",
@@ -65,39 +62,35 @@ const CATEGORIES = [
  *           type: string
  *           description: Cuisine or food style.
  *           enum:
- *             - African
- *             - American
- *             - Asian
+ *             - Slovenian
+ *             - Croatian
+ *             - Bosnian
+ *             - Serbian
+ *             - Montenegrin
+ *             - Macedonian
+ *             - Kosovar
+ *             - Balkan
+ *             - Yugoslav Fusion
  *             - Bakery
  *             - Barbecue
- *             - Cajun
- *             - Caribbean
- *             - Chinese
- *             - Continental
- *             - French
- *             - Fusion
- *             - Greek
- *             - Indian
- *             - Italian
- *             - Japanese
- *             - Korean
- *             - Latin American
- *             - Lebanese
- *             - Mediterranean
- *             - Mexican
- *             - Middle Eastern
  *             - Pizza
  *             - Seafood
- *             - Southern
- *             - Spanish
- *             - Steakhouse
- *             - Sushi
- *             - Thai
+ *             - Grill
+ *             - Mediterranean
+ *             - Middle Eastern
+ *             - Greek
  *             - Turkish
+ *             - Italian
+ *             - Fusion
  *             - Vegan
  *             - Vegetarian
- *             - Vietnamese
- *           example: Mediterranean
+ *             - Asian
+ *             - American
+ *             - French
+ *             - Chinese
+ *             - Indian
+ *             - Mexican
+ *           example: Bosnian
  *         description:
  *           type: string
  *           description: Free‑text description.
@@ -160,78 +153,89 @@ const CATEGORIES = [
  *         - country
  *         - rating
  */
-const Restaurant = sequelize.define("Restaurant", {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    },
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    category: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        validate: {
-            isIn: [CATEGORIES],
-        },
-    },
-    foodType: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        validate: {
-            isIn: [FOOD_TYPES],
-        },
-    },
-    description: {
-        type: DataTypes.TEXT,
-        allowNull: true,
-    },
-    latitude: {
-        type:  DataTypes.DECIMAL(9,6),
-        allowNull: false,
-    },
-    
-    longitude: {
-        type:  DataTypes.DECIMAL(9,6),
-        allowNull: false,
-    },
-    location: {
-        type: DataTypes.GEOGRAPHY('POINT', 4326),
-        allowNull: false,
-    },
-    address: {
-        type: DataTypes.TEXT,
-        allowNull: false,
-    },
-    city: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    country: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    photos: {
-        type: DataTypes.JSONB,
-        allowNull: true,
-    },
-    rating: {
-        type: DataTypes.DECIMAL,
-        allowNull: false,
-        defaultValue: 0,
+class Restaurant extends Model {
+
+    toJSON() {
+    const values = { ...this.get() };
+    if (values.location && values.location.coordinates) {
+      const [lng, lat] = values.location.coordinates;
+      values.latitude = lat;
+      values.longitude = lng;
     }
+    return values;
+  }
+}
+
+Restaurant.init({
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  category: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      isIn: [CATEGORIES],
+    },
+  },
+  foodType: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      isIn: [FOOD_TYPES],
+    },
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  location: {
+    type: DataTypes.GEOGRAPHY("POINT", 4326),
+    allowNull: false,
+  },
+  address: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  city: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  postalCode: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  country: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  photos: {
+  type: DataTypes.ARRAY(DataTypes.STRING),
+  allowNull: false,
+  defaultValue: [],
+  },
+  rating: {
+    type: DataTypes.DECIMAL,
+    allowNull: false,
+    defaultValue: 0,
+  },
 }, {
-    tableName: "restaurants",
-    timestamps: true,
+  sequelize,
+  modelName: "Restaurant",
+  tableName: "restaurants",
+  timestamps: true,
 });
 
-Restaurant.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
-User.hasMany(Restaurant, { foreignKey: "userId", onDelete: "CASCADE" });
+Restaurant.belongsTo(User, { foreignKey: "userId", as: 'user', onDelete: "CASCADE"});
+User.hasMany(Restaurant, { foreignKey: "userId", as: 'restaurants', onDelete: "CASCADE"});
 
 export default Restaurant;

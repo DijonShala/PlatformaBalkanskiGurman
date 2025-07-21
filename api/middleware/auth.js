@@ -16,6 +16,7 @@ export const isOwnerOrAdmin = (model, idParam = 'id') => {
 
       if (
         resource.id !== req.auth.id &&
+        resource.userId !== req.auth.id &&
         req.auth.role !== 'admin'
       ) {
         return res.status(403).json({ message: 'Not authorized.' });

@@ -1,0 +1,29 @@
+<div *ngIf="loading" class="loading">
+  Loading restaurants...
+</div>
+
+<div *ngIf="error" class="error">
+  {{ error }}
+</div>
+
+<div *ngIf="!loading && !error && restaurants?.length === 0" class="no-results">
+  No restaurants found.
+</div>
+
+<div class="restaurant-list" *ngIf="!loading && !error">
+  <a
+    *ngFor="let restaurant of restaurants"
+    [routerLink]="['/restaurants', restaurant.id]"
+    class="restaurant-card-link"
+  >
+    <app-restaurant-card
+      [restaurant]="restaurant"
+      class="restaurant-card"
+    ></app-restaurant-card>
+  </a>
+   <div class="pagination-controls">
+    <button (click)="prevPage()" [disabled]="page === 1">Previous</button>
+    <span>Page {{ page }} of {{ totalPages }}</span>
+    <button (click)="nextPage()" [disabled]="page === totalPages">Next</button>
+  </div>
+</div>

@@ -1,0 +1,49 @@
+<div class="login-container">
+  <h2>Login</h2>
+
+  <form (ngSubmit)="onLoginSubmit()" autocomplete="off" novalidate>
+    <div *ngIf="formError" class="alert alert-danger" role="alert">
+      {{ formError }}
+    </div>
+
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input
+        id="username"
+        name="username"
+        type="text"
+        [(ngModel)]="credentials.username"
+        class="form-control"
+        placeholder="Enter your username"
+        required
+        aria-required="true"
+        aria-describedby="usernameHelp"
+      />
+      <small id="usernameHelp" class="form-text text-muted">Your unique username.</small>
+    </div>
+
+    <div class="form-group mt-3">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        [(ngModel)]="credentials.password"
+        class="form-control"
+        placeholder="Enter your password"
+        required
+        aria-required="true"
+      />
+    </div>
+
+    <div class="form-group mt-4">
+         <button matButton="elevated">Log in</button>
+    </div>
+  </form>
+
+  <p class="mt-4 text-sm">
+  Don't have an account? 
+  <a routerLink="/register" class="text-blue-600 hover:underline">Register here</a>.
+  </p>
+
+</div>

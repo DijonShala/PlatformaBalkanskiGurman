@@ -1,0 +1,16 @@
+<nav class="w-64 bg-gray-100 h-full p-4">
+  <ul class="space-y-2">
+    <li>
+      <a routerLink="profile" routerLinkActive="font-bold text-blue-600">Profile</a>
+    </li>
+    <li>
+      <a routerLink="change-password" routerLinkActive="font-bold text-blue-600">Change Password</a>
+    </li>
+    <li *ngIf="isAdmin">
+      <a routerLink="users" routerLinkActive="font-bold text-blue-600">Users</a>
+    </li>
+    <li>
+      <a routerLink="restaurants" routerLinkActive="font-bold text-blue-600">My Restaurants</a>
+    </li>
+  </ul>
+</nav>

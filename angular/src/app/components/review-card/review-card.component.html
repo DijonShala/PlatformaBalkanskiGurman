@@ -1,0 +1,28 @@
+<div class="card mb-3">
+  <div class="card-body">
+    <div *ngIf="review.photo" class="mt-3">
+    <img
+      [src]="review.photo"
+      alt="Review photo"
+      class="img-fluid rounded"
+      style="max-height: 250px; object-fit: cover;"
+    />
+  </div>
+    <h5 class="card-title">
+      {{ review.user?.username || 'Anonymous' }}
+      <span class="badge bg-warning text-dark ms-2">★ {{ review.rating }}</span>
+
+       <button
+        *ngIf="authService.getCurrentUser()?.id === review.userId || authService.getCurrentUser()?.role === 'admin'"
+        (click)="onDelete()"
+        class="btn btn-sm btn-outline-danger float-end"
+      >
+        Delete
+      </button>
+    </h5>
+    <p class="card-text">{{ review.comment }}</p>
+    <p class="card-text">
+      <small class="text-muted">Reviewed on {{ review.createdAt | date:'mediumDate' }}</small>
+    </p>
+  </div>
+</div>

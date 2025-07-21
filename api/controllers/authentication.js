@@ -1,6 +1,6 @@
 import passport from "passport";
 import User from "../models/User.js";
-
+import { loginSchema, registerSchema } from "../middleware/joivalidate.js";
 /**
  * @openapi
  * /login:
@@ -52,15 +52,19 @@ import User from "../models/User.js";
  *        message: Database not available.
  */
 const login = (req, res) => {
-     if (!req.body.username || !req.body.password)
-      return res.status(400).json({ message: "All fields required." });
-    else
-      passport.authenticate("local", (err, user, info) => {
-        if (err) return res.status(500).json({ message: err.message });
-        if (user) return res.status(200).json({ token: user.generateJwt() });
-        else return res.status(401).json({ message: info.message });
-      })(req, res);
-}
+  const { error, value } = loginSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
+  }
+  const { username, password } = value;
+
+  passport.authenticate("local", (err, user, info) => {
+    if (err) return res.status(500).json({ message: err.message });
+    if (user) return res.status(200).json({ token: user.generateJwt() });
+    else return res.status(401).json({ message: info.message });
+  })(req, res);
+};
 
 /**
  * @openapi
@@ -136,19 +140,14 @@ const login = (req, res) => {
  *       example:
  *        message: Database not available.
  */
-async function register ( req, res ) {
- const { username, email, password, firstname, lastname } = req.body;
+async function register(req, res) {
+  const { error, value } = registerSchema.validate(req.body);
 
-  if (!username || !email || !password || !firstname || !lastname) {
-    return res.status(400).json({ message: "All fields are required." });
+  if (error) {
+    return res.status(400).json({ message: error.details[0].message });
   }
 
-  const emailRegex =
-    /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
-
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ message: "Invalid email format." });
-  }
+  const { username, email, password, firstname, lastname } = value;
 
   try {
     const existingUser = await User.findOne({ where: { email } });
@@ -175,6 +174,7 @@ async function register ( req, res ) {
     return res.status(500).json({ message: "Server error." });
   }
 };
+
 export default {
     login,
     register,
