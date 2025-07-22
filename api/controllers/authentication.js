@@ -22,11 +22,11 @@ import { loginSchema, registerSchema } from "../middleware/joivalidate.js";
  *         username:
  *           type: string
  *           description: <b>Username</b> of the registered user.
- *           example: john_doe
+ *           example: admin
  *         password:
  *           type: string
  *           description: <b>Password</b> for the user account.
- *           example: secret123
+ *           example: admin123
  *   responses:
  *    '200':
  *     description: <b>OK</b>, with JWT token.

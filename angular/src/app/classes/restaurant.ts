@@ -2,8 +2,8 @@ export class Restaurant {
   id!: number;
   userId!: number;
   name!: string;
-  category?: string;
-  foodType?: string;
+  category!: string;
+  foodType?: string[];
   description?: string;
   location!: {
     type: 'Point';
@@ -14,6 +14,7 @@ export class Restaurant {
   city!: string;
   country!: string;
   photos?: string[];
+  icon!: string;
   rating!: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -32,11 +33,12 @@ export interface CreateRestaurantPayload {
   id?: number;
   name: string;
   category?: string;
-  foodType?: string;
+  foodType?: string[];
   description?: string;
   address: string;
   postalCode?: number;
   city: string;
   country: string;
   photos?: string[];
+  icon?: string;
 }

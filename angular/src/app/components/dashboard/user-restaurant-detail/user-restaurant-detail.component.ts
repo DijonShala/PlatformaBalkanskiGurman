@@ -109,8 +109,14 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
     }
 
     const formValues = this.form.value;
-    const formData = new FormData();
+    const foodTypeArray = formValues.foodType
+    ? formValues.foodType
+        .split(',')
+        .map((s: string) => s.trim())
+        .filter(Boolean)
+    : [];
 
+    const formData = new FormData();
     formData.append('name', formValues.name);
     formData.append('category', formValues.category || '');
     formData.append('foodType', formValues.foodType || '');
@@ -120,6 +126,10 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
     formData.append('city', formValues.city);
     formData.append('country', formValues.country);
 
+    for (const food of foodTypeArray) {
+    formData.append('foodType', food);
+    }
+    
     for (const file of this.selectedFiles) {
       formData.append('restaurant_photos', file);
     }

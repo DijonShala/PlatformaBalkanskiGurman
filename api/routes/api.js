@@ -39,6 +39,7 @@ router.delete("/user/:id", auth, isOwnerOrAdmin(User), ctrlUsers.deleteProfile);
 /**
  * Restaurant
  */
+router.get('/restaurants/in-bounds', ctrlRestaurants.getRestaurantsInBounds);
 router.get("/restaurants", ctrlRestaurants.allRestaurants);
 router.get("/restaurants/user/:id", auth, isOwnerOrAdmin(Restaurant), ctrlRestaurants.restaurantsByUserId);
 router.get("/restaurants/distance", ctrlRestaurants.getRestaurantsByDistance);

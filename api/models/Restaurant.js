@@ -2,15 +2,10 @@ import { Model, DataTypes } from "sequelize";
 import { sequelize } from "./db.js";
 import User from "./User.js";
 
-const FOOD_TYPES = ["Slovenian", "Croatian", "Bosnian", "Serbian", "Montenegrin", "Macedonian", "Kosovar",
-    "Balkan", "Yugoslav Fusion", "Bakery", "Barbecue", "Pizza", "Seafood", "Grill", "Mediterranean",
-    "Middle Eastern", "Greek", "Turkish", "Italian", "Fusion", "Vegan", "Vegetarian", "Asian", "American",
-    "French", "Chinese", "Indian", "Mexican"];
-
 const CATEGORIES = [
   "Cafe", "Casual Dining", "Fast Food", "Fine Dining", "Food Truck", "Bakery",
   "Bar", "Bistro", "Buffet", "Canteen", "Coffee Shop", "Deli", "Drive-Thru",
-  "Family Style", "Gastropub", "Pop-Up", "Pub", "Quick Service", "Takeaway", "Tea House"
+  "Family Style", "Gastropub", "Pop-Up", "Pub", "Quick Service", "Takeaway", "Tea House", "Pizzeria", "Restaurant"
 ];
 
 /**
@@ -38,6 +33,7 @@ const CATEGORIES = [
  *           description: High‑level category.
  *           enum:
  *             - Cafe
+ *             - Restaurant
  *             - Casual Dining
  *             - Fast Food
  *             - Fine Dining
@@ -59,38 +55,11 @@ const CATEGORIES = [
  *             - Tea House
  *           example: Fine Dining
  *         foodType:
- *           type: string
+ *           type: array
  *           description: Cuisine or food style.
- *           enum:
- *             - Slovenian
- *             - Croatian
- *             - Bosnian
- *             - Serbian
- *             - Montenegrin
- *             - Macedonian
- *             - Kosovar
- *             - Balkan
- *             - Yugoslav Fusion
- *             - Bakery
- *             - Barbecue
- *             - Pizza
- *             - Seafood
- *             - Grill
- *             - Mediterranean
- *             - Middle Eastern
- *             - Greek
- *             - Turkish
- *             - Italian
- *             - Fusion
- *             - Vegan
- *             - Vegetarian
- *             - Asian
- *             - American
- *             - French
- *             - Chinese
- *             - Indian
- *             - Mexican
- *           example: Bosnian
+ *           items:
+ *             type: string
+ *           example: ["Bosnian", "Barbecue", "Coffee"]
  *         description:
  *           type: string
  *           description: Free‑text description.
@@ -125,6 +94,10 @@ const CATEGORIES = [
  *             format: uri
  *           example:
  *             - https://example.com/photo10.jpg
+ *         icon:
+ *           type: string
+ *           description: Icon of hte restaurant.
+ *           example: restaurant.png.
  *         rating:
  *           type: number
  *           format: float
@@ -148,23 +121,12 @@ const CATEGORIES = [
  *         - name
  *         - latitude
  *         - longitude
- *         - address
  *         - city
  *         - country
  *         - rating
+ *         - icon
  */
-class Restaurant extends Model {
-
-    toJSON() {
-    const values = { ...this.get() };
-    if (values.location && values.location.coordinates) {
-      const [lng, lat] = values.location.coordinates;
-      values.latitude = lat;
-      values.longitude = lng;
-    }
-    return values;
-  }
-}
+class Restaurant extends Model {}
 
 Restaurant.init({
   id: {
@@ -182,17 +144,15 @@ Restaurant.init({
   },
   category: {
     type: DataTypes.STRING,
-    allowNull: true,
+    allowNull: false,
     validate: {
       isIn: [CATEGORIES],
     },
   },
   foodType: {
-    type: DataTypes.STRING,
+    type: DataTypes.ARRAY(DataTypes.STRING),
     allowNull: true,
-    validate: {
-      isIn: [FOOD_TYPES],
-    },
+    defaultValue: [],
   },
   description: {
     type: DataTypes.TEXT,
@@ -204,7 +164,7 @@ Restaurant.init({
   },
   address: {
     type: DataTypes.TEXT,
-    allowNull: false,
+    allowNull: true,
   },
   city: {
     type: DataTypes.STRING,
@@ -220,8 +180,13 @@ Restaurant.init({
   },
   photos: {
   type: DataTypes.ARRAY(DataTypes.STRING),
-  allowNull: false,
+  allowNull: true,
   defaultValue: [],
+  },
+  icon: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: "default.png",
   },
   rating: {
     type: DataTypes.DECIMAL,

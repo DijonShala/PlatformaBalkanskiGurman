@@ -51,7 +51,6 @@ import cloudinary from "./cloudinary.js";
  *    '500':
  *     description: <b>Internal Server Error</b>, failed to retrieve restaurants.
  */
-
 const allRestaurants = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1; // Default page 1
@@ -220,8 +219,12 @@ const oneRestaurant = async (req, res) => {
  *                 type: string
  *                 example: "Fine Dining"
  *               foodType:
- *                 type: string
- *                 example: "Mediterranean-Slovenian"
+ *                 oneOf:
+ *                   - type: string
+ *                   - type: array
+ *                     items:
+ *                       type: string
+ *                 example: ["Mediterranean", "Slovenian"]
  *               description:
  *                 type: string
  *                 example: "Modern Mediterranean cuisine with Slovenian flair and local wines."
@@ -264,6 +267,30 @@ const oneRestaurant = async (req, res) => {
  *       '500':
  *         description: <b>Internal Server Error</b>, could not create restaurant.
  */
+
+const CATEGORY_ICONS = {
+  "Cafe": "cafe.png",
+  "Casual Dining": "casual-dining.png",
+  "Fast Food": "fast-food.png",
+  "Fine Dining": "fine-dining.png",
+  "Food Truck": "food-truck.png",
+  "Bakery": "bakery.png",
+  "Bar": "bar.png",
+  "Bistro": "bistro.png",
+  "Buffet": "buffet.png",
+  "Canteen": "canteen.png",
+  "Coffee Shop": "coffee-shop.png",
+  "Deli": "deli.png",
+  "Drive-Thru": "drive-thru.png",
+  "Family Style": "family-style.png",
+  "Gastropub": "gastropub.png",
+  "Pop-Up": "pop-up.png",
+  "Pub": "pub.png",
+  "Quick Service": "quick-service.png",
+  "Takeaway": "takeaway.png",
+  "Tea House": "tea-house.png",
+};
+
 const createRestaurant = async (req, res) => {
   try {
     const { error, value } = createRestaurantSchema.validate(req.body);
@@ -280,33 +307,44 @@ const createRestaurant = async (req, res) => {
       postalCode,
       city,
       country,
+      latitude,
+      longitude
     } = value;
 
     if (!req.auth?.id) {
       return res.status(401).json({ message: "Authentication required." });
     }
 
-    const fullQuery = [address, postalCode, city, country].filter(Boolean).join(", ");
+    let location;
 
-    const geoRes = await axios.get("https://geocode.maps.co/search", {
-      params: {
-        q: fullQuery,
-        api_key: process.env.GEOCODE_API_KEY,
-      },
-    });
+    if (latitude && longitude) {
+      location = {
+        type: "Point",
+        coordinates: [parseFloat(longitude), parseFloat(latitude)],
+      };
+    } else {
+      const fullQuery = [address, postalCode, city, country].filter(Boolean).join(", ");
 
-    if (!geoRes.data || geoRes.data.length === 0) {
-      return res.status(400).json({
-        message: "Unable to geocode address. Please check the provided location.",
+      const geoRes = await axios.get("https://geocode.maps.co/search", {
+        params: {
+          q: fullQuery,
+          api_key: process.env.GEOCODE_API_KEY,
+        },
       });
+
+      if (!geoRes.data || geoRes.data.length === 0) {
+        return res.status(400).json({
+          message: "Unable to geocode address. Please check the provided location.",
+        });
+      }
+
+      const { lat, lon } = geoRes.data[0];
+
+      location = {
+        type: "Point",
+        coordinates: [parseFloat(lon), parseFloat(lat)],
+      };
     }
-
-    const { lat, lon } = geoRes.data[0];
-
-    const location = {
-      type: "Point",
-      coordinates: [parseFloat(lon), parseFloat(lat)],
-    };
 
     let photoUrls = [];
     if (req.files && req.files.length > 0) {
@@ -327,12 +365,19 @@ const createRestaurant = async (req, res) => {
       photoUrls = await Promise.all(uploads);
     }
 
+    const normalizedFoodType = Array.isArray(foodType)
+      ? foodType
+      : typeof foodType === 'string'
+      ? [foodType]
+      : [];
+
+    const icon = CATEGORY_ICONS[category] || "default.png";
 
     const newRestaurant = await Restaurant.create({
       userId: req.auth.id,
       name,
       category: category || null,
-      foodType: foodType || null,
+      foodType: normalizedFoodType,
       description: description || null,
       location,
       address,
@@ -340,6 +385,7 @@ const createRestaurant = async (req, res) => {
       city,
       country,
       photos: photoUrls,
+      icon
     });
 
     res.status(201).json({
@@ -397,8 +443,12 @@ const createRestaurant = async (req, res) => {
  *                 type: string
  *                 example: "Fine Dining"
  *               foodType:
- *                 type: string
- *                 example: "Fusion"
+ *                 oneOf:
+ *                   - type: string
+ *                   - type: array
+ *                     items:
+ *                       type: string
+ *                 example: ["Fusion", "Local"]
  *               description:
  *                 type: string
  *                 example: "Delicious fusion food with local flavors."
@@ -433,10 +483,12 @@ const createRestaurant = async (req, res) => {
  *       '500':
  *         description: <b>Internal Server Error</b>, update failed.
  */
+
 const updateRestaurant = async (req, res) => {
   try {
-    if (req.body.postalCode) {
-      req.body.postalCode = parseInt(req.body.postalCode, 10);
+    // Parse postalCode if present and a string
+    if (req.body.postalCode && typeof req.body.postalCode === "string") {
+      req.body.postalCode = req.body.postalCode.trim();
     }
 
     const { error, value } = updateRestaurantSchema.validate(req.body);
@@ -446,11 +498,13 @@ const updateRestaurant = async (req, res) => {
 
     const { id } = req.params;
 
+    // Find restaurant by PK
     const restaurant = await Restaurant.findByPk(id);
     if (!restaurant) {
       return res.status(404).json({ message: "Restaurant not found" });
     }
 
+    // Destructure validated values
     const {
       name,
       category,
@@ -460,25 +514,34 @@ const updateRestaurant = async (req, res) => {
       postalCode,
       city,
       country,
-      photos, // optional field from frontend
+      photos,
     } = value;
 
     const updatedFields = {};
 
     if (name !== undefined) updatedFields.name = name;
-    if (category !== undefined) updatedFields.category = category;
-    if (foodType !== undefined) updatedFields.foodType = foodType;
+    if (category !== undefined) {
+      updatedFields.category = category;
+      updatedFields.icon == CATEGORY_ICONS[category];
+    }
+    if (foodType !== undefined) {
+      updatedFields.foodType = Array.isArray(foodType)
+        ? foodType
+        : typeof foodType === "string"
+        ? [foodType]
+        : [];
+    }
     if (description !== undefined) updatedFields.description = description;
     if (address !== undefined) updatedFields.address = address;
     if (postalCode !== undefined) updatedFields.postalCode = postalCode;
     if (city !== undefined) updatedFields.city = city;
     if (country !== undefined) updatedFields.country = country;
 
-    // Optional: Replace existing photos if new ones are uploaded
+    // Handle photo uploads if files are sent
     let newPhotoUrls = [];
 
-    if (req.files && req.files.length >= 0) {
-      const uploads = req.files.map(file => {
+    if (req.files && req.files.length > 0) {
+      const uploads = req.files.map((file) => {
         return new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
             { folder: "restaurant_photos" },
@@ -492,12 +555,13 @@ const updateRestaurant = async (req, res) => {
       });
 
       newPhotoUrls = await Promise.all(uploads);
-      updatedFields.photos = newPhotoUrls; // fully replace
+      updatedFields.photos = newPhotoUrls; // Replace existing photos
     } else if (photos !== undefined) {
-      updatedFields.photos = photos; // could be empty array from frontend
+      // Replace photos if sent directly in JSON
+      updatedFields.photos = photos;
     }
 
-    // Recalculate geolocation if address fields changed
+    // If any address component changed, update geolocation
     if (
       address !== undefined ||
       postalCode !== undefined ||
@@ -534,6 +598,7 @@ const updateRestaurant = async (req, res) => {
       };
     }
 
+    // Update restaurant record in DB
     await restaurant.update(updatedFields);
 
     res.status(200).json({
@@ -612,7 +677,9 @@ const deleteAllRestaurants = async (req, res) => {
  * /restaurants/filter:
  *  get:
  *   summary: Filter restaurants with pagination
- *   description: Filter restaurants by category, food type, country, city, or name with pagination support.
+ *   description: >
+ *     Filter restaurants by category, food type (single cuisine), country, city, or name with pagination support.
+ *     Note: `foodType` matches any restaurant that includes the specified cuisine in its food type array.
  *   tags: [Restaurants]
  *   parameters:
  *    - in: query
@@ -623,6 +690,7 @@ const deleteAllRestaurants = async (req, res) => {
  *      name: foodType
  *      schema:
  *       type: string
+ *      description: A single cuisine name (e.g. `Italian`, `Balkan`)
  *    - in: query
  *      name: country
  *      schema:
@@ -682,7 +750,11 @@ const filterRestaurants = async (req, res) => {
 
     let whereClause = {};
     if (category) whereClause.category = category;
-    if (foodType) whereClause.foodType = foodType;
+    if (foodType) {
+      whereClause.foodType = {
+        [Op.contains]: [foodType]
+      };
+    }
     if (country) whereClause.country = country;
     if (city) whereClause.city = city;
     if (name) whereClause.name = { [Op.iLike]: `%${name}%` };
@@ -714,7 +786,13 @@ const filterRestaurants = async (req, res) => {
  * /restaurants/codelist/{codelist}:
  *  get:
  *   summary: Get distinct values for a field
- *   description: Get all unique values for a specified codelist field (category, foodType, country).
+ *   description: |
+ *     Get all unique values for a specified codelist field.
+ *     
+ *     - `category`: Top-level category of restaurant
+ *     - `foodType`: Unique cuisines (flattened from array)
+ *     - `country`: Country name
+ *     - `city`: City name
  *   tags: [Restaurants]
  *   parameters:
  *    - in: path
@@ -723,9 +801,23 @@ const filterRestaurants = async (req, res) => {
  *      schema:
  *       type: string
  *       enum: [category, foodType, country, city]
+ *      description: Name of the field to get unique values for.
  *   responses:
  *    '200':
  *     description: <b>OK</b>, list of distinct values.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         status:
+ *          type: string
+ *          example: OK
+ *         data:
+ *          type: array
+ *          items:
+ *           type: string
+ *          example: ["Balkan", "Seafood", "Italian"]
  *    '400':
  *     description: <b>Bad Request</b>, invalid codelist field.
  *    '500':
@@ -743,12 +835,27 @@ const listCodelistValues = async (req, res) => {
   }
 
   try {
-    const values = await Restaurant.findAll({
-      attributes: [[fn("DISTINCT", col(field)), field]],
-      raw: true,
-    });
+    let list = [];
 
-    const list = values.map((v) => v[field]).filter(Boolean);
+    if (field === "foodType") {
+      const records = await Restaurant.findAll({
+        attributes: ["foodType"],
+        raw: true,
+      });
+
+      const flat = records
+        .flatMap(r => Array.isArray(r.foodType) ? r.foodType : [])
+        .filter(Boolean);
+
+      list = [...new Set(flat)];
+    } else {
+      const values = await Restaurant.findAll({
+        attributes: [[fn("DISTINCT", col(field)), field]],
+        raw: true,
+      });
+
+      list = values.map(v => v[field]).filter(Boolean);
+    }
 
     res.status(200).json({ status: "OK", data: list });
   } catch (err) {
@@ -895,6 +1002,124 @@ const getRestaurantsByDistance = async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching restaurants by distance:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * @swagger
+ * /api/restaurants/in-bounds:
+ *   get:
+ *     summary: Get restaurants within a bounding box
+ *     tags:
+ *       - Restaurants
+ *     parameters:
+ *       - in: query
+ *         name: minLat
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Minimum latitude (southwest corner)
+ *       - in: query
+ *         name: minLng
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Minimum longitude (southwest corner)
+ *       - in: query
+ *         name: maxLat
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Maximum latitude (northeast corner)
+ *       - in: query
+ *         name: maxLng
+ *         schema:
+ *           type: number
+ *         required: true
+ *         description: Maximum longitude (northeast corner)
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         required: false
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *         required: false
+ *         description: Number of restaurants per page
+ *     responses:
+ *       200:
+ *         description: A paginated list of restaurants in the bounding box
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 currentPage:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 totalItems:
+ *                   type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Restaurant'
+ *       400:
+ *         description: Invalid bounding box coordinates
+ *       500:
+ *         description: Internal server error
+ */
+const getRestaurantsInBounds = async (req, res) => {
+  const minLat = parseFloat(req.query.minLat);
+  const minLng = parseFloat(req.query.minLng);
+  const maxLat = parseFloat(req.query.maxLat);
+  const maxLng = parseFloat(req.query.maxLng);
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 50;  // adjust limit for your use case
+  const offset = (page - 1) * limit;
+
+  if (
+    [minLat, minLng, maxLat, maxLng].some((v) => isNaN(v))
+  ) {
+    return res.status(400).json({ error: "Invalid bounding box coordinates" });
+  }
+
+  try {
+    const count = await Restaurant.count({
+      where: sequelize.where(
+        sequelize.literal(`
+          location && ST_MakeEnvelope(${minLng}, ${minLat}, ${maxLng}, ${maxLat}, 4326)
+        `),
+        true
+      ),
+    });
+
+    const restaurants = await Restaurant.findAll({
+      where: sequelize.where(
+        sequelize.literal(`
+          location && ST_MakeEnvelope(${minLng}, ${minLat}, ${maxLng}, ${maxLat}, 4326)
+        `),
+        true
+      ),
+      limit,
+      offset,
+      raw: true,
+    });
+
+    return res.status(200).json({
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+      data: restaurants,
+    });
+  } catch (err) {
+    console.error("Error fetching restaurants in bounds:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -1050,5 +1275,6 @@ export default {
   getRestaurantsByDistance,
   listCodelistValues,
   updateAverageRating,
-  searchRestaurantByName
+  searchRestaurantByName,
+  getRestaurantsInBounds
 };

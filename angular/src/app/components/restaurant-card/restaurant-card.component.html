@@ -1,9 +1,8 @@
 <div *ngIf="restaurant" class="bg-white rounded-xl shadow p-4 flex gap-4 hover:shadow-md transition">
   <img
-    *ngIf="restaurant.photos?.[0]"
-    [src]="restaurant.photos?.[0] || '../../../../public/assets/food.png'"
-    alt="Restaurant"
-    class="w-28 h-28 object-cover rounded-md"
+    [src]="getCategoryIcon()"
+    alt="{{ restaurant.category || 'Category Icon' }}"
+    class="w-28 h-28 object-contain rounded-md"
   />
 
   <div class="flex-1">
@@ -12,7 +11,7 @@
     <p class="mt-2 text-gray-700 text-sm">{{ restaurant.description }}</p>
 
     <div class="mt-2 text-yellow-500">
-  ★ {{ formatRating(restaurant.rating) }}
-  </div>
+      ★ {{ formatRating(restaurant.rating) }}
+    </div>
   </div>
 </div>

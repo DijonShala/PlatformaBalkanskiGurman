@@ -67,12 +67,17 @@ export const reviewUpdateSchema = Joi.object({
  */
 export const createRestaurantSchema = Joi.object({
   name: Joi.string().required(),
-  category: Joi.string().optional(),
-  foodType: Joi.string().optional(),
+  category: Joi.string().required(),
+  foodType: Joi.alternatives().try(
+  Joi.string(),
+  Joi.array().items(Joi.string())
+  ).optional(),
   description: Joi.string().optional(),
-  address: Joi.string().required(),
+  address: Joi.string().optional(),
   postalCode: Joi.number().optional(),
   city: Joi.string().required(),
+  latitude: Joi.string().optional(),
+  longitude: Joi.string().optional(),
   country: Joi.string().required(),
   photos: Joi.array().items(Joi.string().uri()).optional().allow(null),
 });
@@ -80,11 +85,16 @@ export const createRestaurantSchema = Joi.object({
 export const updateRestaurantSchema = Joi.object({
   name: Joi.string().optional(),
   category: Joi.string().optional(),
-  foodType: Joi.string().optional(),
+  foodType: Joi.alternatives().try(
+  Joi.string(),
+  Joi.array().items(Joi.string())
+  ),
   description: Joi.string().optional(),
   address: Joi.string().optional(),
   postalCode: Joi.number().optional(),
   city: Joi.string().optional(),
   country: Joi.string().optional(),
+  latitude: Joi.string().optional(),
+  longitude: Joi.string().optional(),
   photos: Joi.array().items(Joi.string().uri()).optional(),
 });

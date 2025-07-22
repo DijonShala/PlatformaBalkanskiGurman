@@ -2,7 +2,7 @@
   <div class="max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
     <!-- Logo and Name -->
     <div class="flex items-center gap-2">
-      <img src="../../../../public/assets/food.png" alt="Logo" class="h-8 w-8" />
+      <img src="assets/logo.png" alt="Logo" class="h-8 w-8" />
       <a routerLink="/" class="text-xl font-bold text-gray-800 hover:underline cursor-pointer">
         Balkanski Gurman
       </a>
@@ -35,7 +35,7 @@
       <!-- Avatar Dropdown Menu -->
       <div *ngIf="authService.isLoggedIn()" class="relative group">
         <button class="flex items-center space-x-2 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full">
-          <img src="../../../../public/assets/avatar.png" alt="Avatar" class="w-8 h-8 rounded-full" />
+          <img src="assets/user.png" alt="Avatar" class="w-8 h-8 rounded-full" />
           <span class="hidden md:inline text-sm font-medium text-gray-700">
             {{ authService.getCurrentUser()?.firstname || 'User' }}
           </span>

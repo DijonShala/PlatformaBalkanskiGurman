@@ -44,7 +44,12 @@ export class RestaurantService {
         data: res.data.map(r => new Restaurant(r))
       }))
     );
-}
+  }
+
+  getAllRestaurants(): Observable<Restaurant[]> {
+  return this.http.get<any>(`${this.apiUrl}/restaurants/all`)
+    .pipe(map(res => res.data.map((r: any) => new Restaurant(r))));
+  }
 
   getRestaurantById(id: number): Observable<Restaurant> {
     return this.http.get<Restaurant>(`${this.apiUrl}/restaurants/${id}`)
@@ -76,6 +81,17 @@ searchRestaurantsByName(name: string, page = 1, limit = 10): Observable<Paginati
         data: res.data.map(r => new Restaurant(r))
       }))
     );
+}
+
+getRestaurantsInBounds(minLat: number, minLng: number, maxLat: number, maxLng: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/restaurants/in-bounds`, {
+    params: {
+      minLat,
+      minLng,
+      maxLat,
+      maxLng,
+    }
+  });
 }
 
 filterRestaurants(filters: {
