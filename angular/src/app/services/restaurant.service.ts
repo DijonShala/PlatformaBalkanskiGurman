@@ -46,11 +46,6 @@ export class RestaurantService {
     );
   }
 
-  getAllRestaurants(): Observable<Restaurant[]> {
-  return this.http.get<any>(`${this.apiUrl}/restaurants/all`)
-    .pipe(map(res => res.data.map((r: any) => new Restaurant(r))));
-  }
-
   getRestaurantById(id: number): Observable<Restaurant> {
     return this.http.get<Restaurant>(`${this.apiUrl}/restaurants/${id}`)
     .pipe(map(r => new Restaurant(r)));;
@@ -118,29 +113,7 @@ filterRestaurants(filters: {
 updateRestaurants(restaurants: Restaurant[]) {
     this.restaurantsSubject.next(restaurants);
 }
-/*
-public createRestaurant(payload: CreateRestaurantPayload): Observable<Restaurant> {
-  const url = `${this.apiUrl}/restaurants`;
 
-   const body = {
-    name: payload.name,
-    category: payload.category ?? null,
-    foodType: payload.foodType ?? null,
-    description: payload.description ?? null,
-    postalCode: payload.postalCode,
-    address: payload.address,
-    city: payload.city,
-    country: payload.country,
-    photos: payload.photos ?? [],
-  };
-
-  const headers = new HttpHeaders()
-    .set('Content-Type', 'application/json')
-    .set('Authorization', `Bearer ${this.storage.getItem('jwt-token')}`);
-
-  return this.http.post<Restaurant>(url, body, { headers });
-}
-*/
 public createRestaurant(formData: FormData): Observable<Restaurant> {
   const url = `${this.apiUrl}/restaurants`;
 

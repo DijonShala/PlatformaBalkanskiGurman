@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
 import { Restaurant } from '../../classes/restaurant';
 import { Review } from '../../classes/review';
 import { RestaurantService } from '../../services/restaurant.service';
 import { AuthenticationService } from '../../services/authentication.service';
 import { ReviewCardComponent } from '../review-card/review-card.component';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-restaurant-detail',
@@ -27,7 +27,8 @@ export class RestaurantDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private restaurantService: RestaurantService,
-    public authenticationService: AuthenticationService
+    public authenticationService: AuthenticationService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {

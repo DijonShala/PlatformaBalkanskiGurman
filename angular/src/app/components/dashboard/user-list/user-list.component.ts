@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { UserService } from '../../../services/user.service';
 import { User } from '../../../classes/user';
+import { FilterService } from '../../../services/filter.service';
 
 @Component({
   selector: 'app-user-list',
@@ -22,16 +23,22 @@ export class UserListComponent implements OnInit {
 
   constructor(
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private filterService: FilterService
   ) {}
 
   ngOnInit(): void {
+    // Retrieve page from filterService, or default to 1
+    this.currentPage = this.filterService.getPage() || 1;
     this.fetchUsers(this.currentPage);
   }
 
   fetchUsers(page: number): void {
     this.loading = true;
     this.error = null;
+
+    // Store current page in filterService
+    this.filterService.setPage(page);
 
     this.userService.getAllUsers(page, this.pageSize).subscribe({
       next: res => {
@@ -61,6 +68,6 @@ export class UserListComponent implements OnInit {
   }
 
   goToUser(id: number): void {
-  this.router.navigate(['/admin/users', id]);
+    this.router.navigate(['/admin/users', id]);
   }
 }

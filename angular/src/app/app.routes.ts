@@ -15,7 +15,7 @@ import { adminGuard } from './guards/admin.guard';
 import { UserRestaurantDetailComponent } from './components/dashboard/user-restaurant-detail/user-restaurant-detail.component';
 
 export const routes: Routes = [
-     { path: '', component: RestaurantListComponent },
+     { path: '', redirectTo: '/restaurants', pathMatch: 'full' },
      { path: 'login', component: LoginComponent, canActivate: [canLogRegGuard] },
      { path: 'register', component: RegisterComponent, canActivate: [canLogRegGuard] },
      { path: 'restaurants', component: RestaurantListComponent },

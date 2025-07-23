@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router, NavigationStart } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Subscription } from 'rxjs';
-
+import { filter } from 'rxjs/operators';
 import { Restaurant } from '../../classes/restaurant';
 import { RestaurantCardComponent } from '../restaurant-card/restaurant-card.component';
 import { RestaurantService } from '../../services/restaurant.service';
@@ -38,12 +38,32 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
 
   constructor(
     private restaurantService: RestaurantService,
-    private filterService: FilterService,
+    protected filterService: FilterService,
     private dialog: MatDialog,
-    private commService: RestaurantCommunicationService
+    private commService: RestaurantCommunicationService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+    // Load page from filterService (default to 1 if none)
+    this.page = this.filterService.getPage() || 1;
+    
+    this.router.events
+    .pipe(filter(event => event instanceof NavigationStart))
+    .subscribe(() => {
+      this.filterService.setPage(this.page);
+    });
+    // Load filters from filterService (if any)
+    const savedFilters = this.filterService.getFilters();
+    if (savedFilters && Object.values(savedFilters).some(val => !!val)) {
+      this.lastFilters = savedFilters;
+      this.fetchMode = 'filter';
+    } else {
+      this.fetchMode = 'all';
+    }
+
+    this.loadRestaurants(this.page);
+
     this.subscription = this.restaurantService.currentRestaurants$.subscribe({
       next: (restaurants) => {
         this.restaurants = restaurants;
@@ -71,20 +91,15 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
         this.triggerNearby(lat, lng, maxDistance);
       })
     );
-
-    this.fetchInitialRestaurants();
-  }
-
-  fetchInitialRestaurants(): void {
-    this.fetchMode = 'all';
-    this.lastFilters = {};
-    this.loadRestaurants(1);
   }
 
   loadRestaurants(page: number = 1): void {
     this.loading = true;
     this.error = '';
     this.page = page;
+
+    // Store page in filterService
+    this.filterService.setPage(page);
 
     let fetch$;
 
@@ -151,11 +166,19 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
   }
 
   nextPage(): void {
-    if (this.page < this.totalPages) this.loadRestaurants(this.page + 1);
+    if (this.page < this.totalPages) {
+      this.page++;
+      this.filterService.setPage(this.page);
+      this.loadRestaurants(this.page);
+    }
   }
 
   prevPage(): void {
-    if (this.page > 1) this.loadRestaurants(this.page - 1);
+    if (this.page > 1) {
+      this.page--;
+      this.filterService.setPage(this.page);
+      this.loadRestaurants(this.page);
+    }
   }
 
   triggerSearch(name: string): void {
@@ -168,6 +191,7 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
     const hasAnyFilter = Object.values(filters).some(value => !!value);
     this.fetchMode = hasAnyFilter ? 'filter' : 'all';
     this.lastFilters = filters;
+    this.filterService.setFilters(filters);
     this.loadRestaurants(1);
   }
 

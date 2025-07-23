@@ -1,9 +1,14 @@
 <div *ngIf="authService.getCurrentUser()?.role === 'admin'" class="admin-select">
   <label for="userSelect">Select User:</label>
- <select [(ngModel)]="selectedUserId" (change)="fetchRestaurants()" *ngIf="users.length > 0">
-  <option [ngValue]="null">-- Select a user --</option>
-  <option *ngFor="let user of users" [ngValue]="user.id">{{ user.username }}</option>
-</select>
+  <select
+    [(ngModel)]="selectedUserId"
+    (change)="onUserChange()"
+    *ngIf="users.length > 0"
+    id="userSelect"
+  >
+    <option [ngValue]="null">-- Select a user --</option>
+    <option *ngFor="let user of users" [ngValue]="user.id">{{ user.username }}</option>
+  </select>
 </div>
 
 <div *ngIf="loading">Loading restaurants...</div>
@@ -21,6 +26,13 @@
   >
     <h3>{{ restaurant.name }}</h3>
   </a>
+</div>
+
+<!-- Pagination controls -->
+<div *ngIf="!loading && totalPages > 1" class="pagination-controls">
+  <button (click)="prevPage()" [disabled]="page <= 1">Previous</button>
+  <span>Page {{ page }} of {{ totalPages }}</span>
+  <button (click)="nextPage()" [disabled]="page >= totalPages">Next</button>
 </div>
 
 <div *ngIf="selectedRestaurant">
