@@ -9,11 +9,14 @@ import { RestaurantCardComponent } from '../restaurant-card/restaurant-card.comp
 import { RestaurantService } from '../../services/restaurant.service';
 import { FilterService } from '../../services/filter.service';
 import { RestaurantCommunicationService } from '../../services/restaurant-communication.service';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-restaurant-list',
   standalone: true,
-  imports: [CommonModule, RestaurantCardComponent, RouterLink],
+  imports: [CommonModule, RestaurantCardComponent, RouterLink, MatProgressSpinnerModule, MatPaginatorModule],
   templateUrl: './restaurant-list.component.html',
   styleUrls: ['./restaurant-list.component.scss']
 })
@@ -22,8 +25,9 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
   loading = true;
   error = '';
 
-  page = 1;
+  totalItems = 0;
   limit = 10;
+  page = 1;
   totalPages = 1;
 
   fetchMode: 'all' | 'filter' | 'nearby' | 'search' = 'all';
@@ -137,48 +141,38 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
     }
 
     fetch$.subscribe({
-      next: (res) => {
-        let rawData: any[] = [];
+  next: (res) => {
+    let rawData: any[] = [];
 
-        if (Array.isArray(res)) {
-          rawData = res;
-          this.totalPages = 1;
-        } else if (res?.data && Array.isArray(res.data)) {
-          rawData = res.data;
-          this.totalPages = res.totalPages || 1;
-        } else {
-          this.error = 'Unexpected response format.';
-          this.loading = false;
-          return;
-        }
-
-        this.restaurants = rawData.map((r: any) => new Restaurant(r));
-        this.restaurantService.updateRestaurants(this.restaurants);
-        this.loading = false;
-
-        this.error = this.restaurants.length === 0 ? 'No restaurants found.' : '';
-      },
-      error: () => {
-        this.error = 'Failed to load restaurants.';
-        this.loading = false;
-      }
-    });
-  }
-
-  nextPage(): void {
-    if (this.page < this.totalPages) {
-      this.page++;
-      this.filterService.setPage(this.page);
-      this.loadRestaurants(this.page);
+    if (res?.data && Array.isArray(res.data)) {
+      rawData = res.data;
+      this.totalPages = res.totalPages || 1;
+      this.totalItems = res.totalItems || 0;
+      this.page = res.currentPage || this.page;
+    } else {
+      this.error = 'Unexpected response format.';
+      this.loading = false;
+      return;
     }
-  }
 
-  prevPage(): void {
-    if (this.page > 1) {
-      this.page--;
-      this.filterService.setPage(this.page);
-      this.loadRestaurants(this.page);
-    }
+    this.restaurants = rawData.map((r: any) => new Restaurant(r));
+    this.restaurantService.updateRestaurants(this.restaurants);
+    this.loading = false;
+    this.error = this.restaurants.length === 0 ? 'No restaurants found.' : '';
+  },
+  error: () => {
+    this.error = 'Failed to load restaurants.';
+    this.loading = false;
+  }
+  });
+  }
+  
+  onPageChange(event: PageEvent): void {
+  this.limit = event.pageSize;
+  this.page = event.pageIndex + 1;
+
+  this.filterService.setPage(this.page);
+  this.loadRestaurants(this.page);
   }
 
   triggerSearch(name: string): void {

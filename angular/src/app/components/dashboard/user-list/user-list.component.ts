@@ -4,11 +4,14 @@ import { RouterModule, Router } from '@angular/router';
 import { UserService } from '../../../services/user.service';
 import { User } from '../../../classes/user';
 import { FilterService } from '../../../services/filter.service';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, MatProgressSpinnerModule, MatPaginatorModule],
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss']
 })
@@ -55,16 +58,9 @@ export class UserListComponent implements OnInit {
     });
   }
 
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.fetchUsers(this.currentPage + 1);
-    }
-  }
-
-  prevPage(): void {
-    if (this.currentPage > 1) {
-      this.fetchUsers(this.currentPage - 1);
-    }
+  onPageChange(event: PageEvent): void {
+  this.currentPage = event.pageIndex + 1;
+  this.fetchUsers(this.currentPage);
   }
 
   goToUser(id: number): void {

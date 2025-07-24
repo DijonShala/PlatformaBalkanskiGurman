@@ -8,11 +8,14 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FilterService } from '../../../services/filter.service';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-user-restaurants',
   standalone: true,
-  imports: [CommonModule, FormsModule, UserRestaurantDetailComponent, RouterLink],
+  imports: [CommonModule, FormsModule, UserRestaurantDetailComponent, RouterLink, MatProgressSpinnerModule, MatPaginatorModule],
   templateUrl: './user-restaurants.component.html',
   styleUrls: ['./user-restaurants.component.scss']
 })
@@ -29,6 +32,7 @@ export class UserRestaurantsComponent implements OnInit, OnDestroy {
   page = 1;
   limit = 10;
   totalPages = 1;
+  totalItems = 0;
 
   private subscriptions: Subscription[] = [];
 
@@ -94,6 +98,7 @@ export class UserRestaurantsComponent implements OnInit, OnDestroy {
         next: res => {
           this.restaurants = res.data || [];
           this.totalPages = res.totalPages || 1;
+          this.totalItems = res.totalItems || this.restaurants.length;
           this.loading = false;
         },
         error: err => {
@@ -113,20 +118,9 @@ export class UserRestaurantsComponent implements OnInit, OnDestroy {
     this.selectedRestaurant = null;
   }
 
-  nextPage(): void {
-    if (this.page < this.totalPages) {
-      this.page++;
-      this.filterService.setPage(this.page);
-      this.fetchRestaurants(this.page);
-    }
-  }
-
-  prevPage(): void {
-    if (this.page > 1) {
-      this.page--;
-      this.filterService.setPage(this.page);
-      this.fetchRestaurants(this.page);
-    }
+  onPageChange(event: PageEvent): void {
+  this.page = event.pageIndex + 1;
+  this.fetchRestaurants(this.page);
   }
 
   ngOnDestroy(): void {

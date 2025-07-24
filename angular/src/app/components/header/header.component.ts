@@ -2,19 +2,20 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AddRestaurantFormComponent } from '../add-restaurant-form/add-restaurant-form.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RestaurantService } from '../../services/restaurant.service';
 import { AuthenticationService } from '../../services/authentication.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, MatDialogModule],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent {
   @Output() mapToggle = new EventEmitter<void>();
+  isMenuOpen = false;
 
   constructor(
     private dialog: MatDialog,
@@ -24,8 +25,8 @@ export class HeaderComponent {
   ) {}
 
   toggleMap() {
-  this.router.navigate(['/map']);
-}
+    this.router.navigate(['/map']);
+  }
 
   openAddRestaurantModal() {
     if (!this.authService.isLoggedIn()) {
@@ -62,5 +63,9 @@ export class HeaderComponent {
   logout() {
     this.authService.logout();
     this.router.navigate(['/']);
+  }
+
+  toggleMenu() {
+    this.isMenuOpen = !this.isMenuOpen;
   }
 }

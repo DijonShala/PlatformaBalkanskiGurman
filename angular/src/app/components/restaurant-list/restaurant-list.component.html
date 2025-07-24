@@ -1,5 +1,5 @@
 <div *ngIf="loading" class="loading">
-  Loading restaurants...
+  <mat-spinner></mat-spinner>
 </div>
 
 <div *ngIf="error" class="error">
@@ -21,9 +21,12 @@
       class="restaurant-card"
     ></app-restaurant-card>
   </a>
-   <div class="pagination-controls">
-    <button (click)="prevPage()" [disabled]="page === 1">Previous</button>
-    <span>Page {{ page }} of {{ totalPages }}</span>
-    <button (click)="nextPage()" [disabled]="page === totalPages">Next</button>
-  </div>
+  <mat-paginator
+      [length]="totalItems"
+      [pageSize]="10"
+      [pageSizeOptions]="[]"
+      [pageIndex]="page - 1"
+      [showFirstLastButtons]="true"
+      (page)="onPageChange($event)">
+  </mat-paginator>
 </div>
