@@ -14,7 +14,6 @@ export class Restaurant {
   city!: string;
   country!: string;
   photos?: string[];
-  icon!: string;
   rating!: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -40,5 +39,4 @@ export interface CreateRestaurantPayload {
   city: string;
   country: string;
   photos?: string[];
-  icon?: string;
 }

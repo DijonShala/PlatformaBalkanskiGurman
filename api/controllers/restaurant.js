@@ -268,31 +268,9 @@ const oneRestaurant = async (req, res) => {
  *         description: <b>Internal Server Error</b>, could not create restaurant.
  */
 
-const CATEGORY_ICONS = {
-  "Cafe": "cafe.png",
-  "Casual Dining": "casual-dining.png",
-  "Fast Food": "fast-food.png",
-  "Fine Dining": "fine-dining.png",
-  "Food Truck": "food-truck.png",
-  "Bakery": "bakery.png",
-  "Bar": "bar.png",
-  "Bistro": "bistro.png",
-  "Buffet": "buffet.png",
-  "Canteen": "canteen.png",
-  "Coffee Shop": "coffee-shop.png",
-  "Deli": "deli.png",
-  "Drive-Thru": "drive-thru.png",
-  "Family Style": "family-style.png",
-  "Gastropub": "gastropub.png",
-  "Pop-Up": "pop-up.png",
-  "Pub": "pub.png",
-  "Quick Service": "quick-service.png",
-  "Takeaway": "takeaway.png",
-  "Tea House": "tea-house.png",
-};
-
 const createRestaurant = async (req, res) => {
   try {
+    // Validate input
     const { error, value } = createRestaurantSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
@@ -311,12 +289,27 @@ const createRestaurant = async (req, res) => {
       longitude
     } = value;
 
+    // Check authentication
     if (!req.auth?.id) {
       return res.status(401).json({ message: "Authentication required." });
     }
 
-    let location;
+    // Check if restaurant with same name + city already exists for same user
+    const existing = await Restaurant.findOne({
+      where: {
+        name,
+        city,
+      },
+    });
 
+    if (existing) {
+      return res.status(409).json({
+        message: `A restaurant named "${name}" already exists in "${city}".`,
+      });
+    }
+
+    // Geolocation
+    let location;
     if (latitude && longitude) {
       location = {
         type: "Point",
@@ -339,13 +332,13 @@ const createRestaurant = async (req, res) => {
       }
 
       const { lat, lon } = geoRes.data[0];
-
       location = {
         type: "Point",
         coordinates: [parseFloat(lon), parseFloat(lat)],
       };
     }
 
+    // Optional photo uploads
     let photoUrls = [];
     if (req.files && req.files.length > 0) {
       console.log("FILES RECEIVED:", req.files.length);
@@ -365,14 +358,14 @@ const createRestaurant = async (req, res) => {
       photoUrls = await Promise.all(uploads);
     }
 
+    // Normalize foodType
     const normalizedFoodType = Array.isArray(foodType)
       ? foodType
       : typeof foodType === 'string'
       ? [foodType]
       : [];
 
-    const icon = CATEGORY_ICONS[category] || "default.png";
-
+    // Create new restaurant
     const newRestaurant = await Restaurant.create({
       userId: req.auth.id,
       name,
@@ -385,14 +378,14 @@ const createRestaurant = async (req, res) => {
       city,
       country,
       photos: photoUrls,
-      icon
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       status: "Created",
       data: newRestaurant,
     });
   } catch (err) {
+    console.error("Create restaurant error:", err);
     res.status(500).json({ message: err.message });
   }
 };

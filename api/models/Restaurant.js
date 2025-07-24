@@ -98,10 +98,6 @@ const FOOD_TYPES = ["Slovenian", "Croatian", "Bosnian", "Serbian", "Montenegrin"
  *             format: uri
  *           example:
  *             - https://example.com/photo10.jpg
- *         icon:
- *           type: string
- *           description: Icon of hte restaurant.
- *           example: restaurant.png.
  *         rating:
  *           type: number
  *           format: float
@@ -157,6 +153,17 @@ Restaurant.init({
     type: DataTypes.ARRAY(DataTypes.STRING),
     allowNull: true,
     defaultValue: [],
+    validate: {
+      isValidFoodType(value) {
+        if (!Array.isArray(value)) {
+          throw new Error("foodType must be an array");
+        }
+        const invalidValues = value.filter(v => !FOOD_TYPES.includes(v));
+        if (invalidValues.length > 0) {
+          throw new Error(`Invalid foodType values: ${invalidValues.join(", ")}`);
+        }
+      }
+    }
   },
   description: {
     type: DataTypes.TEXT,
@@ -186,11 +193,6 @@ Restaurant.init({
   type: DataTypes.ARRAY(DataTypes.STRING),
   allowNull: true,
   defaultValue: [],
-  },
-  icon: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    defaultValue: "default.png",
   },
   rating: {
     type: DataTypes.DECIMAL,
