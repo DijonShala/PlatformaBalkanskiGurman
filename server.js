@@ -50,11 +50,7 @@ const swaggerDocument = swaggerJsDoc({
         description: "Secure development server for testing",
       },
       {
-        url: "http://localhost:3000/api",
-        description: "Development server for testing",
-      },
-      {
-        url: "http://test.com/api",
+        url: "https://platforma-balkanski-gurman.onrender.com",
         description: "Production server",
       },
     ],
@@ -151,7 +147,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 app.use(passport.initialize());
 
  /**
-  * Statc pages
+  * Static pages
   */
  app.use(express.static(join(__dirname, "angular", "build", "browser")));
 
