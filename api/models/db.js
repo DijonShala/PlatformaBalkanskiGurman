@@ -21,7 +21,6 @@ const pool = new Pool({
   },
 });
 
-console.log('DB URI:', dbURI);
 
 const sequelize = new Sequelize(dbURI, {
   dialect: 'postgres',
