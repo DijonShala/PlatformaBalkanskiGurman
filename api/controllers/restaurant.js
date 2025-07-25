@@ -1,11 +1,14 @@
-import Restaurant from "../models/Restaurant.js";
-import { Op, fn, col, literal } from "sequelize";
-import { sequelize } from "../models/db.js";
-import Review from "../models/Review.js";
-import { createRestaurantSchema, updateRestaurantSchema } from "../middleware/joivalidate.js";
-import axios from "axios";
-import streamifier from "streamifier";
-import cloudinary from "./cloudinary.js";
+import Restaurant from '../models/Restaurant.js';
+import { Op, fn, col, literal } from 'sequelize';
+import { sequelize } from '../models/db.js';
+import Review from '../models/Review.js';
+import {
+  createRestaurantSchema,
+  updateRestaurantSchema,
+} from '../middleware/joivalidate.js';
+import axios from 'axios';
+import streamifier from 'streamifier';
+import cloudinary from './cloudinary.js';
 
 /**
  * @openapi
@@ -178,7 +181,7 @@ const oneRestaurant = async (req, res) => {
     const restaurant = await Restaurant.findOne({ where: { id } });
 
     if (!restaurant) {
-      return res.status(404).json({ message: "Restaurant not found." });
+      return res.status(404).json({ message: 'Restaurant not found.' });
     }
 
     res.status(200).json(restaurant);
@@ -286,11 +289,11 @@ const createRestaurant = async (req, res) => {
       city,
       country,
       latitude,
-      longitude
+      longitude,
     } = value;
 
     if (!req.auth?.id) {
-      return res.status(401).json({ message: "Authentication required." });
+      return res.status(401).json({ message: 'Authentication required.' });
     }
 
     const existing = await Restaurant.findOne({
@@ -310,13 +313,15 @@ const createRestaurant = async (req, res) => {
     let location;
     if (latitude && longitude) {
       location = {
-        type: "Point",
+        type: 'Point',
         coordinates: [parseFloat(longitude), parseFloat(latitude)],
       };
     } else {
-      const fullQuery = [address, postalCode, city, country].filter(Boolean).join(", ");
+      const fullQuery = [address, postalCode, city, country]
+        .filter(Boolean)
+        .join(', ');
 
-      const geoRes = await axios.get("https://geocode.maps.co/search", {
+      const geoRes = await axios.get('https://geocode.maps.co/search', {
         params: {
           q: fullQuery,
           api_key: process.env.GEOCODE_API_KEY,
@@ -325,13 +330,14 @@ const createRestaurant = async (req, res) => {
 
       if (!geoRes.data || geoRes.data.length === 0) {
         return res.status(400).json({
-          message: "Unable to geocode address. Please check the provided location.",
+          message:
+            'Unable to geocode address. Please check the provided location.',
         });
       }
 
       const { lat, lon } = geoRes.data[0];
       location = {
-        type: "Point",
+        type: 'Point',
         coordinates: [parseFloat(lon), parseFloat(lat)],
       };
     }
@@ -339,11 +345,11 @@ const createRestaurant = async (req, res) => {
     //photo uploads
     let photoUrls = [];
     if (req.files && req.files.length > 0) {
-      console.log("FILES RECEIVED:", req.files.length);
-      const uploads = req.files.map(file => {
+      console.log('FILES RECEIVED:', req.files.length);
+      const uploads = req.files.map((file) => {
         return new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: "restaurant_photos" },
+            { folder: 'restaurant_photos' },
             (error, result) => {
               if (result) resolve(result.secure_url);
               else reject(error);
@@ -360,8 +366,8 @@ const createRestaurant = async (req, res) => {
     const normalizedFoodType = Array.isArray(foodType)
       ? foodType
       : typeof foodType === 'string'
-      ? [foodType]
-      : [];
+        ? [foodType]
+        : [];
 
     const newRestaurant = await Restaurant.create({
       userId: req.auth.id,
@@ -378,11 +384,11 @@ const createRestaurant = async (req, res) => {
     });
 
     return res.status(201).json({
-      status: "Created new restaurant",
+      status: 'Created new restaurant',
       data: newRestaurant,
     });
   } catch (err) {
-    console.error("Create restaurant error:", err);
+    console.error('Create restaurant error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -476,7 +482,7 @@ const createRestaurant = async (req, res) => {
 
 const updateRestaurant = async (req, res) => {
   try {
-    if (req.body.postalCode && typeof req.body.postalCode === "string") {
+    if (req.body.postalCode && typeof req.body.postalCode === 'string') {
       req.body.postalCode = req.body.postalCode.trim();
     }
 
@@ -489,7 +495,7 @@ const updateRestaurant = async (req, res) => {
 
     const restaurant = await Restaurant.findByPk(id);
     if (!restaurant) {
-      return res.status(404).json({ message: "Restaurant not found" });
+      return res.status(404).json({ message: 'Restaurant not found' });
     }
 
     const {
@@ -513,9 +519,9 @@ const updateRestaurant = async (req, res) => {
     if (foodType !== undefined) {
       updatedFields.foodType = Array.isArray(foodType)
         ? foodType
-        : typeof foodType === "string"
-        ? [foodType]
-        : [];
+        : typeof foodType === 'string'
+          ? [foodType]
+          : [];
     }
     if (description !== undefined) updatedFields.description = description;
     if (address !== undefined) updatedFields.address = address;
@@ -529,7 +535,7 @@ const updateRestaurant = async (req, res) => {
       const uploads = req.files.map((file) => {
         return new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: "restaurant_photos" },
+            { folder: 'restaurant_photos' },
             (error, result) => {
               if (result) resolve(result.secure_url);
               else reject(error);
@@ -559,9 +565,9 @@ const updateRestaurant = async (req, res) => {
         country !== undefined ? country : restaurant.country,
       ].filter(Boolean);
 
-      const fullQuery = addressParts.join(", ");
+      const fullQuery = addressParts.join(', ');
 
-      const geoRes = await axios.get("https://geocode.maps.co/search", {
+      const geoRes = await axios.get('https://geocode.maps.co/search', {
         params: {
           q: fullQuery,
           api_key: process.env.GEOCODE_API_KEY,
@@ -570,14 +576,15 @@ const updateRestaurant = async (req, res) => {
 
       if (!geoRes.data || geoRes.data.length === 0) {
         return res.status(400).json({
-          message: "Unable to geocode address. Please check the provided location.",
+          message:
+            'Unable to geocode address. Please check the provided location.',
         });
       }
 
       const { lat, lon } = geoRes.data[0];
 
       updatedFields.location = {
-        type: "Point",
+        type: 'Point',
         coordinates: [parseFloat(lon), parseFloat(lat)],
       };
     }
@@ -585,7 +592,7 @@ const updateRestaurant = async (req, res) => {
     await restaurant.update(updatedFields);
 
     res.status(200).json({
-      status: "Updated",
+      status: 'Updated',
       data: restaurant,
     });
   } catch (err) {
@@ -622,10 +629,10 @@ const deleteRestaurant = async (req, res) => {
     const deleted = await Restaurant.destroy({ where: { id } });
 
     if (deleted === 0) {
-      return res.status(404).json({ message: "Restaurant not found." });
+      return res.status(404).json({ message: 'Restaurant not found.' });
     }
 
-    res.status(200).json({ message: "Restaurant deleted." });
+    res.status(200).json({ message: 'Restaurant deleted.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -649,7 +656,7 @@ const deleteRestaurant = async (req, res) => {
 const deleteAllRestaurants = async (req, res) => {
   try {
     await Restaurant.destroy({ where: {} });
-    res.status(200).json({ message: "All restaurants deleted." });
+    res.status(200).json({ message: 'All restaurants deleted.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -678,7 +685,7 @@ const deleteAllRestaurants = async (req, res) => {
  *      name: country
  *      schema:
  *       type: string
- *    - in: query  
+ *    - in: query
  *      name: city
  *      schema:
  *       type: string
@@ -735,7 +742,7 @@ const filterRestaurants = async (req, res) => {
     if (category) whereClause.category = category;
     if (foodType) {
       whereClause.foodType = {
-        [Op.contains]: [foodType]
+        [Op.contains]: [foodType],
       };
     }
     if (country) whereClause.country = country;
@@ -746,11 +753,11 @@ const filterRestaurants = async (req, res) => {
       where: whereClause,
       limit,
       offset,
-      order: [["createdAt", "DESC"]],
+      order: [['createdAt', 'DESC']],
     });
 
     if (!results.length) {
-      return res.status(404).json({ message: "No restaurants found." });
+      return res.status(404).json({ message: 'No restaurants found.' });
     }
 
     res.status(200).json({
@@ -771,7 +778,7 @@ const filterRestaurants = async (req, res) => {
  *   summary: Get distinct values for a field
  *   description: |
  *     Get all unique values for a specified codelist field.
- *     
+ *
  *     - `category`: Top-level category of restaurant
  *     - `foodType`: Unique cuisines (flattened from array)
  *     - `country`: Country name
@@ -806,41 +813,41 @@ const filterRestaurants = async (req, res) => {
  *    '500':
  *     description: <b>Internal Server Error</b>, failed to retrieve list.
  */
-const allowedCodelists = ["category", "foodType", "country", "city"];
+const allowedCodelists = ['category', 'foodType', 'country', 'city'];
 
 const listCodelistValues = async (req, res) => {
   const field = req.params.codelist;
 
   if (!allowedCodelists.includes(field)) {
     return res.status(400).json({
-      message: `Parameter 'codelist' must be one of: ${allowedCodelists.join(", ")}`,
+      message: `Parameter 'codelist' must be one of: ${allowedCodelists.join(', ')}`,
     });
   }
 
   try {
     let list = [];
 
-    if (field === "foodType") {
+    if (field === 'foodType') {
       const records = await Restaurant.findAll({
-        attributes: ["foodType"],
+        attributes: ['foodType'],
         raw: true,
       });
 
       const flat = records
-        .flatMap(r => Array.isArray(r.foodType) ? r.foodType : [])
+        .flatMap((r) => (Array.isArray(r.foodType) ? r.foodType : []))
         .filter(Boolean);
 
       list = [...new Set(flat)];
     } else {
       const values = await Restaurant.findAll({
-        attributes: [[fn("DISTINCT", col(field)), field]],
+        attributes: [[fn('DISTINCT', col(field)), field]],
         raw: true,
       });
 
-      list = values.map(v => v[field]).filter(Boolean);
+      list = values.map((v) => v[field]).filter(Boolean);
     }
 
-    res.status(200).json({ status: "OK", data: list });
+    res.status(200).json({ status: 'OK', data: list });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -924,7 +931,8 @@ const getRestaurantsByDistance = async (req, res) => {
 
   if (isNaN(lat) || isNaN(lng)) {
     return res.status(400).json({
-      error: "Query parameters 'lat' and 'lng' are required and must be valid numbers",
+      error:
+        "Query parameters 'lat' and 'lng' are required and must be valid numbers",
     });
   }
 
@@ -954,7 +962,7 @@ const getRestaurantsByDistance = async (req, res) => {
                 ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326)
               )
             `),
-            "rawDistance",
+            'rawDistance',
           ],
         ],
       },
@@ -983,8 +991,8 @@ const getRestaurantsByDistance = async (req, res) => {
       data: restaurants,
     });
   } catch (err) {
-    console.error("Error fetching restaurants by distance:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error fetching restaurants by distance:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -1066,10 +1074,8 @@ const getRestaurantsInBounds = async (req, res) => {
   const limit = parseInt(req.query.limit) || 50;
   const offset = (page - 1) * limit;
 
-  if (
-    [minLat, minLng, maxLat, maxLng].some((v) => isNaN(v))
-  ) {
-    return res.status(400).json({ error: "Invalid bounding box coordinates" });
+  if ([minLat, minLng, maxLat, maxLng].some((v) => isNaN(v))) {
+    return res.status(400).json({ error: 'Invalid bounding box coordinates' });
   }
 
   try {
@@ -1101,8 +1107,8 @@ const getRestaurantsInBounds = async (req, res) => {
       data: restaurants,
     });
   } catch (err) {
-    console.error("Error fetching restaurants in bounds:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error fetching restaurants in bounds:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -1110,7 +1116,7 @@ export const updateAverageRating = async (restaurantId) => {
   try {
     const reviews = await Review.findAll({
       where: { restaurantId },
-      attributes: ["rating"],
+      attributes: ['rating'],
     });
 
     if (reviews.length === 0) {
@@ -1126,9 +1132,11 @@ export const updateAverageRating = async (restaurantId) => {
       { where: { id: restaurantId } }
     );
 
-    console.log(`Updated avg rating for restaurant ${restaurantId}: ${average.toFixed(1)}`);
+    console.log(
+      `Updated avg rating for restaurant ${restaurantId}: ${average.toFixed(1)}`
+    );
   } catch (err) {
-    console.error("Error updating average rating:", err);
+    console.error('Error updating average rating:', err);
   }
 };
 
@@ -1215,14 +1223,16 @@ const searchRestaurantByName = async (req, res) => {
     const offset = (page - 1) * limit;
 
     if (!name) {
-      return res.status(400).json({ message: "Query parameter 'name' is required" });
+      return res
+        .status(400)
+        .json({ message: "Query parameter 'name' is required" });
     }
 
     const { count, rows: restaurants } = await Restaurant.findAndCountAll({
       where: {
         name: {
-          [Op.iLike]: `%${name}%`
-        }
+          [Op.iLike]: `%${name}%`,
+        },
       },
       limit,
       offset,
@@ -1230,7 +1240,9 @@ const searchRestaurantByName = async (req, res) => {
     });
 
     if (restaurants.length === 0) {
-      return res.status(404).json({ message: "No restaurants found with that name" });
+      return res
+        .status(404)
+        .json({ message: 'No restaurants found with that name' });
     }
 
     return res.status(200).json({
@@ -1240,8 +1252,8 @@ const searchRestaurantByName = async (req, res) => {
       data: restaurants,
     });
   } catch (error) {
-    console.error("Search error:", error);
-    return res.status(500).json({ message: "Server error" });
+    console.error('Search error:', error);
+    return res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -1258,5 +1270,5 @@ export default {
   listCodelistValues,
   updateAverageRating,
   searchRestaurantByName,
-  getRestaurantsInBounds
+  getRestaurantsInBounds,
 };

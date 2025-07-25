@@ -69,7 +69,8 @@ async function run(country = getTodayCountry()) {
           continue;
         }
 
-        const hasValidCoords = isValidCoordinate(latitude) && isValidCoordinate(longitude);
+        const hasValidCoords =
+          isValidCoordinate(latitude) && isValidCoordinate(longitude);
         const location = hasValidCoords
           ? { type: 'Point', coordinates: [longitude, latitude] }
           : null;

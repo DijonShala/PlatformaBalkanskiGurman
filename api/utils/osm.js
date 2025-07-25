@@ -7,9 +7,9 @@ export async function fetchPOIsFromOSM(cityName, countryName) {
     [out:json][timeout:25];
     area["name"="${cityName}"]->.searchArea;
     (
-      ${AMENITIES.map(a => `node["amenity"="${a}"]["name"](area.searchArea);`).join('\n')}
-      ${AMENITIES.map(a => `way["amenity"="${a}"]["name"](area.searchArea);`).join('\n')}
-      ${AMENITIES.map(a => `relation["amenity"="${a}"]["name"](area.searchArea);`).join('\n')}
+      ${AMENITIES.map((a) => `node["amenity"="${a}"]["name"](area.searchArea);`).join('\n')}
+      ${AMENITIES.map((a) => `way["amenity"="${a}"]["name"](area.searchArea);`).join('\n')}
+      ${AMENITIES.map((a) => `relation["amenity"="${a}"]["name"](area.searchArea);`).join('\n')}
     );
     out center tags;
   `;
@@ -22,31 +22,29 @@ export async function fetchPOIsFromOSM(cityName, countryName) {
   const data = await response.json();
 
   const amenityToCategoryMap = {
-  restaurant: 'Restaurant',
-  cafe: 'Cafe',
-  bar: 'Bar',
-  pub: 'Pub',
-  fast_food: 'Fast Food',
+    restaurant: 'Restaurant',
+    cafe: 'Cafe',
+    bar: 'Bar',
+    pub: 'Pub',
+    fast_food: 'Fast Food',
   };
- function parseCuisine(cuisineStr) {
-  if (!cuisineStr) return [];
+  function parseCuisine(cuisineStr) {
+    if (!cuisineStr) return [];
 
-  return cuisineStr
-    .replace(/_/g, ' ')       
-    .split(/[;,]/)             
-    .map(s => s.trim())       
-    .filter(Boolean)          
-    .map(s =>
-      s
-        .split(' ')       
-        .map(word =>
-          word
-            .toLowerCase()   
-            .replace(/^\w/, c => c.toUpperCase()) 
-        )
-        .join(' ')
-    );
-}
+    return cuisineStr
+      .replace(/_/g, ' ')
+      .split(/[;,]/)
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map((s) =>
+        s
+          .split(' ')
+          .map((word) =>
+            word.toLowerCase().replace(/^\w/, (c) => c.toUpperCase())
+          )
+          .join(' ')
+      );
+  }
   const results = data.elements
     .filter((el) => el.tags?.name)
     .map((el) => {
@@ -54,7 +52,9 @@ export async function fetchPOIsFromOSM(cityName, countryName) {
       const houseNumber = el.tags['addr:housenumber'] || '';
       const address = `${street} ${houseNumber}`.trim();
       const rawAmenity = el.tags.amenity || null;
-      const category = rawAmenity ? amenityToCategoryMap[rawAmenity] || null : null;
+      const category = rawAmenity
+        ? amenityToCategoryMap[rawAmenity] || null
+        : null;
       const cuisines = parseCuisine(el.tags.cuisine);
 
       return {
@@ -71,9 +71,13 @@ export async function fetchPOIsFromOSM(cityName, countryName) {
       };
     });
 
-  console.log(`___Fetched____:  ${cityName}, ${countryName}, NUM: ${results.length}`);
+  console.log(
+    `___Fetched____:  ${cityName}, ${countryName}, NUM: ${results.length}`
+  );
   results.forEach((r, i) => {
-    console.log(`${i + 1}. ${r.name} (${r.amenity}) — ${r.address || 'unknown address'}`);
+    console.log(
+      `${i + 1}. ${r.name} (${r.amenity}) — ${r.address || 'unknown address'}`
+    );
   });
 
   return results;

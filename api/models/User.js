@@ -1,22 +1,22 @@
-import { DataTypes, Model } from "sequelize";
-import { sequelize } from "./db.js";
-import crypto from "crypto";
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
+import { DataTypes, Model } from 'sequelize';
+import { sequelize } from './db.js';
+import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 dotenv.config();
 
 class User extends Model {
   setPassword(password) {
-    this.salt = crypto.randomBytes(16).toString("hex");
+    this.salt = crypto.randomBytes(16).toString('hex');
     this.hash = crypto
-      .pbkdf2Sync(password, this.salt, 1000, 64, "sha512")
-      .toString("hex");
+      .pbkdf2Sync(password, this.salt, 1000, 64, 'sha512')
+      .toString('hex');
   }
 
   validPassword(password) {
     const hash = crypto
-      .pbkdf2Sync(password, this.salt, 1000, 64, "sha512")
-      .toString("hex");
+      .pbkdf2Sync(password, this.salt, 1000, 64, 'sha512')
+      .toString('hex');
     return this.hash === hash;
   }
 
@@ -110,9 +110,9 @@ User.init(
       allowNull: false,
     },
     role: {
-      type: DataTypes.ENUM("admin", "basic"),
+      type: DataTypes.ENUM('admin', 'basic'),
       allowNull: false,
-      defaultValue: "basic",
+      defaultValue: 'basic',
     },
     email: {
       type: DataTypes.STRING,
@@ -133,8 +133,8 @@ User.init(
   },
   {
     sequelize,
-    modelName: "User",
-    tableName: "users",
+    modelName: 'User',
+    tableName: 'users',
     timestamps: true,
   }
 );

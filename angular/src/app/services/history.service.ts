@@ -1,8 +1,8 @@
-import { Injectable } from "@angular/core";
-import { Router, NavigationEnd } from "@angular/router";
+import { Injectable } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root',
 })
 export class HistoryService {
   private urls: string[] = [];
@@ -17,14 +17,14 @@ export class HistoryService {
   public getPreviousUrl(): string {
     this.urls.pop();
     if (this.urls.length > 0) return this.urls.slice(-1).toString();
-    else return "/";
+    else return '/';
   }
 
   public getLastNonLoginUrl(): string {
-    const exclude: string[] = ["/register", "/login"];
+    const exclude: string[] = ['/register', '/login'];
     this.urls.pop();
     const filtererd = this.urls.filter((url) => !exclude.includes(url));
     if (filtererd.length > 0) return filtererd.slice(-1).toString();
-    else return "/";
+    else return '/';
   }
 }

@@ -1,5 +1,10 @@
-<div *ngIf="authService.getCurrentUser()?.role === 'admin'" class="max-w-md mx-auto mb-8">
-  <label for="userSelect" class="block mb-2 text-sm font-semibold text-gray-700">Select User</label>
+<div
+  *ngIf="authService.getCurrentUser()?.role === 'admin'"
+  class="max-w-md mx-auto mb-8"
+>
+  <label for="userSelect" class="block mb-2 text-sm font-semibold text-gray-700"
+    >Select User</label
+  >
   <select
     id="userSelect"
     [(ngModel)]="selectedUserId"
@@ -7,7 +12,9 @@
     *ngIf="users.length > 0"
     class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
   >
-    <option *ngFor="let user of users" [ngValue]="user.id">{{ user.username }}</option>
+    <option *ngFor="let user of users" [ngValue]="user.id">
+      {{ user.username }}
+    </option>
   </select>
 </div>
 
@@ -15,11 +22,17 @@
   <mat-spinner></mat-spinner>
 </div>
 
-<div *ngIf="!loading && restaurants.length === 0" class="text-center text-gray-500 py-6">
+<div
+  *ngIf="!loading && restaurants.length === 0"
+  class="text-center text-gray-500 py-6"
+>
   <p>No restaurants found for selected user.</p>
 </div>
 
-<div *ngIf="!loading && restaurants.length > 0" class="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+<div
+  *ngIf="!loading && restaurants.length > 0"
+  class="grid gap-6 sm:grid-cols-2 md:grid-cols-3"
+>
   <a
     *ngFor="let restaurant of restaurants"
     [routerLink]="[baseRoute, restaurant.id]"
@@ -27,7 +40,9 @@
     class="block rounded-xl border border-gray-200 bg-white p-5 shadow hover:shadow-md transition-all"
   >
     <h3 class="text-lg font-bold text-gray-800 mb-1">{{ restaurant.name }}</h3>
-    <p class="text-sm text-gray-600 truncate">{{ restaurant.city || 'No city given' }}</p>
+    <p class="text-sm text-gray-600 truncate">
+      {{ restaurant.city || "No city given" }}
+    </p>
   </a>
 </div>
 
@@ -37,6 +52,7 @@
     [pageSize]="10"
     [pageIndex]="page - 1"
     [showFirstLastButtons]="true"
-    (page)="onPageChange($event)">
+    (page)="onPageChange($event)"
+  >
   </mat-paginator>
 </div>

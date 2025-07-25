@@ -1,5 +1,13 @@
-import {Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RestaurantService } from '../../../services/restaurant.service';
@@ -11,7 +19,6 @@ import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-user-restaurant-detail',
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -36,16 +43,59 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
   alertType: string | null = null;
 
   CATEGORIES = [
-    "Cafe", "Casual Dining", "Fast Food", "Fine Dining", "Food Truck", "Bakery",
-    "Bar", "Bistro", "Buffet", "Canteen", "Coffee Shop", "Deli", "Drive-Thru",
-    "Family Style", "Gastropub", "Pop-Up", "Pub", "Quick Service", "Takeaway", "Tea House", "Pizzeria", "Restaurant"
+    'Cafe',
+    'Casual Dining',
+    'Fast Food',
+    'Fine Dining',
+    'Food Truck',
+    'Bakery',
+    'Bar',
+    'Bistro',
+    'Buffet',
+    'Canteen',
+    'Coffee Shop',
+    'Deli',
+    'Drive-Thru',
+    'Family Style',
+    'Gastropub',
+    'Pop-Up',
+    'Pub',
+    'Quick Service',
+    'Takeaway',
+    'Tea House',
+    'Pizzeria',
+    'Restaurant',
   ];
 
   FOOD_TYPES = [
-    "Slovenian", "Croatian", "Bosnian", "Serbian", "Montenegrin", "Macedonian", "Kosovar",
-    "Balkan", "Yugoslav Fusion", "Bakery", "Barbecue", "Pizza", "Seafood", "Grill", "Mediterranean",
-    "Middle Eastern", "Greek", "Turkish", "Italian", "Fusion", "Vegan", "Vegetarian", "Asian", "American",
-    "French", "Chinese", "Indian", "Mexican"
+    'Slovenian',
+    'Croatian',
+    'Bosnian',
+    'Serbian',
+    'Montenegrin',
+    'Macedonian',
+    'Kosovar',
+    'Balkan',
+    'Yugoslav Fusion',
+    'Bakery',
+    'Barbecue',
+    'Pizza',
+    'Seafood',
+    'Grill',
+    'Mediterranean',
+    'Middle Eastern',
+    'Greek',
+    'Turkish',
+    'Italian',
+    'Fusion',
+    'Vegan',
+    'Vegetarian',
+    'Asian',
+    'American',
+    'French',
+    'Chinese',
+    'Indian',
+    'Mexican',
   ];
 
   constructor(
@@ -53,7 +103,7 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
     private restaurantService: RestaurantService,
     private route: ActivatedRoute,
     private router: Router,
-    private authService: AuthenticationService
+    private authService: AuthenticationService,
   ) {}
 
   ngOnInit(): void {
@@ -89,12 +139,12 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
 
   initForm(data: any): void {
     this.form = this.fb.group({
-      name: [data.name || '',],
+      name: [data.name || ''],
       category: [data.category || ''],
       foodType: [
         Array.isArray(data.foodType)
           ? data.foodType
-          : (data.foodType || '').split(',').map((f: string) => f.trim())
+          : (data.foodType || '').split(',').map((f: string) => f.trim()),
       ],
       description: [data.description || ''],
       address: [data.address || ''],
@@ -172,7 +222,7 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
     this.loading = true;
     this.restaurantService.deleteRestaurant(restaurantId).subscribe({
       next: () => {
-       this.alertType = 'success';
+        this.alertType = 'success';
         this.alertMessage = 'Restaurant deleted succesfully';
         this.loading = false;
         this.updated.emit();

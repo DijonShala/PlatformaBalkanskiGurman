@@ -29,7 +29,7 @@ export class LoginComponent {
     private router: Router,
     private authenticationService: AuthenticationService,
     private connectionService: ConnectionService,
-    private historyService: HistoryService
+    private historyService: HistoryService,
   ) {}
 
   public onLoginSubmit(): void {
@@ -61,7 +61,7 @@ export class LoginComponent {
           this.alertType = 'error';
           this.alertMessage = error.error?.message || 'Login failed.';
           return throwError(() => error);
-        })
+        }),
       )
       .subscribe(() => {
         this.router.navigateByUrl(this.historyService.getLastNonLoginUrl());

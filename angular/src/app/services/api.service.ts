@@ -20,10 +20,12 @@ export class ApiService {
 
   constructor(
     private readonly http: HttpClient,
-    @Inject(BROWSER_STORAGE) private storage: Storage
+    @Inject(BROWSER_STORAGE) private storage: Storage,
   ) {}
 
-  public login(credentials: Pick<User, 'username' | 'password'>): Observable<AuthResponse> {
+  public login(
+    credentials: Pick<User, 'username' | 'password'>,
+  ): Observable<AuthResponse> {
     return this.makeAuthApiCall('login', credentials);
   }
 
@@ -31,22 +33,18 @@ export class ApiService {
     return this.makeAuthApiCall('register', payload);
   }
 
- private makeAuthApiCall(
-  urlPath: string,
-  user: Partial<User>
-): Observable<AuthResponse> {
-  const url: string = `${this.baseUrl}/${urlPath}`;
+  private makeAuthApiCall(
+    urlPath: string,
+    user: Partial<User>,
+  ): Observable<AuthResponse> {
+    const url: string = `${this.baseUrl}/${urlPath}`;
 
-  const headers = new HttpHeaders().set(
-    'Content-Type',
-    'application/json'
-  );
+    const headers = new HttpHeaders().set('Content-Type', 'application/json');
 
-  return this.http
-    .post<AuthResponse>(url, user, { headers })
-    .pipe(retry(1), catchError(this.handleError));
-}
-
+    return this.http
+      .post<AuthResponse>(url, user, { headers })
+      .pipe(retry(1), catchError(this.handleError));
+  }
 
   private handleError(error: HttpErrorResponse) {
     const message = error.error?.message || error.statusText || 'Unknown error';

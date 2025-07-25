@@ -8,16 +8,22 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FilterService } from '../../../services/filter.service';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-user-restaurants',
-  standalone: true,
-  imports: [CommonModule, FormsModule, UserRestaurantDetailComponent, RouterLink, MatProgressSpinnerModule, MatPaginatorModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    UserRestaurantDetailComponent,
+    RouterLink,
+    MatProgressSpinnerModule,
+    MatPaginatorModule,
+  ],
   templateUrl: './user-restaurants.component.html',
-  styleUrls: ['./user-restaurants.component.scss']
+  styleUrls: ['./user-restaurants.component.scss'],
 })
 export class UserRestaurantsComponent implements OnInit, OnDestroy {
   restaurants: any[] = [];
@@ -40,16 +46,17 @@ export class UserRestaurantsComponent implements OnInit, OnDestroy {
     private restaurantService: RestaurantService,
     protected authService: AuthenticationService,
     private userService: UserService,
-    private filterService: FilterService
+    private filterService: FilterService,
   ) {}
 
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) return;
 
-    this.baseRoute = currentUser.role === 'admin'
-      ? '/admin/restaurants'
-      : '/dashboard/restaurants';
+    this.baseRoute =
+      currentUser.role === 'admin'
+        ? '/admin/restaurants'
+        : '/dashboard/restaurants';
 
     this.userId = currentUser.id;
 
@@ -74,7 +81,7 @@ export class UserRestaurantsComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.error = 'Failed to load users.';
-      }
+      },
     });
   }
 
@@ -94,18 +101,20 @@ export class UserRestaurantsComponent implements OnInit, OnDestroy {
     this.filterService.setPage(page);
 
     this.subscriptions.push(
-      this.restaurantService.getRestaurantsByUserId(this.selectedUserId, page, this.limit).subscribe({
-        next: res => {
-          this.restaurants = res.data || [];
-          this.totalPages = res.totalPages || 1;
-          this.totalItems = res.totalItems || this.restaurants.length;
-          this.loading = false;
-        },
-        error: err => {
-          this.error = err.error?.message || 'Failed to load restaurants.';
-          this.loading = false;
-        }
-      })
+      this.restaurantService
+        .getRestaurantsByUserId(this.selectedUserId, page, this.limit)
+        .subscribe({
+          next: (res) => {
+            this.restaurants = res.data || [];
+            this.totalPages = res.totalPages || 1;
+            this.totalItems = res.totalItems || this.restaurants.length;
+            this.loading = false;
+          },
+          error: (err) => {
+            this.error = err.error?.message || 'Failed to load restaurants.';
+            this.loading = false;
+          },
+        }),
     );
   }
 
@@ -119,11 +128,11 @@ export class UserRestaurantsComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(event: PageEvent): void {
-  this.page = event.pageIndex + 1;
-  this.fetchRestaurants(this.page);
+    this.page = event.pageIndex + 1;
+    this.fetchRestaurants(this.page);
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

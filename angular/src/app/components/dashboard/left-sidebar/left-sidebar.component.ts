@@ -8,16 +8,15 @@ import { FilterService } from '../../../services/filter.service';
   selector: 'app-left-sidebar',
   imports: [CommonModule, RouterModule],
   templateUrl: './left-sidebar.component.html',
-  styleUrl: './left-sidebar.component.scss'
+  styleUrl: './left-sidebar.component.scss',
 })
 export class LeftSidebarComponent {
- constructor(
-  private readonly authService: AuthenticationService,
-  protected readonly filterService: FilterService
-) {}
+  constructor(
+    private readonly authService: AuthenticationService,
+    protected readonly filterService: FilterService,
+  ) {}
 
   get isAdmin(): boolean {
     return this.authService.getCurrentUser()?.role === 'admin';
   }
-
 }

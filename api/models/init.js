@@ -1,15 +1,15 @@
-import { sequelize } from "./db.js";
+import { sequelize } from './db.js';
 import Restaurant from './Restaurant.js';
-import User from "./User.js";
-import Review from "./Review.js";
-import InitData from "../controllers/initdb.js"
+import User from './User.js';
+import Review from './Review.js';
+import InitData from '../controllers/initdb.js';
 
 export default async function initDB() {
   try {
     await sequelize.authenticate();
     console.log('Database connected');
 
-    await sequelize.sync({ alter: true }); 
+    await sequelize.sync({ alter: true });
     console.log('Database synchronized');
 
     await InitData.addInitialData();
@@ -17,4 +17,3 @@ export default async function initDB() {
     console.error('Error initializing database:', err);
   }
 }
-

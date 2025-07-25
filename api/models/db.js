@@ -1,14 +1,14 @@
-import dotenv from "dotenv";
-import pg from "pg";
+import dotenv from 'dotenv';
+import pg from 'pg';
 import { Sequelize } from 'sequelize';
 
 dotenv.config();
 
 const { Pool } = pg;
 
-let dbURI = "";
-if (process.env.NODE_ENV === "production") {
-  dbURI = process.env.RENDER_POSTGRES_URI || "";
+let dbURI = '';
+if (process.env.NODE_ENV === 'production') {
+  dbURI = process.env.RENDER_POSTGRES_URI || '';
 } else {
   dbURI = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`;
 }
@@ -32,17 +32,17 @@ const sequelize = new Sequelize(dbURI, {
   },
 });
 
-pool.on("connect", () => {
-    console.log("Connection pool established with DB");
-})
+pool.on('connect', () => {
+  console.log('Connection pool established with DB');
+});
 
-pool.on("error", (err, client) => {
-  console.error("error on idle client", err);
+pool.on('error', (err, client) => {
+  console.error('error on idle client', err);
   process.exit(-1);
 });
 
-pool.on("remove", () => {
-  console.log("client was removed from pool");
+pool.on('remove', () => {
+  console.log('client was removed from pool');
 });
 
 const gracefulShutdown = async (msg, callback) => {
@@ -51,21 +51,23 @@ const gracefulShutdown = async (msg, callback) => {
     console.log(`PostgreSQL pool disconnected through ${msg}.`);
     callback();
   } catch (err) {
-    console.error("Error during pool shutdown", err);
+    console.error('Error during pool shutdown', err);
     callback(err);
   }
 };
 
-process.once("SIGUSR2", () => {
-  gracefulShutdown("nodemon restart", () => process.kill(process.pid, "SIGUSR2"));
+process.once('SIGUSR2', () => {
+  gracefulShutdown('nodemon restart', () =>
+    process.kill(process.pid, 'SIGUSR2')
+  );
 });
 
-process.on("SIGINT", () => {
-  gracefulShutdown("app termination", () => process.exit(0));
+process.on('SIGINT', () => {
+  gracefulShutdown('app termination', () => process.exit(0));
 });
 
-process.on("SIGTERM", () => {
-  gracefulShutdown("Cloud-based app shutdown", () => process.exit(0));
+process.on('SIGTERM', () => {
+  gracefulShutdown('Cloud-based app shutdown', () => process.exit(0));
 });
 
 export { pool, sequelize };

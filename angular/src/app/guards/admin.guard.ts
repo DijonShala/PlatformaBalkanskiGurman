@@ -4,7 +4,10 @@ import { AuthenticationService } from '../services/authentication.service';
 
 @Injectable({ providedIn: 'root' })
 export class adminGuard implements CanActivate {
-  constructor(private authService: AuthenticationService, private router: Router) {}
+  constructor(
+    private authService: AuthenticationService,
+    private router: Router,
+  ) {}
 
   canActivate(): boolean {
     const user = this.authService.getCurrentUser();

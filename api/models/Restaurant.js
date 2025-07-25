@@ -1,17 +1,62 @@
-import { Model, DataTypes } from "sequelize";
-import { sequelize } from "./db.js";
-import User from "./User.js";
+import { Model, DataTypes } from 'sequelize';
+import { sequelize } from './db.js';
+import User from './User.js';
 
 const CATEGORIES = [
-  "Cafe", "Casual Dining", "Fast Food", "Fine Dining", "Food Truck", "Bakery",
-  "Bar", "Bistro", "Buffet", "Canteen", "Coffee Shop", "Deli", "Drive-Thru",
-  "Family Style", "Gastropub", "Pop-Up", "Pub", "Quick Service", "Takeaway", "Tea House", "Pizzeria", "Restaurant"
+  'Cafe',
+  'Casual Dining',
+  'Fast Food',
+  'Fine Dining',
+  'Food Truck',
+  'Bakery',
+  'Bar',
+  'Bistro',
+  'Buffet',
+  'Canteen',
+  'Coffee Shop',
+  'Deli',
+  'Drive-Thru',
+  'Family Style',
+  'Gastropub',
+  'Pop-Up',
+  'Pub',
+  'Quick Service',
+  'Takeaway',
+  'Tea House',
+  'Pizzeria',
+  'Restaurant',
 ];
 
-const FOOD_TYPES = ["Slovenian", "Croatian", "Bosnian", "Serbian", "Montenegrin", "Macedonian", "Kosovar",
-    "Balkan", "Yugoslav Fusion", "Bakery", "Barbecue", "Pizza", "Seafood", "Grill", "Mediterranean",
-    "Middle Eastern", "Greek", "Turkish", "Italian", "Fusion", "Vegan", "Vegetarian", "Asian", "American",
-    "French", "Chinese", "Indian", "Mexican"];
+const FOOD_TYPES = [
+  'Slovenian',
+  'Croatian',
+  'Bosnian',
+  'Serbian',
+  'Montenegrin',
+  'Macedonian',
+  'Kosovar',
+  'Balkan',
+  'Yugoslav Fusion',
+  'Bakery',
+  'Barbecue',
+  'Pizza',
+  'Seafood',
+  'Grill',
+  'Mediterranean',
+  'Middle Eastern',
+  'Greek',
+  'Turkish',
+  'Italian',
+  'Fusion',
+  'Vegan',
+  'Vegetarian',
+  'Asian',
+  'American',
+  'French',
+  'Chinese',
+  'Indian',
+  'Mexican',
+];
 /**
  * @openapi
  * components:
@@ -128,85 +173,98 @@ const FOOD_TYPES = ["Slovenian", "Croatian", "Bosnian", "Serbian", "Montenegrin"
  */
 class Restaurant extends Model {}
 
-Restaurant.init({
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  category: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    validate: {
-      isIn: [CATEGORIES],
+Restaurant.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    category: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isIn: [CATEGORIES],
+      },
+    },
+    foodType: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+      defaultValue: [],
+      validate: {
+        isValidFoodType(value) {
+          if (!Array.isArray(value)) {
+            throw new Error('foodType must be an array');
+          }
+          const invalidValues = value.filter((v) => !FOOD_TYPES.includes(v));
+          if (invalidValues.length > 0) {
+            throw new Error(
+              `Invalid foodType values: ${invalidValues.join(', ')}`
+            );
+          }
+        },
+      },
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    location: {
+      type: DataTypes.GEOGRAPHY('POINT', 4326),
+      allowNull: false,
+    },
+    address: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    postalCode: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    country: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    photos: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: true,
+      defaultValue: [],
+    },
+    rating: {
+      type: DataTypes.DECIMAL,
+      allowNull: false,
+      defaultValue: 0,
     },
   },
-  foodType: {
-    type: DataTypes.ARRAY(DataTypes.STRING),
-    allowNull: true,
-    defaultValue: [],
-    validate: {
-      isValidFoodType(value) {
-        if (!Array.isArray(value)) {
-          throw new Error("foodType must be an array");
-        }
-        const invalidValues = value.filter(v => !FOOD_TYPES.includes(v));
-        if (invalidValues.length > 0) {
-          throw new Error(`Invalid foodType values: ${invalidValues.join(", ")}`);
-        }
-      }
-    }
-  },
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
-  location: {
-    type: DataTypes.GEOGRAPHY("POINT", 4326),
-    allowNull: false,
-  },
-  address: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
-  city: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  postalCode: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  country: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  photos: {
-  type: DataTypes.ARRAY(DataTypes.STRING),
-  allowNull: true,
-  defaultValue: [],
-  },
-  rating: {
-    type: DataTypes.DECIMAL,
-    allowNull: false,
-    defaultValue: 0,
-  },
-}, {
-  sequelize,
-  modelName: "Restaurant",
-  tableName: "restaurants",
-  timestamps: true,
-});
+  {
+    sequelize,
+    modelName: 'Restaurant',
+    tableName: 'restaurants',
+    timestamps: true,
+  }
+);
 
-Restaurant.belongsTo(User, { foreignKey: "userId", as: 'user', onDelete: "CASCADE"});
-User.hasMany(Restaurant, { foreignKey: "userId", as: 'restaurants', onDelete: "CASCADE"});
+Restaurant.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
+  onDelete: 'CASCADE',
+});
+User.hasMany(Restaurant, {
+  foreignKey: 'userId',
+  as: 'restaurants',
+  onDelete: 'CASCADE',
+});
 
 export default Restaurant;

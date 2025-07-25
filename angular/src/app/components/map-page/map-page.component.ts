@@ -9,10 +9,10 @@ import { CommonModule } from '@angular/common';
 import { RestaurantService } from '../../services/restaurant.service';
 import { Router } from '@angular/router';
 import * as L from 'leaflet';
+import { GeolocationService } from '../../services/geolocation.service';
 
 @Component({
   selector: 'app-map-page',
-  standalone: true,
   imports: [CommonModule],
   templateUrl: './map-page.component.html',
   styleUrls: ['./map-page.component.scss'],
@@ -20,7 +20,7 @@ import * as L from 'leaflet';
 export class MapPageComponent implements OnInit, AfterViewInit {
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef;
   restaurants: any[] = [];
-  userCoords: [number, number] = [40 , 40];
+  userCoords: [number, number] = [46.056946, 14.505751]; //lj
   map!: L.Map;
   restaurantMarkers: L.Marker[] = [];
 
@@ -45,12 +45,13 @@ export class MapPageComponent implements OnInit, AfterViewInit {
     'Quick Service': 'assets/quick-service.png',
     Takeaway: 'assets/takeaway.png',
     'Tea House': 'assets/tea-house.png',
-    Restaurant: 'assets/restaurant.png'
+    Restaurant: 'assets/restaurant.png',
   };
 
   constructor(
     private restaurantService: RestaurantService,
-    private router: Router
+    private router: Router,
+    private geolocationService: GeolocationService,
   ) {}
 
   ngOnInit(): void {
@@ -60,7 +61,8 @@ export class MapPageComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     const DefaultIcon = L.icon({
       iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      shadowUrl:
+        'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       iconSize: [25, 41],
       iconAnchor: [12, 41],
       popupAnchor: [1, -34],
@@ -70,36 +72,27 @@ export class MapPageComponent implements OnInit, AfterViewInit {
     L.Marker.prototype.options.icon = DefaultIcon;
   }
 
-  createCategoryIcon(category: string): L.Icon {
-    const iconUrl = this.CATEGORY_ICONS[category] || 'assets/restuarant.png';
-
-    return L.icon({
-      iconUrl,
-      iconSize: [30, 30],
-      iconAnchor: [15, 30],
-      popupAnchor: [0, -30],
-    });
-  }
-
   initMap(): void {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        this.userCoords = [pos.coords.latitude, pos.coords.longitude];
+    this.geolocationService
+      .getCurrentPosition()
+      .then((coords) => {
+        this.userCoords = [coords.lat, coords.lng];
         this.createMap();
-      },
-      () => {
-        this.createMap();
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
+      })
+      .catch((err) => {
+        console.warn(
+          'Geolocation failed, using fallback coordinates.',
+          err.message,
+        );
+        this.createMap(); // uses default coords [40, 40]
+      });
   }
 
   createMap(): void {
-    this.map = L.map(this.mapContainer.nativeElement).setView(this.userCoords, 13);
+    this.map = L.map(this.mapContainer.nativeElement).setView(
+      this.userCoords,
+      13,
+    );
 
     L.tileLayer(
       'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=7Gdtuyj5Uo3n1L1mkXl9',
@@ -107,7 +100,7 @@ export class MapPageComponent implements OnInit, AfterViewInit {
         attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a>',
         tileSize: 512,
         zoomOffset: -1,
-      }
+      },
     ).addTo(this.map);
 
     L.marker(this.userCoords, { icon: this.createUserIcon() })
@@ -140,7 +133,6 @@ export class MapPageComponent implements OnInit, AfterViewInit {
   }
 
   renderRestaurantMarkers(): void {
-    //clear old markers
     this.restaurantMarkers.forEach((marker) => this.map.removeLayer(marker));
     this.restaurantMarkers = [];
 
@@ -149,24 +141,36 @@ export class MapPageComponent implements OnInit, AfterViewInit {
         const [longitude, latitude] = r.location.coordinates;
         const addressText = r.address ? r.address : '';
         const ratingNum = Number(r.rating);
-        const ratingText = !isNaN(ratingNum) ? `Rating: ★ ${ratingNum.toFixed(1)}` : '';
+        const ratingText = !isNaN(ratingNum)
+          ? `Rating: ★ ${ratingNum.toFixed(1)}`
+          : '';
 
         const popupContent = `
-        <strong>${r.name}</strong><br>
-        ${addressText}<br>
-        ${ratingText ? ratingText + '<br>' : ''}
-        <a href="/restaurants/${r.id}">View Details</a>
+          <strong>${r.name}</strong><br>
+          ${addressText}<br>
+          ${ratingText ? ratingText + '<br>' : ''}
+          <a href="/restaurants/${r.id}">View Details</a>
         `;
+
         const marker = L.marker([latitude, longitude], {
           icon: this.createCategoryIcon(r.category),
         })
           .addTo(this.map)
-          .bindPopup(
-            popupContent
-          );
+          .bindPopup(popupContent);
 
         this.restaurantMarkers.push(marker);
       }
+    });
+  }
+
+  createCategoryIcon(category: string): L.Icon {
+    const iconUrl = this.CATEGORY_ICONS[category] || 'assets/restaurant.png';
+
+    return L.icon({
+      iconUrl,
+      iconSize: [30, 30],
+      iconAnchor: [15, 30],
+      popupAnchor: [0, -30],
     });
   }
 

@@ -21,14 +21,18 @@ export const routes: Routes = [
    * Public
    */
   { path: 'login', component: LoginComponent, canActivate: [canLogRegGuard] },
-  { path: 'register', component: RegisterComponent, canActivate: [canLogRegGuard] },
+  {
+    path: 'register',
+    component: RegisterComponent,
+    canActivate: [canLogRegGuard],
+  },
 
   {
     path: '',
     children: [
       { path: 'restaurants', component: RestaurantListComponent },
-      { path: 'restaurants/:id', component: RestaurantDetailComponent }
-    ]
+      { path: 'restaurants/:id', component: RestaurantDetailComponent },
+    ],
   },
 
   /**
@@ -45,8 +49,8 @@ export const routes: Routes = [
       { path: 'users', component: UserListComponent },
       { path: 'users/:id', component: UserProfileComponent },
       { path: 'restaurants', component: UserRestaurantsComponent },
-      { path: 'restaurants/:id', component: UserRestaurantDetailComponent }
-    ]
+      { path: 'restaurants/:id', component: UserRestaurantDetailComponent },
+    ],
   },
 
   /**
@@ -61,8 +65,8 @@ export const routes: Routes = [
       { path: 'profile', component: UserProfileComponent },
       { path: 'change-password', component: ChangePasswordComponent },
       { path: 'restaurants', component: UserRestaurantsComponent },
-      { path: 'restaurants/:id', component: UserRestaurantDetailComponent }
-    ]
+      { path: 'restaurants/:id', component: UserRestaurantDetailComponent },
+    ],
   },
 
   /**
@@ -71,8 +75,10 @@ export const routes: Routes = [
   {
     path: 'map',
     loadComponent: () =>
-      import('./components/map-page/map-page.component').then((m) => m.MapPageComponent)
+      import('./components/map-page/map-page.component').then(
+        (m) => m.MapPageComponent,
+      ),
   },
 
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: '' },
 ];

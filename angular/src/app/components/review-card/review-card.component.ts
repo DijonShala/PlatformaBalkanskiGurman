@@ -7,13 +7,13 @@ import { AuthenticationService } from '../../services/authentication.service';
   selector: 'app-review-card',
   imports: [CommonModule],
   templateUrl: './review-card.component.html',
-  styleUrl: './review-card.component.scss'
+  styleUrl: './review-card.component.scss',
 })
 export class ReviewCardComponent {
   @Input() review!: Review;
   @Output() deleteReview = new EventEmitter<number>();
 
-   constructor(public authService: AuthenticationService) {}
+  constructor(public authService: AuthenticationService) {}
 
   onDelete() {
     if (confirm('Are you sure you want to delete this review?')) {

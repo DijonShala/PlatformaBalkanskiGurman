@@ -1,5 +1,4 @@
 <div class="bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200">
-
   <div class="space-y-2">
     <h1 class="text-3xl font-bold text-gray-900">{{ restaurant?.name }}</h1>
     <p class="text-gray-500">
@@ -8,71 +7,76 @@
     </p>
     <p class="text-gray-500 italic">{{ restaurant?.address }}</p>
     <p class="text-gray-700">{{ restaurant?.description }}</p>
-    <div class="text-yellow-500 font-semibold">★ {{ restaurant?.rating?.toFixed(1) }}</div>
+    <div class="text-yellow-500 font-semibold">
+      ★ {{ restaurant?.rating?.toFixed(1) }}
+    </div>
   </div>
 
   <div *ngIf="restaurant?.photos?.length" class="mt-6 grid gap-4">
+    <div class="grid gap-4">
+      <div class="w-full h-64 sm:h-80">
+        <img
+          class="w-full h-full rounded-lg object-contain bg-gray-100"
+          [src]="mainPhoto || restaurant?.photos?.[0]"
+          alt="Featured Restaurant Photo"
+        />
+      </div>
 
-<div class="grid gap-4">
-  <div class="w-full h-64 sm:h-80">
-    <img
-      class="w-full h-full rounded-lg object-contain bg-gray-100"
-      [src]="mainPhoto || restaurant?.photos?.[0]"
-      alt="Featured Restaurant Photo"
-    />
-  </div>
-
-  <div class="flex flex-wrap gap-3 justify-start">
-    <div
-      *ngFor="let photo of restaurant?.photos?.slice(1, 5)"
-      class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden"
-    >
-      <img
-        class="w-full h-full object-contain cursor-pointer"
-        [src]="photo"
-        alt="Restaurant Photo Thumbnail"
-        (click)="onThumbnailClick(photo)"
-      />
+      <div class="flex flex-wrap gap-3 justify-start">
+        <div
+          *ngFor="let photo of restaurant?.photos?.slice(1, 5)"
+          class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden"
+        >
+          <img
+            class="w-full h-full object-contain cursor-pointer"
+            [src]="photo"
+            alt="Restaurant Photo Thumbnail"
+            (click)="onThumbnailClick(photo)"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-
-</div>
-</div>
-
-<div class="bg-white mt-8 p-6 rounded-lg shadow space-y-6 border border-gray-200">
+<div
+  class="bg-white mt-8 p-6 rounded-lg shadow space-y-6 border border-gray-200"
+>
   <h2 class="text-xl font-bold text-gray-900">Reviews</h2>
 
   <div *ngIf="isLoggedIn(); else loginReminder" class="space-y-2">
     <h3 class="text-lg font-semibold text-gray-800">Leave a Review</h3>
     <div *ngIf="alertMessage" class="mb-4">
-    <div
-      [ngClass]="{
-        'text-green-800 bg-green-50 border border-green-300 dark:bg-green-50 dark:text-green-800 dark:border-green-300': alertType === 'success',
-        'text-red-800 bg-red-50 border border-red-300 dark:bg-red-50 dark:text-red-800 dark:border-red-300': alertType === 'error'
-      }"
-      class="flex items-center p-4 text-sm rounded-lg"
-      role="alert"
-    >
-      <svg
-        class="shrink-0 inline w-4 h-4 me-3"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
+      <div
+        [ngClass]="{
+          'text-green-800 bg-green-50 border border-green-300 dark:bg-green-50 dark:text-green-800 dark:border-green-300':
+            alertType === 'success',
+          'text-red-800 bg-red-50 border border-red-300 dark:bg-red-50 dark:text-red-800 dark:border-red-300':
+            alertType === 'error',
+        }"
+        class="flex items-center p-4 text-sm rounded-lg"
+        role="alert"
       >
-        <path
-          d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
-        />
-      </svg>
-      <span class="sr-only">Alert</span>
-      <div>
-        <span class="font-medium">{{ alertType === 'success' ? 'Success:' : 'Error:' }}</span>
-        {{ alertMessage }}
+        <svg
+          class="shrink-0 inline w-4 h-4 me-3"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+        >
+          <path
+            d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+          />
+        </svg>
+        <span class="sr-only">Alert</span>
+        <div>
+          <span class="font-medium">{{
+            alertType === "success" ? "Success:" : "Error:"
+          }}</span>
+          {{ alertMessage }}
+        </div>
       </div>
     </div>
-  </div>
 
     <label class="block text-sm font-medium text-gray-700">Rating</label>
     <select
@@ -90,7 +94,9 @@
       class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
     ></textarea>
 
-    <label class="block text-sm font-medium text-gray-700 mt-2">Photo (optional)</label>
+    <label class="block text-sm font-medium text-gray-700 mt-2"
+      >Photo (optional)</label
+    >
     <input
       type="file"
       (change)="onFileSelected($event)"

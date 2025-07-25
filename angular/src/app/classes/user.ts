@@ -13,4 +13,3 @@ export class User {
     Object.assign(this, init);
   }
 }
-

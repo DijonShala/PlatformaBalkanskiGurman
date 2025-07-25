@@ -75,8 +75,8 @@ async function test(videoId) {
           foodType: Array.isArray(place.foodType)
             ? place.foodType
             : place.foodType
-            ? [place.foodType]
-            : [],
+              ? [place.foodType]
+              : [],
           description: place.description || null,
           address: place.address,
           postalCode: place.postalCode || null,

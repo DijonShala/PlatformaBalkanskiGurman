@@ -1,6 +1,6 @@
-import passport from "passport";
-import User from "../models/User.js";
-import { loginSchema, registerSchema } from "../middleware/joivalidate.js";
+import passport from 'passport';
+import User from '../models/User.js';
+import { loginSchema, registerSchema } from '../middleware/joivalidate.js';
 /**
  * @openapi
  * /login:
@@ -59,7 +59,7 @@ const login = (req, res) => {
   }
   const { username, password } = value;
 
-  passport.authenticate("local", (err, user, info) => {
+  passport.authenticate('local', (err, user, info) => {
     if (err) return res.status(500).json({ message: err.message });
     if (user) return res.status(200).json({ token: user.generateJwt() });
     else return res.status(401).json({ message: info.message });
@@ -153,7 +153,7 @@ async function register(req, res) {
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(409).json({
-        message: "A user with this email already exists",
+        message: 'A user with this email already exists',
       });
     }
 
@@ -170,12 +170,12 @@ async function register(req, res) {
     const token = user.generateJwt();
     return res.status(201).json({ token });
   } catch (err) {
-    console.error("Registration error:", err);
-    return res.status(500).json({ message: "Server error!" });
+    console.error('Registration error:', err);
+    return res.status(500).json({ message: 'Server error!' });
   }
-};
+}
 
 export default {
-    login,
-    register,
-}
+  login,
+  register,
+};

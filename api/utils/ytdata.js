@@ -8,10 +8,7 @@ const youtube = google.youtube({
   auth: process.env.YOUTUBE_DATA_API_KEY,
 });
 
-const CORE_REVIEW_TERMS = [
-  'restaurant',
-  'food tour',
-];
+const CORE_REVIEW_TERMS = ['restaurant', 'food tour'];
 
 const CITY_MAP = {
   Slovenia: ['ljubljana', 'maribor', 'celje', 'novo mesto'],
@@ -71,4 +68,3 @@ export async function searchVideosByCountry(country, { maxResults = 10 } = {}) {
   console.log(collected);
   return collected;
 }
-

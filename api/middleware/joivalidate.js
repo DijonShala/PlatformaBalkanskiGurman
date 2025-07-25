@@ -1,14 +1,14 @@
-import Joi from "joi";
- 
+import Joi from 'joi';
+
 /**
-  * User
-  */
+ * User
+ */
 export const updateUserSchema = Joi.object({
   username: Joi.string().min(3).max(30),
   firstname: Joi.string().min(2).max(30),
   lastname: Joi.string().min(2).max(30),
   email: Joi.string().email(),
-  role: Joi.string().valid("basic", "admin"),
+  role: Joi.string().valid('basic', 'admin'),
 });
 
 export const changePasswordSchema = Joi.object({
@@ -37,30 +37,32 @@ export const registerSchema = Joi.object({
  */
 export const reviewCreateSchema = Joi.object({
   rating: Joi.number().integer().min(1).max(5).required().messages({
-    "any.required": "Rating is required.",
-    "number.base": "Rating must be a number.",
-    "number.min": "Rating must be at least 1.",
-    "number.max": "Rating must not exceed 5."
+    'any.required': 'Rating is required.',
+    'number.base': 'Rating must be a number.',
+    'number.min': 'Rating must be at least 1.',
+    'number.max': 'Rating must not exceed 5.',
   }),
-  comment: Joi.string().allow("", null),
+  comment: Joi.string().allow('', null),
   photos: Joi.array().items(Joi.string().uri()).messages({
-    "string.uri": "Each photo must be a valid URL."
-  })
+    'string.uri': 'Each photo must be a valid URL.',
+  }),
 });
 
 export const reviewUpdateSchema = Joi.object({
   rating: Joi.number().integer().min(1).max(5).messages({
-    "number.base": "Rating must be a number.",
-    "number.min": "Rating must be at least 1.",
-    "number.max": "Rating must not exceed 5."
+    'number.base': 'Rating must be a number.',
+    'number.min': 'Rating must be at least 1.',
+    'number.max': 'Rating must not exceed 5.',
   }),
-  comment: Joi.string().allow("", null),
+  comment: Joi.string().allow('', null),
   photos: Joi.array().items(Joi.string().uri()).messages({
-    "string.uri": "Each photo must be a valid URL."
-  })
-}).or("rating", "comment", "photos").messages({
-  "object.missing": "At least one field must be provided for update."
-});
+    'string.uri': 'Each photo must be a valid URL.',
+  }),
+})
+  .or('rating', 'comment', 'photos')
+  .messages({
+    'object.missing': 'At least one field must be provided for update.',
+  });
 
 /**
  * Restaurant
@@ -68,10 +70,9 @@ export const reviewUpdateSchema = Joi.object({
 export const createRestaurantSchema = Joi.object({
   name: Joi.string().required(),
   category: Joi.string().required(),
-  foodType: Joi.alternatives().try(
-  Joi.string(),
-  Joi.array().items(Joi.string())
-  ).optional(),
+  foodType: Joi.alternatives()
+    .try(Joi.string(), Joi.array().items(Joi.string()))
+    .optional(),
   description: Joi.string().optional(),
   address: Joi.string().optional(),
   postalCode: Joi.number().optional(),
@@ -85,10 +86,9 @@ export const createRestaurantSchema = Joi.object({
 export const updateRestaurantSchema = Joi.object({
   name: Joi.string().optional(),
   category: Joi.string().optional(),
-  foodType: Joi.alternatives().try(
-  Joi.string(),
-  Joi.array().items(Joi.string())
-  ).optional(),
+  foodType: Joi.alternatives()
+    .try(Joi.string(), Joi.array().items(Joi.string()))
+    .optional(),
   description: Joi.string().optional(),
   address: Joi.string().optional(),
   postalCode: Joi.number().optional(),

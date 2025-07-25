@@ -5,40 +5,40 @@ import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-restaurant-card',
-  standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './restaurant-card.component.html',
-  styleUrl: './restaurant-card.component.scss'
+  styleUrl: './restaurant-card.component.scss',
 })
 export class RestaurantCardComponent {
   @Input() restaurant!: Restaurant;
 
   CATEGORY_ICONS: Record<string, string> = {
-    "Cafe": "cafe.png",
-    "Casual Dining": "casual-dining.png",
-    "Fast Food": "fast-food.png",
-    "Fine Dining": "fine-dining.png",
-    "Food Truck": "food-truck.png",
-    "Bakery": "bakery.png",
-    "Bar": "bar.png",
-    "Bistro": "bistro.png",
-    "Buffet": "buffet.png",
-    "Canteen": "canteen.png",
-    "Coffee Shop": "coffee-shop.png",
-    "Deli": "deli.png",
-    "Drive-Thru": "drive-thru.png",
-    "Family Style": "family-style.png",
-    "Gastropub": "gastropub.png",
-    "Pop-Up": "pop-up.png",
-    "Pub": "pub.png",
-    "Quick Service": "quick-service.png",
-    "Takeaway": "takeaway.png",
-    "Tea House": "tea-house.png",
-    "Restaurant": "restaurant.png",
+    Cafe: 'cafe.png',
+    'Casual Dining': 'casual-dining.png',
+    'Fast Food': 'fast-food.png',
+    'Fine Dining': 'fine-dining.png',
+    'Food Truck': 'food-truck.png',
+    Bakery: 'bakery.png',
+    Bar: 'bar.png',
+    Bistro: 'bistro.png',
+    Buffet: 'buffet.png',
+    Canteen: 'canteen.png',
+    'Coffee Shop': 'coffee-shop.png',
+    Deli: 'deli.png',
+    'Drive-Thru': 'drive-thru.png',
+    'Family Style': 'family-style.png',
+    Gastropub: 'gastropub.png',
+    'Pop-Up': 'pop-up.png',
+    Pub: 'pub.png',
+    'Quick Service': 'quick-service.png',
+    Takeaway: 'takeaway.png',
+    'Tea House': 'tea-house.png',
+    Restaurant: 'restaurant.png',
   };
 
   getCategoryIcon(): string {
-    const iconFile = this.CATEGORY_ICONS[this.restaurant.category] || 'restaurant.png';
+    const iconFile =
+      this.CATEGORY_ICONS[this.restaurant.category] || 'restaurant.png';
     return `assets/${iconFile}`;
   }
 

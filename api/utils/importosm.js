@@ -11,10 +11,34 @@ const openai = new OpenAI({
 });
 
 const FOOD_TYPES = [
-  "Slovenian", "Croatian", "Bosnian", "Serbian", "Montenegrin", "Macedonian", "Kosovar",
-  "Balkan", "Yugoslav Fusion", "Bakery", "Barbecue", "Pizza", "Seafood", "Grill", "Mediterranean",
-  "Middle Eastern", "Greek", "Turkish", "Italian", "Fusion", "Vegan", "Vegetarian", "Asian", "American",
-  "French", "Chinese", "Indian", "Mexican"
+  'Slovenian',
+  'Croatian',
+  'Bosnian',
+  'Serbian',
+  'Montenegrin',
+  'Macedonian',
+  'Kosovar',
+  'Balkan',
+  'Yugoslav Fusion',
+  'Bakery',
+  'Barbecue',
+  'Pizza',
+  'Seafood',
+  'Grill',
+  'Mediterranean',
+  'Middle Eastern',
+  'Greek',
+  'Turkish',
+  'Italian',
+  'Fusion',
+  'Vegan',
+  'Vegetarian',
+  'Asian',
+  'American',
+  'French',
+  'Chinese',
+  'Indian',
+  'Mexican',
 ];
 
 async function fetchDetailsFromOpenAI(name, city, country) {
@@ -29,24 +53,30 @@ async function fetchDetailsFromOpenAI(name, city, country) {
 
     Only include foodType values from this allowed list:
 
-    ${FOOD_TYPES.join(", ")}
+    ${FOOD_TYPES.join(', ')}
 
     If uncertain about food types, leave the list empty.
 `;
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
+      model: 'gpt-4.1-mini',
       messages: [
-        { role: "system", content: "You are assistant with JavaScript expertise that only replies with JSON." },
-        { role: "user", content: prompt },
+        {
+          role: 'system',
+          content:
+            'You are assistant with JavaScript expertise that only replies with JSON.',
+        },
+        { role: 'user', content: prompt },
       ],
     });
 
     const text = completion.choices[0].message.content.trim();
     const parsed = JSON.parse(text);
 
-    const filteredFoodTypes = (parsed.foodType || []).filter(ft => FOOD_TYPES.includes(ft));
+    const filteredFoodTypes = (parsed.foodType || []).filter((ft) =>
+      FOOD_TYPES.includes(ft)
+    );
     return {
       description: parsed.description || null,
       foodType: filteredFoodTypes.length > 0 ? filteredFoodTypes : null,
@@ -74,7 +104,11 @@ const importRestaurantsFromOSM = async (city, country, userId = 1) => {
 
       //for missing foodType or description use openai to fill
       if (!foodType || !description) {
-        const enrichment = await fetchDetailsFromOpenAI(place.name, city, country);
+        const enrichment = await fetchDetailsFromOpenAI(
+          place.name,
+          city,
+          country
+        );
         foodType = foodType || enrichment.foodType;
         description = description || enrichment.description;
       }
@@ -83,7 +117,7 @@ const importRestaurantsFromOSM = async (city, country, userId = 1) => {
         foodType = FOOD_TYPES.includes(foodType) ? [foodType] : null;
       }
       if (foodType) {
-        foodType = foodType.filter(ft => FOOD_TYPES.includes(ft));
+        foodType = foodType.filter((ft) => FOOD_TYPES.includes(ft));
         if (foodType.length === 0) foodType = null;
       }
 
@@ -112,7 +146,7 @@ const importRestaurantsFromOSM = async (city, country, userId = 1) => {
     }
   }
 
- // console.log(`FINISH FOR: ${city}, ${country}, num: ${places.length}`);
+  // console.log(`FINISH FOR: ${city}, ${country}, num: ${places.length}`);
 };
 
 const balkanCities = {
@@ -133,7 +167,7 @@ const runImport = async () => {
     }
   }
 
-  console.log("_________________-IMPORT IS COMPLETEDD_______________-");
+  console.log('_________________-IMPORT IS COMPLETEDD_______________-');
 };
 
 runImport();

@@ -41,7 +41,7 @@
     "country": "Slovenia",
     "photos": ["https://example.com/photo3.jpg"]
   },
-   {
+  {
     "userId": 1,
     "name": "JB Restaurant",
     "category": "Fine Dining",

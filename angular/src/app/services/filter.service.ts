@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class FilterService {
-
-   private filters: any = {};
-   private page = 1;
+  private filters: any = {};
+  private page = 1;
 
   setFilters(filters: any) {
     this.filters = filters;

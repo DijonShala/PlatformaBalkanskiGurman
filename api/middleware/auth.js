@@ -1,6 +1,6 @@
 export const isAdmin = (req, res, next) => {
-  if (req.auth.role !== "admin") {
-    return res.status(403).json({ message: "Forbidden: Admins only." });
+  if (req.auth.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Admins only' });
   }
   next();
 };
@@ -11,7 +11,7 @@ export const isOwnerOrAdmin = (model, idParam = 'id') => {
       const resource = await model.findByPk(req.params[idParam]);
 
       if (!resource) {
-        return res.status(404).json({ message: 'Resource not found.' });
+        return res.status(404).json({ message: 'Resource wasnt found' });
       }
 
       if (

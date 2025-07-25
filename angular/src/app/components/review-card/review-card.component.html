@@ -1,4 +1,6 @@
-<div class="flex flex-col md:flex-row bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 overflow-hidden">
+<div
+  class="flex flex-col md:flex-row bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 overflow-hidden"
+>
   <div *ngIf="review.photo" class="md:w-48 w-full h-40 md:h-auto">
     <img
       [src]="review.photo"
@@ -10,12 +12,17 @@
   <div class="flex flex-col justify-between p-4 w-full">
     <div class="flex items-start justify-between">
       <h5 class="text-lg font-semibold text-gray-900">
-        {{ review.user?.username || 'Anonymous' }}
-        <span class="ml-2 text-yellow-500 font-medium">★ {{ review.rating }}</span>
+        {{ review.user?.username || "Anonymous" }}
+        <span class="ml-2 text-yellow-500 font-medium"
+          >★ {{ review.rating }}</span
+        >
       </h5>
 
       <button
-        *ngIf="authService.getCurrentUser()?.id === review.userId || authService.getCurrentUser()?.role === 'admin'"
+        *ngIf="
+          authService.getCurrentUser()?.id === review.userId ||
+          authService.getCurrentUser()?.role === 'admin'
+        "
         (click)="onDelete()"
         class="text-red-600 hover:text-red-800 text-sm"
       >
@@ -28,7 +35,7 @@
     </p>
 
     <p class="text-gray-500 text-xs mt-1">
-      Reviewed on {{ review.createdAt | date: 'mediumDate' }}
+      Reviewed on {{ review.createdAt | date: "mediumDate" }}
     </p>
   </div>
 </div>

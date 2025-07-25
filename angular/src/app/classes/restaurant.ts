@@ -21,10 +21,10 @@ export class Restaurant {
   constructor(init?: Partial<Restaurant>) {
     Object.assign(this, init);
     if (init?.rating != null) {
-    this.rating = Number(init.rating);
-  } else {
-    this.rating = 0;
-  }
+      this.rating = Number(init.rating);
+    } else {
+      this.rating = 0;
+    }
   }
 }
 

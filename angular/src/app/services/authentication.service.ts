@@ -11,19 +11,21 @@ import { User } from '../classes/user';
 export class AuthenticationService {
   constructor(
     @Inject(BROWSER_STORAGE) private readonly storage: Storage,
-    private readonly apiService: ApiService
+    private readonly apiService: ApiService,
   ) {}
 
-  public login(user: Pick<User, 'username' | 'password'>): Observable<AuthResponse> {
-    return this.apiService.login(user).pipe(
-      tap((response: AuthResponse) => this.saveToken(response.token))
-    );
+  public login(
+    user: Pick<User, 'username' | 'password'>,
+  ): Observable<AuthResponse> {
+    return this.apiService
+      .login(user)
+      .pipe(tap((response: AuthResponse) => this.saveToken(response.token)));
   }
 
   public register(user: Partial<User>): Observable<AuthResponse> {
-    return this.apiService.register(user).pipe(
-      tap((response: AuthResponse) => this.saveToken(response.token))
-    );
+    return this.apiService
+      .register(user)
+      .pipe(tap((response: AuthResponse) => this.saveToken(response.token)));
   }
 
   public saveToken(token: string): void {
@@ -44,7 +46,7 @@ export class AuthenticationService {
         .call(window.atob(input), (character: string) => {
           return '%' + ('00' + character.charCodeAt(0).toString(16)).slice(-2);
         })
-        .join('')
+        .join(''),
     );
   }
 

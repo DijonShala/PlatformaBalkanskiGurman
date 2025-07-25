@@ -15,17 +15,16 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
   selector: 'app-restaurant-list',
-  standalone: true,
   imports: [
     CommonModule,
     RestaurantCardComponent,
     RouterLink,
     MatProgressSpinnerModule,
     MatPaginatorModule,
-    SidebarComponent
+    SidebarComponent,
   ],
   templateUrl: './restaurant-list.component.html',
-  styleUrls: ['./restaurant-list.component.scss']
+  styleUrls: ['./restaurant-list.component.scss'],
 })
 export class RestaurantListComponent implements OnInit, OnDestroy {
   restaurants: Restaurant[] = [];
@@ -51,20 +50,20 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
     private restaurantService: RestaurantService,
     protected filterService: FilterService,
     private commService: RestaurantCommunicationService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.page = this.filterService.getPage() || 1;
 
     this.router.events
-      .pipe(filter(event => event instanceof NavigationStart))
+      .pipe(filter((event) => event instanceof NavigationStart))
       .subscribe(() => {
         this.filterService.setPage(this.page);
       });
 
     const savedFilters = this.filterService.getFilters();
-    if (savedFilters && Object.values(savedFilters).some(val => !!val)) {
+    if (savedFilters && Object.values(savedFilters).some((val) => !!val)) {
       this.lastFilters = savedFilters;
       this.fetchMode = 'filter';
     } else {
@@ -77,12 +76,13 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
       next: (restaurants) => {
         this.restaurants = restaurants;
         this.loading = false;
-        this.error = this.restaurants.length === 0 ? 'No restaurants found.' : '';
+        this.error =
+          this.restaurants.length === 0 ? 'No restaurants found.' : '';
       },
       error: () => {
         this.error = 'Failed to load restaurants.';
         this.loading = false;
-      }
+      },
     });
 
     this.reloadSubscription = this.restaurantService.reload$.subscribe(() => {
@@ -90,15 +90,15 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
     });
 
     this.commSubscriptions.push(
-      this.commService.filtersChanged$.subscribe(filters => {
+      this.commService.filtersChanged$.subscribe((filters) => {
         this.triggerFilter(filters);
-      })
+      }),
     );
 
     this.commSubscriptions.push(
       this.commService.nearbySearch$.subscribe(({ lat, lng, maxDistance }) => {
         this.triggerNearby(lat, lng, maxDistance);
-      })
+      }),
     );
   }
 
@@ -113,17 +113,20 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
     switch (this.fetchMode) {
       case 'search':
         fetch$ = this.restaurantService.searchRestaurantsByName(
-          this.lastSearchName, this.page, this.limit
+          this.lastSearchName,
+          this.page,
+          this.limit,
         );
         break;
       case 'filter':
-        fetch$ = this.lastFilters && Object.keys(this.lastFilters).length
-          ? this.restaurantService.filterRestaurants({
-              ...this.lastFilters,
-              page: this.page,
-              limit: this.limit
-            })
-          : this.restaurantService.getRestaurants(this.page, this.limit);
+        fetch$ =
+          this.lastFilters && Object.keys(this.lastFilters).length
+            ? this.restaurantService.filterRestaurants({
+                ...this.lastFilters,
+                page: this.page,
+                limit: this.limit,
+              })
+            : this.restaurantService.getRestaurants(this.page, this.limit);
         break;
       case 'nearby':
         fetch$ = this.restaurantService.getNearbyRestaurants(
@@ -131,7 +134,7 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
           this.lastCoords.lng,
           this.lastMaxDistance,
           this.page,
-          this.limit
+          this.limit,
         );
         break;
       default:
@@ -157,12 +160,13 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
         this.restaurants = rawData.map((r: any) => new Restaurant(r));
         this.restaurantService.updateRestaurants(this.restaurants);
         this.loading = false;
-        this.error = this.restaurants.length === 0 ? 'No restaurants found.' : '';
+        this.error =
+          this.restaurants.length === 0 ? 'No restaurants found.' : '';
       },
       error: () => {
         this.error = 'Failed to load restaurants.';
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -180,7 +184,7 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
   }
 
   triggerFilter(filters: any): void {
-    const hasAnyFilter = Object.values(filters).some(value => !!value);
+    const hasAnyFilter = Object.values(filters).some((value) => !!value);
     this.fetchMode = hasAnyFilter ? 'filter' : 'all';
     this.lastFilters = filters;
     this.filterService.setFilters(filters);
@@ -197,6 +201,6 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
     this.reloadSubscription?.unsubscribe();
-    this.commSubscriptions.forEach(sub => sub.unsubscribe());
+    this.commSubscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

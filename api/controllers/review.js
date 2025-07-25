@@ -1,10 +1,13 @@
-import Review from "../models/Review.js";
-import User from "../models/User.js";
-import Restaurant from "../models/Restaurant.js";
-import { updateAverageRating } from "./restaurant.js";
-import { reviewCreateSchema, reviewUpdateSchema } from "../middleware/joivalidate.js";
-import streamifier from "streamifier";
-import cloudinary from "./cloudinary.js";
+import Review from '../models/Review.js';
+import User from '../models/User.js';
+import Restaurant from '../models/Restaurant.js';
+import { updateAverageRating } from './restaurant.js';
+import {
+  reviewCreateSchema,
+  reviewUpdateSchema,
+} from '../middleware/joivalidate.js';
+import streamifier from 'streamifier';
+import cloudinary from './cloudinary.js';
 
 /**
  * @openapi
@@ -62,8 +65,8 @@ const getReviews = async (req, res) => {
   try {
     const { count, rows: reviews } = await Review.findAndCountAll({
       where: { restaurantId: idrest },
-      include: [{ model: User, as: 'user', attributes: ["id", "username"] }],
-      order: [["createdAt", "DESC"]],
+      include: [{ model: User, as: 'user', attributes: ['id', 'username'] }],
+      order: [['createdAt', 'DESC']],
       limit,
       offset,
     });
@@ -116,14 +119,14 @@ const getReview = async (req, res) => {
   try {
     const review = await Review.findOne({
       where: { id, restaurantId: idrest },
-      include: [{ model: User, as: 'user', attributes: ["id", "username"] }],
+      include: [{ model: User, as: 'user', attributes: ['id', 'username'] }],
     });
 
     if (!review) {
-      return res.status(404).json({ message: "Review not found." });
+      return res.status(404).json({ message: 'Review not found.' });
     }
 
-    res.status(200).json({ status: "OK", data: review });
+    res.status(200).json({ status: 'OK', data: review });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -192,10 +195,12 @@ const getReview = async (req, res) => {
 const postReview = async (req, res) => {
   const { idrest } = req.params;
 
-  const { error, value } = reviewCreateSchema.validate(req.body, { abortEarly: false });
+  const { error, value } = reviewCreateSchema.validate(req.body, {
+    abortEarly: false,
+  });
   if (error) {
     return res.status(400).json({
-      message: "Validation error",
+      message: 'Validation error',
       details: error.details.map((detail) => detail.message),
     });
   }
@@ -205,10 +210,10 @@ const postReview = async (req, res) => {
   try {
     const restaurant = await Restaurant.findByPk(idrest);
     if (!restaurant) {
-      return res.status(404).json({ message: "Restaurant not found" });
+      return res.status(404).json({ message: 'Restaurant not found' });
     }
 
-     let photoUrl = null;
+    let photoUrl = null;
     if (req.file) {
       const uploaded = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
@@ -237,11 +242,11 @@ const postReview = async (req, res) => {
       include: {
         model: User,
         as: 'user',
-        attributes: ['id', 'username']
-      }
+        attributes: ['id', 'username'],
+      },
     });
 
-    res.status(201).json({ status: "Created", data: createdWithUser });
+    res.status(201).json({ status: 'Created', data: createdWithUser });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -303,10 +308,12 @@ const postReview = async (req, res) => {
 const updateReview = async (req, res) => {
   const { idrest, id } = req.params;
 
-  const { error, value } = reviewUpdateSchema.validate(req.body, { abortEarly: false });
+  const { error, value } = reviewUpdateSchema.validate(req.body, {
+    abortEarly: false,
+  });
   if (error) {
     return res.status(400).json({
-      message: "Validation error",
+      message: 'Validation error',
       details: error.details.map((detail) => detail.message),
     });
   }
@@ -314,7 +321,7 @@ const updateReview = async (req, res) => {
   const { rating, comment, photos } = value;
 
   if (rating !== undefined && (rating < 1 || rating > 5)) {
-    return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    return res.status(400).json({ message: 'Rating must be between 1 and 5' });
   }
 
   try {
@@ -323,7 +330,7 @@ const updateReview = async (req, res) => {
     });
 
     if (!review) {
-      return res.status(404).json({ message: "Review not found" });
+      return res.status(404).json({ message: 'Review not found' });
     }
 
     const updateFields = {};
@@ -332,20 +339,18 @@ const updateReview = async (req, res) => {
     if (photos !== undefined) updateFields.photos = photos;
 
     if (Object.keys(updateFields).length === 0) {
-      return res.status(400).json({ message: "No fields provided to update" });
+      return res.status(400).json({ message: 'No fields provided to update' });
     }
 
     await review.update(updateFields);
 
     await updateAverageRating(idrest);
 
-    res.status(200).json({ message: "Review updated successfully" });
+    res.status(200).json({ message: 'Review updated successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
-
 
 /**
  * @openapi
@@ -386,12 +391,12 @@ const deleteReview = async (req, res) => {
     });
 
     if (!deleted) {
-      return res.status(404).json({ message: "Review not found" });
+      return res.status(404).json({ message: 'Review not found' });
     }
 
     await updateAverageRating(idrest);
 
-    res.status(200).json({ message: "Review deleted" });
+    res.status(200).json({ message: 'Review deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

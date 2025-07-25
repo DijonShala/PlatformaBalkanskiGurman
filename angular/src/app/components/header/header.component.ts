@@ -3,15 +3,14 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { AuthenticationService } from '../../services/authentication.service';
 import { filter } from 'rxjs/operators';
-import { MatDialog} from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { AddRestaurantFormComponent } from '../add-restaurant-form/add-restaurant-form.component';
 
 @Component({
   selector: 'app-header',
-  standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './header.component.html',
-  styleUrls: ['./header.component.scss']
+  styleUrls: ['./header.component.scss'],
 })
 export class HeaderComponent {
   @Output() mapToggle = new EventEmitter<void>();
@@ -23,10 +22,10 @@ export class HeaderComponent {
     private dialog: MatDialog,
   ) {
     this.router.events
-    .pipe(filter(event => event instanceof NavigationEnd))
-    .subscribe(() => {
-      this.isMenuOpen = false; //close menu on route change
-    });
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.isMenuOpen = false; //close menu on route change
+      });
   }
 
   toggleMap() {
@@ -34,14 +33,14 @@ export class HeaderComponent {
   }
 
   openAddRestaurantModal() {
-  if (!this.authService.isLoggedIn()) {
-    this.router.navigate(['/login']);
-    return;
-  }
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
 
-  this.dialog.open(AddRestaurantFormComponent, {
-    width: '500px'
-  });
+    this.dialog.open(AddRestaurantFormComponent, {
+      width: '500px',
+    });
   }
 
   goToProfile() {

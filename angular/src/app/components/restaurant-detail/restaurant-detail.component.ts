@@ -10,10 +10,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-restaurant-detail',
-  standalone: true,
   imports: [CommonModule, ReviewCardComponent, FormsModule],
   templateUrl: './restaurant-detail.component.html',
-  styleUrls: ['./restaurant-detail.component.scss']
+  styleUrls: ['./restaurant-detail.component.scss'],
 })
 export class RestaurantDetailComponent implements OnInit {
   restaurant!: Restaurant;
@@ -38,16 +37,16 @@ export class RestaurantDetailComponent implements OnInit {
     this.loadRestaurant(id);
     this.loadReviews(id);
     if (this.restaurant?.photos?.length) {
-    this.mainPhoto = this.restaurant.photos[0];
+      this.mainPhoto = this.restaurant.photos[0];
     }
   }
 
   isLoggedIn(): boolean {
-  return this.authenticationService.isLoggedIn();
+    return this.authenticationService.isLoggedIn();
   }
 
   onThumbnailClick(photo: string) {
-  this.mainPhoto = photo;
+    this.mainPhoto = photo;
   }
 
   loadRestaurant(id: number): void {
@@ -60,66 +59,67 @@ export class RestaurantDetailComponent implements OnInit {
         this.error = 'Could not load restaurant details.';
         console.error(err);
         this.loading = false;
-      }
+      },
     });
   }
 
   loadReviews(id: number): void {
     this.restaurantService.getReviewsByRestaurantId(id).subscribe({
       next: (res) => (this.reviews = res),
-      error: (err) => console.error('Failed to load reviews', err)
+      error: (err) => console.error('Failed to load reviews', err),
     });
   }
 
   onFileSelected(event: Event): void {
-  const input = event.target as HTMLInputElement;
-  if (input.files && input.files.length > 0) {
-    this.selectedPhoto = input.files[0];
-  }
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedPhoto = input.files[0];
+    }
   }
 
   submitReview(): void {
-  if (!this.newReviewComment.trim()) {
-    alert('Comment is required.');
-    return;
+    if (!this.newReviewComment.trim()) {
+      alert('Comment is required.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('rating', this.newReviewRating.toString());
+    formData.append('comment', this.newReviewComment.trim());
+
+    if (this.selectedPhoto) {
+      formData.append('review_photo', this.selectedPhoto);
+    }
+
+    this.restaurantService.postReview(this.restaurant.id, formData).subscribe({
+      next: (res) => {
+        this.reviews.unshift(res);
+        this.newReviewComment = '';
+        this.newReviewRating = 5;
+        this.selectedPhoto = null;
+
+        this.loadRestaurant(this.restaurant.id);
+      },
+      error: (err) => {
+        this.alertType = 'error';
+        this.alertMessage = err.error?.message || 'Failed to submit the review';
+      },
+    });
   }
 
-  const formData = new FormData();
-  formData.append('rating', this.newReviewRating.toString());
-  formData.append('comment', this.newReviewComment.trim());
-
-  if (this.selectedPhoto) {
-    formData.append('review_photo', this.selectedPhoto);
+  deleteReview(reviewId: number): void {
+    this.restaurantService
+      .deleteReview(reviewId, this.restaurant.id)
+      .subscribe({
+        next: () => {
+          this.reviews = this.reviews.filter((r) => r.id !== reviewId);
+          this.loadRestaurant(this.restaurant.id); // load rests to refresh rating
+        },
+        error: (err) => {
+          this.alertType = 'error';
+          this.alertMessage =
+            err.error?.message || 'Failed to delete the review';
+        },
+      });
   }
-
-  this.restaurantService.postReview(this.restaurant.id, formData).subscribe({
-    next: (res) => {
-      this.reviews.unshift(res);
-      this.newReviewComment = '';
-      this.newReviewRating = 5;
-      this.selectedPhoto = null;
-
-      this.loadRestaurant(this.restaurant.id);
-    },
-    error: (err) => {
-      this.alertType = 'error';
-      this.alertMessage = err.error?.message || 'Failed to submit the review';
-    }
-  });
-}
-
-
-deleteReview(reviewId: number): void {
-  this.restaurantService.deleteReview(reviewId, this.restaurant.id).subscribe({
-    next: () => {
-      this.reviews = this.reviews.filter(r => r.id !== reviewId);
-      this.loadRestaurant(this.restaurant.id); // load rests to refresh rating
-    },
-    error: (err) => {
-      this.alertType = 'error';
-      this.alertMessage = err.error?.message || 'Failed to delete the review';
-    }
-  });
-}
-
 }

@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { UserService } from '../../../services/user.service';
 import { AuthenticationService } from '../../../services/authentication.service';
 import { Router } from '@angular/router';
@@ -7,10 +12,9 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-change-password',
-  standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './change-password.component.html',
-  styleUrls: ['./change-password.component.scss']
+  styleUrls: ['./change-password.component.scss'],
 })
 export class ChangePasswordComponent implements OnInit {
   passwordForm!: FormGroup;
@@ -22,7 +26,7 @@ export class ChangePasswordComponent implements OnInit {
     private fb: FormBuilder,
     private userService: UserService,
     private authService: AuthenticationService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -31,18 +35,23 @@ export class ChangePasswordComponent implements OnInit {
 
     this.userId = currentUser.id;
 
-    this.passwordForm = this.fb.group({
-      oldPassword: ['', Validators.required],
-      newPassword: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required]
-    }, {
-      validators: this.passwordMatchValidator
-    });
+    this.passwordForm = this.fb.group(
+      {
+        oldPassword: ['', Validators.required],
+        newPassword: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', Validators.required],
+      },
+      {
+        validators: this.passwordMatchValidator,
+      },
+    );
   }
 
   passwordMatchValidator(group: FormGroup) {
-    return group.get('newPassword')?.value === group.get('confirmPassword')?.value
-      ? null : { mismatch: true };
+    return group.get('newPassword')?.value ===
+      group.get('confirmPassword')?.value
+      ? null
+      : { mismatch: true };
   }
 
   onSubmit(): void {
@@ -50,19 +59,22 @@ export class ChangePasswordComponent implements OnInit {
 
     const { oldPassword, newPassword } = this.passwordForm.value;
 
-    this.userService.changePassword(this.userId, { oldPassword, newPassword }).subscribe({
-      next: res => {
-        this.alertType = 'success';
-        this.alertMessage = 'Password was changed successfully';
+    this.userService
+      .changePassword(this.userId, { oldPassword, newPassword })
+      .subscribe({
+        next: (res) => {
+          this.alertType = 'success';
+          this.alertMessage = 'Password was changed successfully';
 
-        if (res.token) {
-        this.authService.saveToken(res.token);
-        }
-      },
-      error: err => {
-        this.alertType = 'error';
-        this.alertMessage = err.error?.message || 'Password change has failed';
-      }
-    });
+          if (res.token) {
+            this.authService.saveToken(res.token);
+          }
+        },
+        error: (err) => {
+          this.alertType = 'error';
+          this.alertMessage =
+            err.error?.message || 'Password change has failed';
+        },
+      });
   }
 }

@@ -12,8 +12,7 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
-  standalone: true,
-  imports: [CommonModule, FormsModule ],
+  imports: [CommonModule, FormsModule],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
 })
@@ -34,7 +33,7 @@ export class RegisterComponent {
     private router: Router,
     private authenticationService: AuthenticationService,
     private connectionService: ConnectionService,
-    private historyService: HistoryService
+    private historyService: HistoryService,
   ) {}
 
   public onRegisterSubmit(): void {
@@ -62,7 +61,6 @@ export class RegisterComponent {
       return;
     }
 
-
     this.doRegister();
   }
 
@@ -74,7 +72,7 @@ export class RegisterComponent {
           this.alertType = 'error';
           this.alertMessage = error.error?.message || 'Registration failed';
           return throwError(() => error);
-        })
+        }),
       )
       .subscribe(() => {
         this.alertType = 'success';

@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-user',
   imports: [LeftSidebarComponent, RouterOutlet, CommonModule],
   templateUrl: './user.component.html',
-  styleUrl: './user.component.scss'
+  styleUrl: './user.component.scss',
 })
 export class UserComponent {
   sidebarOpen = false;

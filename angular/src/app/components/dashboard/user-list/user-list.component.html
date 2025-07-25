@@ -4,17 +4,35 @@
   <mat-spinner></mat-spinner>
 </div>
 
-<div *ngIf="error" class="text-red-600 bg-red-100 border border-red-300 rounded p-4 mb-4">
+<div
+  *ngIf="error"
+  class="text-red-600 bg-red-100 border border-red-300 rounded p-4 mb-4"
+>
   {{ error }}
 </div>
 
-<div *ngIf="!loading && users.length > 0" class="overflow-x-auto bg-white shadow-md rounded-lg">
+<div
+  *ngIf="!loading && users.length > 0"
+  class="overflow-x-auto bg-white shadow-md rounded-lg"
+>
   <table class="min-w-full divide-y divide-gray-200">
     <thead class="bg-gray-50">
       <tr>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Firstname</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lastname</th>
-        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+        <th
+          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+        >
+          Firstname
+        </th>
+        <th
+          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+        >
+          Lastname
+        </th>
+        <th
+          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+        >
+          Username
+        </th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">
@@ -38,6 +56,7 @@
     [pageSizeOptions]="[]"
     [pageIndex]="currentPage - 1"
     [showFirstLastButtons]="true"
-    (page)="onPageChange($event)">
+    (page)="onPageChange($event)"
+  >
   </mat-paginator>
 </div>

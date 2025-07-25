@@ -4,16 +4,20 @@ import { RouterModule, Router } from '@angular/router';
 import { UserService } from '../../../services/user.service';
 import { User } from '../../../classes/user';
 import { FilterService } from '../../../services/filter.service';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {MatPaginatorModule} from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-user-list',
-  standalone: true,
-  imports: [CommonModule, RouterModule, MatProgressSpinnerModule, MatPaginatorModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatProgressSpinnerModule,
+    MatPaginatorModule,
+  ],
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.scss']
+  styleUrls: ['./user-list.component.scss'],
 })
 export class UserListComponent implements OnInit {
   users: User[] = [];
@@ -27,7 +31,7 @@ export class UserListComponent implements OnInit {
   constructor(
     private userService: UserService,
     private router: Router,
-    private filterService: FilterService
+    private filterService: FilterService,
   ) {}
 
   ngOnInit(): void {
@@ -42,23 +46,23 @@ export class UserListComponent implements OnInit {
     this.filterService.setPage(page);
 
     this.userService.getAllUsers(page, this.pageSize).subscribe({
-      next: res => {
+      next: (res) => {
         this.users = res.data;
         this.currentPage = res.currentPage;
         this.totalPages = res.totalPages;
         this.totalItems = res.totalItems;
         this.loading = false;
       },
-      error: err => {
+      error: (err) => {
         this.error = err.error?.message || 'Failed to load users.';
         this.loading = false;
-      }
+      },
     });
   }
 
   onPageChange(event: PageEvent): void {
-  this.currentPage = event.pageIndex + 1;
-  this.fetchUsers(this.currentPage);
+    this.currentPage = event.pageIndex + 1;
+    this.fetchUsers(this.currentPage);
   }
 
   goToUser(id: number): void {
