@@ -13,26 +13,27 @@ import { UserRestaurantDetailComponent } from './components/dashboard/user-resta
 import { canLogRegGuard } from './guards/canLogReg.guard';
 import { authGuard } from './guards/auth-guard.guard';
 import { adminGuard } from './guards/admin.guard';
-import { LayoutComponent } from './components/layout/layout.component'; // Renamed from FrameworkComponent
 
 export const routes: Routes = [
   { path: '', redirectTo: '/restaurants', pathMatch: 'full' },
 
-  // Public routes
+  /**
+   * Public
+   */
   { path: 'login', component: LoginComponent, canActivate: [canLogRegGuard] },
   { path: 'register', component: RegisterComponent, canActivate: [canLogRegGuard] },
 
-  // Layout wrapper for routes with shared UI
   {
     path: '',
-    component: LayoutComponent,
     children: [
       { path: 'restaurants', component: RestaurantListComponent },
       { path: 'restaurants/:id', component: RestaurantDetailComponent }
     ]
   },
 
-  // Admin dashboard
+  /**
+   * ADMIN only
+   */
   {
     path: 'admin',
     component: AdminComponent,
@@ -48,7 +49,9 @@ export const routes: Routes = [
     ]
   },
 
-  // Authenticated user dashboard
+  /**
+   * User loged in
+   */
   {
     path: 'dashboard',
     component: UserComponent,
@@ -62,13 +65,14 @@ export const routes: Routes = [
     ]
   },
 
-  // Lazy-loaded map route
+  /**
+   * Map
+   */
   {
     path: 'map',
     loadComponent: () =>
       import('./components/map-page/map-page.component').then((m) => m.MapPageComponent)
   },
 
-  // Catch-all redirect
   { path: '**', redirectTo: '' }
 ];

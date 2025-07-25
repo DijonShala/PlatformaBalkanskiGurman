@@ -24,13 +24,13 @@ export class RestaurantDetailComponent implements OnInit {
   newReviewRating: number = 5;
   selectedPhoto: File | null = null;
   mainPhoto: string | null = null;
-
+  alertMessage: string | null = null;
+  alertType: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private restaurantService: RestaurantService,
     public authenticationService: AuthenticationService,
-    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -102,8 +102,8 @@ export class RestaurantDetailComponent implements OnInit {
       this.loadRestaurant(this.restaurant.id);
     },
     error: (err) => {
-      console.error('Failed to submit review', err);
-      alert('Failed to submit review');
+      this.alertType = 'error';
+      this.alertMessage = err.error?.message || 'Failed to submit the review';
     }
   });
 }
@@ -113,11 +113,11 @@ deleteReview(reviewId: number): void {
   this.restaurantService.deleteReview(reviewId, this.restaurant.id).subscribe({
     next: () => {
       this.reviews = this.reviews.filter(r => r.id !== reviewId);
-      this.loadRestaurant(this.restaurant.id); // refresh rating
+      this.loadRestaurant(this.restaurant.id); // load rests to refresh rating
     },
     error: (err) => {
-      console.error('Failed to delete review', err);
-      alert('Could not delete the review.');
+      this.alertType = 'error';
+      this.alertMessage = err.error?.message || 'Failed to delete the review';
     }
   });
 }

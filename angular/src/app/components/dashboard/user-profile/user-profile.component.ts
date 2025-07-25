@@ -17,6 +17,9 @@ export class UserProfileComponent implements OnInit {
   userId!: number;
   isAdmin = false;
   isSelf = false;
+  alertMessage: string | null = null;
+  alertType: string | null = null;
+
 
   constructor(
     private fb: FormBuilder,
@@ -87,13 +90,16 @@ export class UserProfileComponent implements OnInit {
 
     this.userService.updateUser(this.userId, payload).subscribe({
       next: res => {
-        alert('Profile updated successfully');
+        this.alertType = 'succes';
+        this.alertMessage = 'User updated suuccesfully';
         if (res.token && this.isSelf) {
-          // Only update token if editing own profile
           this.authService.saveToken(res.token);
         }
       },
-      error: err => alert(err.error?.message || 'Update failed')
+      error: err => {
+        this.alertType = 'error';
+        this.alertMessage = err.error?.message || 'Updating the user has failed';
+      }
     });
   }
 
@@ -109,7 +115,10 @@ export class UserProfileComponent implements OnInit {
           this.router.navigate(['/admin/users']);
         }
       },
-      error: err => alert(err.error?.message || 'Deletion failed')
+      error: err => {
+        this.alertType = 'error';
+        this.alertMessage = err.error?.message || 'Profile deletion error';
+      }
     });
   }
 }

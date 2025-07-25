@@ -62,7 +62,6 @@ export class AuthenticationService {
       const token = this.getToken();
       if (token) {
         const payload = JSON.parse(this.b64Utf8(token.split('.')[1]));
-        // Map token payload to User instance (only what is in the token)
         return new User({
           id: payload.id,
           username: payload.username,

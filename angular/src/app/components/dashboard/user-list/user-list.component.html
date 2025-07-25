@@ -1,16 +1,13 @@
 <h2 class="text-2xl font-semibold text-gray-800 mb-4">All Users</h2>
 
-<!-- Loading Spinner -->
 <div *ngIf="loading" class="flex justify-center items-center py-8">
   <mat-spinner></mat-spinner>
 </div>
 
-<!-- Error Message -->
 <div *ngIf="error" class="text-red-600 bg-red-100 border border-red-300 rounded p-4 mb-4">
   {{ error }}
 </div>
 
-<!-- Users Table -->
 <div *ngIf="!loading && users.length > 0" class="overflow-x-auto bg-white shadow-md rounded-lg">
   <table class="min-w-full divide-y divide-gray-200">
     <thead class="bg-gray-50">
@@ -34,7 +31,6 @@
   </table>
 </div>
 
-<!-- Paginator -->
 <div class="mt-6 flex justify-center">
   <mat-paginator
     [length]="totalItems"

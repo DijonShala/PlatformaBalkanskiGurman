@@ -80,7 +80,7 @@ export class UserRestaurantsComponent implements OnInit, OnDestroy {
 
   onUserChange(): void {
     if (!this.selectedUserId) return;
-    this.page = 1; // reset page when user changes
+    this.page = 1;
     this.filterService.setPage(this.page);
     this.fetchRestaurants(this.page);
   }

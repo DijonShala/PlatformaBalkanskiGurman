@@ -18,35 +18,34 @@ const FOOD_TYPES = [
 ];
 
 async function fetchDetailsFromOpenAI(name, city, country) {
-  // Compose prompt to get foodType and description from OpenAI
   const prompt = `
-Given the restaurant name "${name}" located in ${city}, ${country}, provide a short description of the restaurant and the main food type(s) it serves. 
-Only respond with a JSON object like this:
+    Given the restaurant name "${name}" located in ${city}, ${country}, provide a short description of the restaurant and the main food type(s) it serves. 
+    Only respond with a JSON object like this:
 
-{
-  "description": "string",
-  "foodType": ["list", "of", "valid", "food types"]
-}
+    {
+      "description": "string",
+      "foodType": ["list", "of", "valid", "food types"]
+    }
 
-Only include foodType values from this allowed list:
+    Only include foodType values from this allowed list:
 
-${FOOD_TYPES.join(", ")}
+    ${FOOD_TYPES.join(", ")}
 
-If uncertain about food types, leave the list empty.
+    If uncertain about food types, leave the list empty.
 `;
 
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       messages: [
-        { role: "system", content: "You are a helpful assistant that only replies with JSON." },
+        { role: "system", content: "You are assistant with JavaScript expertise that only replies with JSON." },
         { role: "user", content: prompt },
       ],
     });
 
     const text = completion.choices[0].message.content.trim();
     const parsed = JSON.parse(text);
-    // Filter foodType array by allowed types only
+
     const filteredFoodTypes = (parsed.foodType || []).filter(ft => FOOD_TYPES.includes(ft));
     return {
       description: parsed.description || null,
@@ -65,7 +64,7 @@ const importRestaurantsFromOSM = async (city, country, userId = 1) => {
     try {
       if (!place.lat || !place.lon) continue;
 
-      // Skip duplicates based on name + city
+      //skip the dplicates based on city and name
       const existing = await Restaurant.findOne({
         where: { name: place.name, city: place.city },
       });
@@ -73,14 +72,13 @@ const importRestaurantsFromOSM = async (city, country, userId = 1) => {
 
       let { foodType, description } = place;
 
-      // Enrich missing foodType or description via OpenAI
+      //for missing foodType or description use openai to fill
       if (!foodType || !description) {
         const enrichment = await fetchDetailsFromOpenAI(place.name, city, country);
         foodType = foodType || enrichment.foodType;
         description = description || enrichment.description;
       }
 
-      // Ensure foodType is either null or array of valid types
       if (foodType && !Array.isArray(foodType)) {
         foodType = FOOD_TYPES.includes(foodType) ? [foodType] : null;
       }
@@ -108,13 +106,13 @@ const importRestaurantsFromOSM = async (city, country, userId = 1) => {
         photos: [],
       });
 
-      console.log(`✅ Added: ${place.name} (${place.city})`);
+      //console.log(`ADD: ${place.name} (${place.city})`);
     } catch (err) {
-      console.error(`❌ Failed to insert ${place.name}:`, err.message);
+      //console.error(`FAIL ${place.name}:`, err.message);
     }
   }
 
-  console.log(`🎉 Finished importing ${places.length} places from ${city}, ${country}`);
+ // console.log(`FINISH FOR: ${city}, ${country}, num: ${places.length}`);
 };
 
 const balkanCities = {
@@ -135,7 +133,7 @@ const runImport = async () => {
     }
   }
 
-  console.log("🌍 All Balkan city imports complete.");
+  console.log("_________________-IMPORT IS COMPLETEDD_______________-");
 };
 
 runImport();

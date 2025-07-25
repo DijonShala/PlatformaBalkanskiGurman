@@ -5,12 +5,13 @@ import { Review } from '../classes/review';
 import { map, Observable, BehaviorSubject, Subject } from 'rxjs';
 import { BROWSER_STORAGE } from '../classes/storage';
 import { Pagination } from '../classes/pagination';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RestaurantService {
-  private apiUrl = 'http://localhost:3000/api'; // adjust if needed
+  private apiUrl = environment.apiUrl;
 
   private reloadTrigger$ = new Subject<void>();
 
@@ -29,6 +30,7 @@ export class RestaurantService {
   triggerReload() {
   this.reloadTrigger$.next();
   }
+  
   getRestaurants(page = 1, limit = 10): Observable<Pagination<Restaurant>> {
   const params = new HttpParams()
     .set('page', page.toString())
@@ -48,7 +50,7 @@ export class RestaurantService {
 
   getRestaurantById(id: number): Observable<Restaurant> {
     return this.http.get<Restaurant>(`${this.apiUrl}/restaurants/${id}`)
-    .pipe(map(r => new Restaurant(r)));;
+    .pipe(map(r => new Restaurant(r)));
   }
 
   getReviewsByRestaurantId(id: number): Observable<Review[]> {

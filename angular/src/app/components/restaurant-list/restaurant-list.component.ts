@@ -50,7 +50,6 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
   constructor(
     private restaurantService: RestaurantService,
     protected filterService: FilterService,
-    private dialog: MatDialog,
     private commService: RestaurantCommunicationService,
     private router: Router
   ) {}

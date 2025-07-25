@@ -74,7 +74,7 @@ const swaggerDocument = swaggerJsDoc({
             "Allowed values for the codelist used in filtering locations.",
           enum: [
             "category",
-            "type",
+            "foodType",
             "city",
             "country",
           ],
@@ -202,7 +202,7 @@ async function createAdminUser() {
     username: "admin",
     firstname: "Admin",
     lastname: "Admin",
-    email: "admin@example.com",
+    email: "admin@admin.com",
     role: "admin",
   });
   

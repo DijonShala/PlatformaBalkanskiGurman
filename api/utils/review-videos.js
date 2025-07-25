@@ -31,7 +31,6 @@ Return a clean JSON array or null. Use "" or null for unknown values. Do not inc
 `.trim();
 
 /**
- * Extracts structured restaurant data from YouTube title and description using OpenAI.
  * @param {{ title: string, description: string }} input
  * @returns {Promise<null | Array<Object>>}
  */
@@ -62,7 +61,7 @@ Description: ${description}
     const parsed = JSON.parse(response);
     return Array.isArray(parsed) || parsed === null ? parsed : [parsed];
   } catch (err) {
-    console.error("❌ Failed to parse OpenAI response:", err.message);
+    console.error("Filed to parse OpenAI response:", err.message);
     console.error("Raw response:", completion.choices[0].message.content);
     return null;
   }

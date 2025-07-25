@@ -19,19 +19,6 @@ import { filter } from 'rxjs/operators';
   styleUrls: ['./layout.component.scss']
 })
 export class LayoutComponent {
-  showMap = false;
-  showSidebar = true;
+  constructor() {}
 
-  constructor(private router: Router) {
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: NavigationEnd) => {
-        const showSidebarOnlyOn = ['/restaurants'];
-        this.showSidebar = showSidebarOnlyOn.includes(event.urlAfterRedirects);
-      });
-  }
-
-  toggleMap(): void {
-    this.showMap = !this.showMap;
-  }
 }

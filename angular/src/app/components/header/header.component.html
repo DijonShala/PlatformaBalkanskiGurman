@@ -1,6 +1,7 @@
+
 <header class="fixed inset-x-0 top-0 z-50 bg-white shadow-md">
   <nav class="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8" aria-label="Global">
-    <!-- Logo and Site Name -->
+
     <div class="flex lg:flex-1 items-center gap-2">
       <a routerLink="/" class="-m-1.5 p-1.5 flex items-center gap-2">
         <img src="assets/logo.png" alt="Logo" class="h-8 w-8" />
@@ -8,7 +9,6 @@
       </a>
     </div>
 
-    <!-- Mobile Menu Button -->
     <div class="flex lg:hidden">
       <button type="button" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
               (click)="isMenuOpen = !isMenuOpen">
@@ -26,14 +26,12 @@
       </button>
     </div>
 
-    <!-- Desktop Links -->
     <div class="hidden lg:flex lg:gap-x-6 lg:items-center">
       <button class="text-sm text-gray-700 border border-blue-600 hover:bg-blue-50 px-4 py-2 rounded"
               (click)="toggleMap()">Show Map</button>
       <button class="text-sm text-gray-700 border border-green-600 hover:bg-green-50 px-4 py-2 rounded"
               (click)="openAddRestaurantModal()">Add Restaurant</button>
 
-      <!-- Auth Links (Desktop) -->
       <ng-container *ngIf="!authService.isLoggedIn(); else loggedInMenu">
         <a routerLink="/login" class="text-sm text-gray-700 px-3 py-2 rounded hover:bg-gray-100">Login</a>
         <a routerLink="/register" class="text-sm text-gray-700 px-3 py-2 rounded hover:bg-gray-100">Register</a>
@@ -56,7 +54,7 @@
     </div>
   </nav>
 
-  <!-- Mobile Menu -->
+  <!--mobile-->
   <div *ngIf="isMenuOpen" class="lg:hidden bg-white px-4 py-4 border-t border-gray-200">
     <div class="space-y-2">
       <button class="w-full text-left text-sm text-gray-700 px-4 py-2 rounded border border-blue-600 hover:bg-blue-50"

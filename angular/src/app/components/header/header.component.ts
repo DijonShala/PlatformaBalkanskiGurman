@@ -1,16 +1,15 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
-import { AddRestaurantFormComponent } from '../add-restaurant-form/add-restaurant-form.component';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { RestaurantService } from '../../services/restaurant.service';
 import { AuthenticationService } from '../../services/authentication.service';
 import { filter } from 'rxjs/operators';
+import { MatDialog} from '@angular/material/dialog';
+import { AddRestaurantFormComponent } from '../add-restaurant-form/add-restaurant-form.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, MatDialogModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss']
 })
@@ -19,15 +18,14 @@ export class HeaderComponent {
   isMenuOpen = false;
 
   constructor(
-    private dialog: MatDialog,
-    private restaurantService: RestaurantService,
     public authService: AuthenticationService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog,
   ) {
     this.router.events
     .pipe(filter(event => event instanceof NavigationEnd))
     .subscribe(() => {
-      this.isMenuOpen = false; // close menu on route change
+      this.isMenuOpen = false; //close menu on route change
     });
   }
 
@@ -36,28 +34,14 @@ export class HeaderComponent {
   }
 
   openAddRestaurantModal() {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']);
-      return;
-    }
+  if (!this.authService.isLoggedIn()) {
+    this.router.navigate(['/login']);
+    return;
+  }
 
-    const dialogRef = this.dialog.open(AddRestaurantFormComponent, {
-      width: '500px'
-    });
-
-    dialogRef.afterClosed().subscribe((formData: FormData) => {
-      if (formData) {
-        this.restaurantService.createRestaurant(formData).subscribe({
-          next: (res) => {
-            console.log('Restaurant created:', res);
-            this.restaurantService.triggerReload();
-          },
-          error: (err) => {
-            console.error('Error creating restaurant:', err);
-          }
-        });
-      }
-    });
+  this.dialog.open(AddRestaurantFormComponent, {
+    width: '500px'
+  });
   }
 
   goToProfile() {

@@ -46,6 +46,10 @@ import { updateUserSchema, changePasswordSchema } from "../middleware/joivalidat
  *           $ref: '#/components/schemas/User'
  *    '500':
  *     description: <b>Internal Server Error</b>, failed to fetch users.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/ErrorMessage'
  */
 const getAllUsers = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -101,7 +105,7 @@ const getAllUsers = async (req, res) => {
  *          $ref: '#/components/schemas/User'
  *    '404':
  *     description: <b>Not Found</b>, user not found.
- *    '500':
+ *    '500': 
  *     description: <b>Internal Server Error</b>, failed to retrieve user.
  */
 const getUser = async (req, res) => {
@@ -113,13 +117,13 @@ const getUser = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      return res.status(404).json({ message: "User not found" });
     }
 
     return res.status(200).json({ status: "OK", data: user });
   } catch (err) {
     console.error("Error fetching user:", err);
-    return res.status(500).json({ message: "Internal server error." });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -178,13 +182,13 @@ const updateProfile = async (req, res) => {
   const id = isAdmin ? req.params.id : req.auth?.id;
 
   if (!id) {
-    return res.status(400).json({ message: "User ID is missing." });
+    return res.status(400).json({ message: "User ID is missing" });
   }
 
   const { error, value } = updateUserSchema.validate(req.body, { abortEarly: false });
   if (error) {
     return res.status(400).json({
-      message: "Validation error.",
+      message: "Validation error",
       details: error.details.map((detail) => detail.message),
     });
   }
@@ -193,7 +197,7 @@ const updateProfile = async (req, res) => {
 
   try {
     const user = await User.findByPk(id);
-    if (!user) return res.status(404).json({ message: "User not found." });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const updateFields = {};
 
@@ -205,11 +209,11 @@ const updateProfile = async (req, res) => {
     if (isAdmin && role !== undefined) {
       updateFields.role = role;
     } else if (!isAdmin && role !== undefined) {
-      return res.status(403).json({ message: "Only admin can change roles." });
+      return res.status(403).json({ message: "Only admin can change roles" });
     }
 
     if (Object.keys(updateFields).length === 0) {
-      return res.status(400).json({ message: "No fields provided to update." });
+      return res.status(400).json({ message: "No fields provided to update" });
     }
 
     await user.update(updateFields);
@@ -224,10 +228,10 @@ const updateProfile = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "1d" }
     );
-    res.status(200).json({ message: "Profile updated successfully." , token});
+    res.status(200).json({ message: "Profile updated successfully" , token});
   } catch (err) {
     if (err.name === 'SequelizeUniqueConstraintError') {
-      return res.status(400).json({ message: "Username or email already in use." });
+      return res.status(400).json({ message: "Username or email already in use" });
     }
 
     res.status(500).json({ message: err.message });
@@ -283,13 +287,13 @@ const changePassword = async (req, res) => {
   const id = isAdmin ? req.params.id : req.auth.id;
 
   if (!id) {
-    return res.status(400).json({ message: "User ID is missing." });
+    return res.status(400).json({ message: "User ID is missing" });
   }
 
   const { error, value } = changePasswordSchema.validate(req.body, { abortEarly: false });
   if (error) {
     return res.status(400).json({
-      message: "Validation error.",
+      message: "Validation error",
       details: error.details.map((detail) => detail.message),
     });
   }
@@ -299,12 +303,12 @@ const changePassword = async (req, res) => {
   try {
     const user = await User.findByPk(id);
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const isValid = user.validPassword(oldPassword);
     if (!isValid) {
-      return res.status(401).json({ message: "Incorrect old password." });
+      return res.status(401).json({ message: "Incorrect old password" });
     }
 
     user.setPassword(newPassword);
@@ -321,10 +325,10 @@ const changePassword = async (req, res) => {
             { expiresIn: "1d" }
           );
 
-    return res.status(200).json({ message: "Password updated successfully." , token });
+    return res.status(200).json({ message: "Password updated successfully" , token });
   } catch (err) {
     console.error("Error changing password:", err);
-    return res.status(500).json({ message: "Internal server error." });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -373,12 +377,8 @@ const deleteProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Update average rating for each of user's restaurants before deleting them
-    for (const restaurant of user.restaurants) {
-      await updateAverageRating(restaurant.id);
-    }
-
-    await user.destroy(); // Assuming cascade delete is configured for related models
+    await user.destroy();
+    
     return res.status(200).json({ message: "User deleted successfully" });
 
   } catch (err) {
@@ -386,8 +386,6 @@ const deleteProfile = async (req, res) => {
     return res.status(500).json({ message: err.message });
   }
 };
-
-
 
 export default {
     getAllUsers,

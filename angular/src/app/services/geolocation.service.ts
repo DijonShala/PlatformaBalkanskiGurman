@@ -35,7 +35,7 @@ export class GeolocationService {
               message = 'Location information is unavailable.';
               break;
             case error.TIMEOUT:
-              message = 'Location request timed out.';
+              message = 'Location request timed out';
               break;
             default:
               message = 'An unknown error occurred.';

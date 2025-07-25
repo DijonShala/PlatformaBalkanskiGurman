@@ -15,6 +15,8 @@ import { CommonModule } from '@angular/common';
 export class ChangePasswordComponent implements OnInit {
   passwordForm!: FormGroup;
   userId!: number;
+  alertMessage: string | null = null;
+  alertType: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -50,14 +52,16 @@ export class ChangePasswordComponent implements OnInit {
 
     this.userService.changePassword(this.userId, { oldPassword, newPassword }).subscribe({
       next: res => {
-        alert('Password changed successfully.');
+        this.alertType = 'success';
+        this.alertMessage = 'Password was changed successfully';
 
         if (res.token) {
         this.authService.saveToken(res.token);
         }
       },
       error: err => {
-        alert(err.error?.message || 'Failed to change password');
+        this.alertType = 'error';
+        this.alertMessage = err.error?.message || 'Password change has failed';
       }
     });
   }

@@ -22,16 +22,16 @@ const sequelize = new Sequelize(process.env.DB_DATABASE, process.env.DB_USER, pr
 });
 
 pool.on("connect", () => {
-    console.log("Connection pool established with Database");
+    console.log("Connection pool established with DB");
 })
 
 pool.on("error", (err, client) => {
-  console.error("Unexpected error on idle client", err);
+  console.error("error on idle client", err);
   process.exit(-1);
 });
 
 pool.on("remove", () => {
-  console.log("Client removed from pool");
+  console.log("client was removed from pool");
 });
 
 const gracefulShutdown = async (msg, callback) => {

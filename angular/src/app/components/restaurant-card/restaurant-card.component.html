@@ -2,7 +2,6 @@
   *ngIf="restaurant"
   class="bg-white rounded-xl shadow p-4 flex flex-col sm:flex-row gap-4 hover:shadow-md transition h-[250px] sm:h-[180px]"
 >
-  <!-- Image: Full width on mobile, smaller on larger screens -->
   <img
     [src]="getCategoryIcon()"
     alt="{{ restaurant.category || 'Category Icon' }}"

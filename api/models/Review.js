@@ -9,7 +9,7 @@ import User from "./User.js";
  *   schemas:
  *     Review:
  *       type: object
- *       description: A user-submitted review for a specific restaurant.
+ *       description: A user submitted review for a specific restaurant.
  *       properties:
  *         id:
  *           type: integer
@@ -40,7 +40,7 @@ import User from "./User.js";
  *             type: string
  *             format: uri
  *           example:
- *             - https://example.com/review-pic1.jpg
+ *             - https://cloudinary.com/review-pictures1.jpg
  *         createdAt:
  *           type: string
  *           format: date-time

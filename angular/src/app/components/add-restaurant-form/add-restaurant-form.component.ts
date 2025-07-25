@@ -4,6 +4,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { RestaurantService } from '../../services/restaurant.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-add-restaurant-form',
@@ -15,6 +17,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 export class AddRestaurantFormComponent {
   restaurantForm: FormGroup;
   selectedFiles: File[] = [];
+  alertMessage: string | null = null;
+  alertType: string | null = null;
 
   CATEGORIES = [
   "Cafe", "Casual Dining", "Fast Food", "Fine Dining", "Food Truck", "Bakery",
@@ -30,6 +34,8 @@ FOOD_TYPES = [
 ];
   constructor(
     private fb: FormBuilder,
+    private restaurantService: RestaurantService,
+    private router: Router,
     private dialogRef: MatDialogRef<AddRestaurantFormComponent>
   ) {
     this.restaurantForm = this.fb.group({
@@ -74,7 +80,18 @@ onFilesSelected(event: Event): void {
       formData.append('restaurant_photos', file);
     }
 
-    this.dialogRef.close(formData);
+     this.restaurantService.createRestaurant(formData).subscribe({
+      next: () => {
+        this.restaurantService.triggerReload();
+         this.alertType = 'success';
+        this.alertMessage = 'Restaurant created successfully.';
+        this.dialogRef.close(true);
+      },
+      error: (err) => {
+        this.alertType = 'error';
+        this.alertMessage = err.error?.message || 'Restaurant creation failed';
+      }
+    });
   }
 }
 

@@ -53,14 +53,14 @@ import cloudinary from "./cloudinary.js";
  */
 const allRestaurants = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1; // Default page 1
-    const limit = parseInt(req.query.limit) || 10; // Default 10 items per page
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
 
     const { count, rows: restaurants } = await Restaurant.findAndCountAll({
       offset,
       limit,
-      order: [['createdAt', 'DESC']], // Optional: order by newest first
+      order: [['createdAt', 'DESC']],
     });
 
     res.status(200).json({
@@ -289,12 +289,10 @@ const createRestaurant = async (req, res) => {
       longitude
     } = value;
 
-    // Check authentication
     if (!req.auth?.id) {
       return res.status(401).json({ message: "Authentication required." });
     }
 
-    // Check if restaurant with same name + city already exists for same user
     const existing = await Restaurant.findOne({
       where: {
         name,
@@ -308,7 +306,7 @@ const createRestaurant = async (req, res) => {
       });
     }
 
-    // Geolocation
+    //geolocation
     let location;
     if (latitude && longitude) {
       location = {
@@ -338,7 +336,7 @@ const createRestaurant = async (req, res) => {
       };
     }
 
-    // Optional photo uploads
+    //photo uploads
     let photoUrls = [];
     if (req.files && req.files.length > 0) {
       console.log("FILES RECEIVED:", req.files.length);
@@ -358,14 +356,13 @@ const createRestaurant = async (req, res) => {
       photoUrls = await Promise.all(uploads);
     }
 
-    // Normalize foodType
+    //foodType
     const normalizedFoodType = Array.isArray(foodType)
       ? foodType
       : typeof foodType === 'string'
       ? [foodType]
       : [];
 
-    // Create new restaurant
     const newRestaurant = await Restaurant.create({
       userId: req.auth.id,
       name,
@@ -381,7 +378,7 @@ const createRestaurant = async (req, res) => {
     });
 
     return res.status(201).json({
-      status: "Created",
+      status: "Created new restaurant",
       data: newRestaurant,
     });
   } catch (err) {
@@ -479,7 +476,6 @@ const createRestaurant = async (req, res) => {
 
 const updateRestaurant = async (req, res) => {
   try {
-    // Parse postalCode if present and a string
     if (req.body.postalCode && typeof req.body.postalCode === "string") {
       req.body.postalCode = req.body.postalCode.trim();
     }
@@ -491,13 +487,11 @@ const updateRestaurant = async (req, res) => {
 
     const { id } = req.params;
 
-    // Find restaurant by PK
     const restaurant = await Restaurant.findByPk(id);
     if (!restaurant) {
       return res.status(404).json({ message: "Restaurant not found" });
     }
 
-    // Destructure validated values
     const {
       name,
       category,
@@ -529,7 +523,6 @@ const updateRestaurant = async (req, res) => {
     if (city !== undefined) updatedFields.city = city;
     if (country !== undefined) updatedFields.country = country;
 
-    // Handle photo uploads if files are sent
     let newPhotoUrls = [];
 
     if (req.files && req.files.length > 0) {
@@ -547,13 +540,12 @@ const updateRestaurant = async (req, res) => {
       });
 
       newPhotoUrls = await Promise.all(uploads);
-      updatedFields.photos = newPhotoUrls; // Replace existing photos
+      updatedFields.photos = newPhotoUrls;
     } else if (photos !== undefined) {
-      // Replace photos if sent directly in JSON
       updatedFields.photos = photos;
     }
 
-    // If any address component changed, update geolocation
+    // if any of adrress data changed update the geolocation
     if (
       address !== undefined ||
       postalCode !== undefined ||
@@ -590,7 +582,6 @@ const updateRestaurant = async (req, res) => {
       };
     }
 
-    // Update restaurant record in DB
     await restaurant.update(updatedFields);
 
     res.status(200).json({
@@ -933,14 +924,13 @@ const getRestaurantsByDistance = async (req, res) => {
 
   if (isNaN(lat) || isNaN(lng)) {
     return res.status(400).json({
-      error: "Query parameters 'lat' and 'lng' are required and must be valid numbers.",
+      error: "Query parameters 'lat' and 'lng' are required and must be valid numbers",
     });
   }
 
   const distance = isNaN(maxDistance) ? 5000 : maxDistance;
 
   try {
-    // Count total matching restaurants for pagination
     const count = await Restaurant.count({
       where: sequelize.where(
         sequelize.literal(`
@@ -1073,7 +1063,7 @@ const getRestaurantsInBounds = async (req, res) => {
   const maxLat = parseFloat(req.query.maxLat);
   const maxLng = parseFloat(req.query.maxLng);
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 50;  // adjust limit for your use case
+  const limit = parseInt(req.query.limit) || 50;
   const offset = (page - 1) * limit;
 
   if (
@@ -1225,7 +1215,7 @@ const searchRestaurantByName = async (req, res) => {
     const offset = (page - 1) * limit;
 
     if (!name) {
-      return res.status(400).json({ message: "Query parameter 'name' is required." });
+      return res.status(400).json({ message: "Query parameter 'name' is required" });
     }
 
     const { count, rows: restaurants } = await Restaurant.findAndCountAll({
@@ -1240,7 +1230,7 @@ const searchRestaurantByName = async (req, res) => {
     });
 
     if (restaurants.length === 0) {
-      return res.status(404).json({ message: "No restaurants found with that name." });
+      return res.status(404).json({ message: "No restaurants found with that name" });
     }
 
     return res.status(200).json({
@@ -1251,7 +1241,7 @@ const searchRestaurantByName = async (req, res) => {
     });
   } catch (error) {
     console.error("Search error:", error);
-    return res.status(500).json({ message: "Server error." });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 

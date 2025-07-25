@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -13,12 +13,14 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule ],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
 })
 export class RegisterComponent {
   public formError: string = '';
+  alertMessage: string | null = null;
+  alertType: string | null = null;
 
   public credentials = {
     username: '',
@@ -69,11 +71,14 @@ export class RegisterComponent {
       .register(this.credentials)
       .pipe(
         catchError((error: HttpErrorResponse) => {
-          this.formError = error.error?.message || 'Registration failed.';
+          this.alertType = 'error';
+          this.alertMessage = error.error?.message || 'Registration failed';
           return throwError(() => error);
         })
       )
       .subscribe(() => {
+        this.alertType = 'success';
+        this.alertMessage = 'Registration successful';
         this.router.navigateByUrl(this.historyService.getLastNonLoginUrl());
       });
   }

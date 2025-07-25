@@ -18,7 +18,8 @@ import { CommonModule } from '@angular/common';
 })
 export class LoginComponent {
   protected formError: string = '';
-
+  alertMessage: string | null = null;
+  alertType: string | null = null;
   protected credentials = {
     username: '',
     password: '',
@@ -57,8 +58,8 @@ export class LoginComponent {
       })
       .pipe(
         catchError((error: HttpErrorResponse) => {
-          // Display detailed error if available or fallback message
-          this.formError = error.error?.message || error.message || 'Login failed. Please try again.';
+          this.alertType = 'error';
+          this.alertMessage = error.error?.message || 'Login failed.';
           return throwError(() => error);
         })
       )

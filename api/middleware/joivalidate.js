@@ -88,7 +88,7 @@ export const updateRestaurantSchema = Joi.object({
   foodType: Joi.alternatives().try(
   Joi.string(),
   Joi.array().items(Joi.string())
-  ),
+  ).optional(),
   description: Joi.string().optional(),
   address: Joi.string().optional(),
   postalCode: Joi.number().optional(),

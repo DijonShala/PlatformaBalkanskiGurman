@@ -25,7 +25,7 @@ const CITY_MAP = {
 
 export async function searchVideosByCountry(country, { maxResults = 10 } = {}) {
   const cities = CITY_MAP[country] || [country.toLowerCase()];
-  const publishedAfter = new Date(Date.now() - 7 * 86400 * 1000).toISOString(); // last 7 days
+  const publishedAfter = new Date(Date.now() - 7 * 86400 * 1000).toISOString(); // last week
 
   const searchQueries = CORE_REVIEW_TERMS.flatMap((term) =>
     cities.map((city) => `${term} ${city}`)
@@ -44,7 +44,7 @@ export async function searchVideosByCountry(country, { maxResults = 10 } = {}) {
         publishedAfter,
         //relevanceLanguage: 'en',
         safeSearch: 'moderate',
-        order: 'viewCount', // Changed from 'relevance'
+        order: 'relevance', // 'relevance'
       });
 
       for (const item of res.data.items || []) {

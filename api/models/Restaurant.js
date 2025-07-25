@@ -63,11 +63,11 @@ const FOOD_TYPES = ["Slovenian", "Croatian", "Bosnian", "Serbian", "Montenegrin"
  *           description: Cuisine or food style.
  *           items:
  *             type: string
- *           example: ["Bosnian", "Barbecue", "Coffee"]
+ *           example: ["Slovenian", "Barbecue", ... ]
  *         description:
  *           type: string
- *           description: Free‑text description.
- *           example: Modern Mediterranean cuisine with Slovenian flair and local wines.
+ *           description: Description.
+ *           example: Modern cuisine with Slovenian local dishes.
  *         latitude:
  *           type: number
  *           format: double
@@ -88,32 +88,32 @@ const FOOD_TYPES = ["Slovenian", "Croatian", "Bosnian", "Serbian", "Montenegrin"
  *           example: Ljubljana
  *         country:
  *           type: string
- *           description: ISO country name.
+ *           description: Country name.
  *           example: Slovenia
  *         photos:
  *           type: array
- *           description: Optional list of photo URLs.
+ *           description: List of photo URL optional
  *           items:
  *             type: string
  *             format: uri
  *           example:
- *             - https://example.com/photo10.jpg
+ *             - https://cloudinary.com/restaurant-photo1.jpg
  *         rating:
  *           type: number
  *           format: float
  *           minimum: 0
  *           maximum: 5
- *           description: Average rating (computed from reviews).
+ *           description: Average rating
  *           example: 4.7
  *         createdAt:
  *           type: string
  *           format: date-time
- *           description: Date of creation (ISO 8601).
+ *           description: Date of creation (ISO 8601)
  *           example: 2025-07-09T21:03:35.121Z
  *         updatedAt:
  *           type: string
  *           format: date-time
- *           description: Date when the record was last updated.
+ *           description: Date when record was last updated
  *           example: 2025-07-09T21:35:11.004Z
  *       required:
  *         - id

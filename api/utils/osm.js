@@ -32,17 +32,17 @@ export async function fetchPOIsFromOSM(cityName, countryName) {
   if (!cuisineStr) return [];
 
   return cuisineStr
-    .replace(/_/g, ' ')        // Replace underscores with space
-    .split(/[;,]/)             // Split by comma or semicolon
-    .map(s => s.trim())        // Trim extra spaces
-    .filter(Boolean)           // Remove empty entries
+    .replace(/_/g, ' ')       
+    .split(/[;,]/)             
+    .map(s => s.trim())       
+    .filter(Boolean)          
     .map(s =>
       s
-        .split(' ')            // Split into words
+        .split(' ')       
         .map(word =>
           word
-            .toLowerCase()     // Convert word to lowercase
-            .replace(/^\w/, c => c.toUpperCase()) // Capitalize first letter
+            .toLowerCase()   
+            .replace(/^\w/, c => c.toUpperCase()) 
         )
         .join(' ')
     );
@@ -71,9 +71,9 @@ export async function fetchPOIsFromOSM(cityName, countryName) {
       };
     });
 
-  console.log(`--- Fetched ${results.length} places in ${cityName}, ${countryName} ---`);
+  console.log(`___Fetched____:  ${cityName}, ${countryName}, NUM: ${results.length}`);
   results.forEach((r, i) => {
-    console.log(`${i + 1}. ${r.name} (${r.amenity}) — ${r.address || 'Unknown Address'}`);
+    console.log(`${i + 1}. ${r.name} (${r.amenity}) — ${r.address || 'unknown address'}`);
   });
 
   return results;

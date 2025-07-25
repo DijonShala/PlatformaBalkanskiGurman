@@ -20,11 +20,10 @@ import * as L from 'leaflet';
 export class MapPageComponent implements OnInit, AfterViewInit {
   @ViewChild('mapContainer', { static: true }) mapContainer!: ElementRef;
   restaurants: any[] = [];
-  userCoords: [number, number] = [44.82, 20.45]; // fallback coords
+  userCoords: [number, number] = [40 , 40];
   map!: L.Map;
   restaurantMarkers: L.Marker[] = [];
 
-  // Move CATEGORY_ICONS outside lifecycle hooks for access in methods
   CATEGORY_ICONS: Record<string, string> = {
     Cafe: 'assets/cafe.png',
     'Casual Dining': 'assets/casual-dining.png',
@@ -72,7 +71,7 @@ export class MapPageComponent implements OnInit, AfterViewInit {
   }
 
   createCategoryIcon(category: string): L.Icon {
-    const iconUrl = this.CATEGORY_ICONS[category] || 'assets/restuarant.png'; // fallback icon
+    const iconUrl = this.CATEGORY_ICONS[category] || 'assets/restuarant.png';
 
     return L.icon({
       iconUrl,
@@ -111,15 +110,12 @@ export class MapPageComponent implements OnInit, AfterViewInit {
       }
     ).addTo(this.map);
 
-    // Add user marker
     L.marker(this.userCoords, { icon: this.createUserIcon() })
       .addTo(this.map)
       .bindPopup('You are here');
 
-    // Load initial bounds
     this.loadRestaurantsInView();
 
-    // Reload restaurants on pan/zoom
     this.map.on('moveend', () => this.loadRestaurantsInView());
   }
 
@@ -144,7 +140,7 @@ export class MapPageComponent implements OnInit, AfterViewInit {
   }
 
   renderRestaurantMarkers(): void {
-    // Clear old markers
+    //clear old markers
     this.restaurantMarkers.forEach((marker) => this.map.removeLayer(marker));
     this.restaurantMarkers = [];
 

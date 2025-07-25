@@ -17,7 +17,7 @@ const COUNTRIES = [
 ];
 
 export function getTodayCountry() {
-  const day = new Date().getDate(); // 1–31
+  const day = new Date().getDate();
   const index = day % COUNTRIES.length;
   return COUNTRIES[index];
 }
@@ -27,18 +27,17 @@ function isValidCoordinate(value) {
 }
 
 async function run(country = getTodayCountry()) {
-  console.log(`📍 Processing country: ${country}`);
+  console.log(`Country: ${country}`);
   const videos = await searchVideosByCountry(country, { maxResults: 10 });
 
   for (const video of videos) {
-    console.log(`\n🔎 Analyzing: ${video.title}`);
     const restaurants = await analyzeVideo({
       title: video.title,
       description: video.description,
     });
 
     if (!restaurants || !Array.isArray(restaurants)) {
-      console.log('❌ No valid restaurant info extracted.');
+      console.log('NOO valid restaurant info');
       continue;
     }
 
@@ -56,9 +55,8 @@ async function run(country = getTodayCountry()) {
           latitude,
           longitude,
         } = place;
-
+        //IF no name cat, addr skip dont save
         if (!name || !category || !address || !city || !country) {
-          console.log(`⚠️ Skipping incomplete entry:`, place);
           continue;
         }
 
@@ -67,7 +65,7 @@ async function run(country = getTodayCountry()) {
         });
 
         if (existing) {
-          console.log(`ℹ️ Already exists: ${name} (${city})`);
+          console.log(`Already exists: ${name} (${city})`);
           continue;
         }
 
@@ -90,16 +88,16 @@ async function run(country = getTodayCountry()) {
           photos: [],
         });
 
-        console.log(`✅ Added: ${name} (${city})`);
+        console.log(`__ADD__: ${name} (${city})`);
       } catch (err) {
-        console.error(`❌ Failed to insert restaurant:`, err.message);
+        console.error(`___FAILL___`, err.message);
       }
     }
   }
 
-  console.log(`🎉 Finished processing YouTube data for ${country}`);
+  console.log(`Finished: ${country}`);
 }
 
 run().catch((err) => {
-  console.error('💥 Error in run():', err);
+  console.error('Error', err);
 });

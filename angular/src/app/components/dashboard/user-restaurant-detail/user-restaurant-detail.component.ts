@@ -1,18 +1,5 @@
-import {
-  Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
-  OnChanges,
-  SimpleChanges,
-} from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import {Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import {FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RestaurantService } from '../../../services/restaurant.service';
@@ -21,7 +8,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatOptionModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
-import { MatError } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-user-restaurant-detail',
@@ -46,6 +32,8 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
   error = '';
   internalRestaurant: any = null;
   selectedFiles: File[] = [];
+  alertMessage: string | null = null;
+  alertType: string | null = null;
 
   CATEGORIES = [
     "Cafe", "Casual Dining", "Fast Food", "Fine Dining", "Food Truck", "Bakery",
@@ -159,12 +147,14 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
     this.loading = true;
     this.restaurantService.updateRestaurant(restaurantId, formData).subscribe({
       next: () => {
-        alert('Restaurant updated successfully!');
+        this.alertType = 'success';
+        this.alertMessage = 'Restaurant updated succesfully';
         this.loading = false;
         this.updated.emit();
       },
       error: (err) => {
-        this.error = err.error?.message || 'Update failed.';
+        this.alertType = 'error';
+        this.alertMessage = err.error?.message || 'Restaurant update failed';
         this.loading = false;
       },
     });
@@ -182,7 +172,8 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
     this.loading = true;
     this.restaurantService.deleteRestaurant(restaurantId).subscribe({
       next: () => {
-        alert('Restaurant deleted successfully!');
+       this.alertType = 'success';
+        this.alertMessage = 'Restaurant deleted succesfully';
         this.loading = false;
         this.updated.emit();
         const currentUser = this.authService.getCurrentUser();
@@ -193,7 +184,8 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
         }
       },
       error: (err) => {
-        this.error = err.error?.message || 'Delete failed.';
+        this.alertType = 'error';
+        this.alertMessage = err.error?.message || 'Restaurant deletion error';
         this.loading = false;
       },
     });

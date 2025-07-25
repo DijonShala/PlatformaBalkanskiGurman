@@ -1,6 +1,5 @@
-<div class="flex flex-col md:flex-row bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 overflow-hidden min-h-[160px] max-h-[200px]">
-  <!-- Review Image -->
-  <div *ngIf="review.photo" class="w-full md:w-40 h-32 md:h-auto flex-shrink-0">
+<div class="flex flex-col md:flex-row bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 overflow-hidden">
+  <div *ngIf="review.photo" class="md:w-48 w-full h-40 md:h-auto">
     <img
       [src]="review.photo"
       alt="Review photo"
@@ -8,30 +7,26 @@
     />
   </div>
 
-  <!-- Review Content -->
-  <div class="flex flex-col justify-between p-4 w-full overflow-hidden">
+  <div class="flex flex-col justify-between p-4 w-full">
     <div class="flex items-start justify-between">
-      <h5 class="text-base md:text-lg font-semibold text-gray-900 truncate">
+      <h5 class="text-lg font-semibold text-gray-900">
         {{ review.user?.username || 'Anonymous' }}
         <span class="ml-2 text-yellow-500 font-medium">★ {{ review.rating }}</span>
       </h5>
 
-      <!-- Delete Button -->
       <button
         *ngIf="authService.getCurrentUser()?.id === review.userId || authService.getCurrentUser()?.role === 'admin'"
         (click)="onDelete()"
-        class="text-red-600 hover:text-red-800 text-xs md:text-sm"
+        class="text-red-600 hover:text-red-800 text-sm"
       >
         Delete
       </button>
     </div>
 
-    <!-- Review Comment -->
-    <p class="text-gray-700 mt-2 text-sm line-clamp-2">
+    <p class="text-gray-700 mt-2 text-sm">
       {{ review.comment }}
     </p>
 
-    <!-- Date -->
     <p class="text-gray-500 text-xs mt-1">
       Reviewed on {{ review.createdAt | date: 'mediumDate' }}
     </p>

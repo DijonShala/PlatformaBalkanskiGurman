@@ -36,7 +36,7 @@ async function test(videoId) {
     console.log('Raw extraction result:', restaurants);
 
     if (!restaurants) {
-      console.log('❌ No valid restaurant info extracted.');
+      console.log('No valid restaurant info extracted.');
       return;
     }
 
@@ -45,7 +45,7 @@ async function test(videoId) {
     for (const place of parsed) {
       try {
         if (!place.name || !place.address || !place.city || !place.country) {
-          console.log('⚠️ Skipping incomplete entry:', place);
+          console.log('Skipping incomplete entry:', place);
           continue;
         }
 
@@ -53,7 +53,7 @@ async function test(videoId) {
           where: { name: place.name, city: place.city },
         });
         if (existing) {
-          console.log(`ℹ️ Already exists: ${place.name} (${place.city})`);
+          console.log(`Already exists: ${place.name} (${place.city})`);
           continue;
         }
 
@@ -86,9 +86,9 @@ async function test(videoId) {
           photos: [],
         });
 
-        console.log(`✅ Added: ${place.name} (${place.city})`);
+        console.log(`Added: ${place.name} (${place.city})`);
       } catch (err) {
-        console.error(`❌ Failed to insert ${place.name}:`, err.message);
+        console.error(`Failed to insert ${place.name}:`, err.message);
       }
     }
   } catch (err) {
@@ -96,8 +96,7 @@ async function test(videoId) {
   }
 }
 
-// Call test wrapped in async IIFE (if your environment supports it)
 (async () => {
-  const VIDEO_ID = 'LxXFcmmCxzw'; // replace with your test video ID
+  const VIDEO_ID = 'LxXFcmmCxzw';
   await test(VIDEO_ID);
 })();

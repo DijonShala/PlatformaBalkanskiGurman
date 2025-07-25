@@ -31,7 +31,6 @@ export class UserListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Retrieve page from filterService, or default to 1
     this.currentPage = this.filterService.getPage() || 1;
     this.fetchUsers(this.currentPage);
   }
@@ -40,7 +39,6 @@ export class UserListComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    // Store current page in filterService
     this.filterService.setPage(page);
 
     this.userService.getAllUsers(page, this.pageSize).subscribe({
