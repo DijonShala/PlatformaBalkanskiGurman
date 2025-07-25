@@ -244,7 +244,7 @@ if (process.env.HTTPS == "true") {
     );
   });
 } else {
-  app.listen(port, '0.0.0.0', () => {
+  app.listen(port, () => {
     console.log(
       `App started in ${
         process.env.NODE_ENV || "development"
