@@ -1,82 +1,149 @@
-<div *ngIf="form; else noSelection">
-  <h2>Edit Restaurant Details</h2>
+<div *ngIf="form; else noSelection" class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md border border-gray-200">
+  <h2 class="text-2xl font-semibold text-center mb-6 text-gray-900">Edit Restaurant Details</h2>
 
-  <form [formGroup]="form" (ngSubmit)="updateRestaurant()">
+  <form [formGroup]="form" (ngSubmit)="updateRestaurant()" class="space-y-5">
+
+    <!-- Name -->
     <div>
-      <label>Name *</label><br />
-      <input formControlName="name" />
-      <div *ngIf="form.controls['name'].invalid && form.controls['name'].touched" style="color:red;">
-        Name is required.
+      <label class="block mb-2 text-sm font-medium text-gray-900">Name <span class="text-red-500">*</span></label>
+      <input
+        formControlName="name"
+        type="text"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+        [class.border-red-500]="form.controls['name'].invalid && form.controls['name'].touched"
+      />
+    </div>
+
+    <!-- Category -->
+    <div>
+      <label class="block mb-2 text-sm font-medium text-gray-900">Category</label>
+      <select
+        formControlName="category"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+      >
+        <option value="">Select category</option>
+        <option *ngFor="let cat of CATEGORIES" [value]="cat">{{ cat }}</option>
+      </select>
+    </div>
+
+    <!-- Food Type -->
+    <mat-form-field appearance="fill" class="w-full">
+      <mat-label>Food Type <span class="text-red-500">*</span></mat-label>
+      <mat-select formControlName="foodType" multiple required>
+        <mat-option *ngFor="let food of FOOD_TYPES" [value]="food">{{ food }}</mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('foodType')?.invalid && form.get('foodType')?.touched">
+        Food Type is required.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Description -->
+    <div>
+      <label class="block mb-2 text-sm font-medium text-gray-900">Description</label>
+      <textarea
+        formControlName="description"
+        rows="4"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+      ></textarea>
+    </div>
+
+    <!-- Address -->
+    <div>
+      <label class="block mb-2 text-sm font-medium text-gray-900">Address <span class="text-red-500">*</span></label>
+      <input
+        formControlName="address"
+        type="text"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+      />
+    </div>
+
+    <!-- Postal Code -->
+    <div>
+      <label class="block mb-2 text-sm font-medium text-gray-900">Postal Code</label>
+      <input
+        formControlName="postalCode"
+        type="text"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+      />
+    </div>
+
+    <!-- City -->
+    <div>
+      <label class="block mb-2 text-sm font-medium text-gray-900">City <span class="text-red-500">*</span></label>
+      <input
+        formControlName="city"
+        type="text"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+      />
+    </div>
+
+    <!-- Country -->
+    <div>
+      <label class="block mb-2 text-sm font-medium text-gray-900">Country <span class="text-red-500">*</span></label>
+      <input
+        formControlName="country"
+        type="text"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+      />
+    </div>
+
+    <!-- Photos Upload -->
+    <div>
+      <label class="block mb-2 text-sm font-medium text-gray-900">Photos</label>
+      <div class="flex items-center gap-4 mb-2">
+        <button
+          type="button"
+          (click)="clearAllPhotos()"
+          class="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-600"
+        >
+          Delete All Photos
+        </button>
+
+        <label
+          tabindex="0"
+          class="cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-4 py-2.5"
+        >
+          Choose Photos
+          <input type="file" (change)="onFilesSelected($event)" multiple accept="image/*" class="hidden" />
+        </label>
+      </div>
+
+      <div *ngIf="form.value.photos?.length" class="flex flex-wrap gap-3">
+        <img
+          *ngFor="let photo of form.value.photos"
+          [src]="photo"
+          alt="Photo preview"
+          class="w-24 h-24 object-cover rounded border"
+        />
       </div>
     </div>
 
-    <div>
-      <label>Category</label><br />
-      <input formControlName="category" />
+    <!-- Error Message -->
+    <div *ngIf="error" class="text-red-500 text-sm">{{ error }}</div>
+
+    <!-- Buttons -->
+    <div class="flex gap-4 mt-6">
+      <button
+        type="submit"
+        [disabled]="loading"
+        class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+      >
+        Update
+      </button>
+      <button
+        type="button"
+        [disabled]="loading"
+        (click)="deleteRestaurant()"
+        class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition focus:outline-none focus:ring-2 focus:ring-red-400"
+      >
+        Delete
+      </button>
     </div>
-
-    <div>
-      <label>Food Type</label><br />
-      <input formControlName="foodType" />
-    </div>
-
-    <div>
-      <label>Description</label><br />
-      <textarea formControlName="description"></textarea>
-    </div>
-
-    <div>
-      <label>Address</label><br />
-      <input formControlName="address" />
-    </div>
-
-    <div>
-      <label>Postal Code</label><br />
-      <input formControlName="postalCode" />
-    </div>
-
-    <div>
-      <label>City</label><br />
-      <input formControlName="city" />
-    </div>
-
-    <div>
-      <label>Country</label><br />
-      <input formControlName="country" />
-    </div>
-
-   <div>
-  <label>Photos</label><br />
-
-  <button type="button" (click)="clearAllPhotos()">Delete All Photos</button>
-
-  <input
-    type="file"
-    (change)="onFilesSelected($event)"
-    multiple
-    accept="image/*"
-  />
-
-  <div *ngIf="form.value.photos?.length">
-    <h4>Preview:</h4>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-      <img
-        *ngFor="let photo of form.value.photos"
-        [src]="photo"
-        alt="Photo preview"
-        style="width: 100px; height: auto; object-fit: cover; border-radius: 4px;"
-      />
-    </div>
-  </div>
-</div>
-
-    <div *ngIf="error" style="color:red;">{{ error }}</div>
-
-    <button type="submit" [disabled]="loading">Update</button>
-    <button type="button" (click)="deleteRestaurant()" [disabled]="loading">Delete</button>
   </form>
 </div>
 
 <ng-template #noSelection>
-  <p>Please select a restaurant to view details.</p>
+  <div class="text-center text-gray-600 py-8">
+    Please select a restaurant to view details.
+  </div>
 </ng-template>

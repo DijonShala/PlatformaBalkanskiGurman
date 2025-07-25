@@ -1,165 +1,188 @@
-<div class="p-6">
-<h2 class="text-2xl font-bold mb-6 text-gray-800">Add Your Restaurant</h2>
+<!-- Modal Background -->
+<div class="fixed inset-0 z-50 bg-opacity-30 flex items-center justify-center overflow-auto px-4 py-6">
+  <div class="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-lg p-6">
 
-<form
-  [formGroup]="restaurantForm"
-  (ngSubmit)="submit()"
-  class="space-y-5 max-w-md"
-  novalidate
->
-  <div>
-    <label class="block mb-1 font-semibold text-gray-700" for="name">
-      Name <span class="text-red-500">*</span>
-    </label>
-    <input
-      id="name"
-      formControlName="name"
-      required
-      type="text"
-      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
-      [class.border-red-500]="
-        restaurantForm.get('name')?.invalid && restaurantForm.get('name')?.touched
-      "
-    />
-    <small
-      *ngIf="
-        restaurantForm.get('name')?.invalid && restaurantForm.get('name')?.touched
-      "
-      class="text-red-500"
-    >
-      Name is required.
-    </small>
+    <h2 class="text-3xl font-bold mb-8 text-gray-900 text-center">Add Your Restaurant</h2>
+
+    <form [formGroup]="restaurantForm" (ngSubmit)="submit()" novalidate class="space-y-6">
+
+      <!-- Name -->
+      <div>
+        <label for="name" class="block mb-2 text-sm font-medium text-gray-900">Name <span class="text-red-500">*</span></label>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          placeholder="Restaurant Name"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          [class.border-red-500]="restaurantForm.get('name')?.invalid && restaurantForm.get('name')?.touched"
+          required
+        />
+        <p *ngIf="restaurantForm.get('name')?.invalid && restaurantForm.get('name')?.touched" class="text-red-500 text-sm mt-1">
+          Name is required.
+        </p>
+      </div>
+
+      <!-- Category -->
+      <div>
+        <label for="category" class="block mb-2 text-sm font-medium text-gray-900">Category <span class="text-red-500">*</span></label>
+        <select
+          id="category"
+          formControlName="category"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          [class.border-red-500]="restaurantForm.get('category')?.invalid && restaurantForm.get('category')?.touched"
+          required
+        >
+          <option value="" disabled selected>Select a category</option>
+          <option *ngFor="let category of CATEGORIES" [value]="category">{{ category }}</option>
+        </select>
+        <p *ngIf="restaurantForm.get('category')?.invalid && restaurantForm.get('category')?.touched" class="text-red-500 text-sm mt-1">
+          Category is required.
+        </p>
+      </div>
+
+      <!-- Food Type -->
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Food Type <span class="text-red-500">*</span></mat-label>
+        <mat-select formControlName="foodType" multiple required>
+          <mat-option *ngFor="let food of FOOD_TYPES" [value]="food">{{ food }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="restaurantForm.get('foodType')?.invalid && restaurantForm.get('foodType')?.touched">
+          Food Type is required.
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Description -->
+      <div>
+        <label for="description" class="block mb-2 text-sm font-medium text-gray-900">Description <span class="text-red-500">*</span></label>
+        <textarea
+          id="description"
+          rows="4"
+          formControlName="description"
+          placeholder="Write a description"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 resize-y"
+          [class.border-red-500]="restaurantForm.get('description')?.invalid && restaurantForm.get('description')?.touched"
+          required
+        ></textarea>
+        <p *ngIf="restaurantForm.get('description')?.invalid && restaurantForm.get('description')?.touched" class="text-red-500 text-sm mt-1">
+          Description is required.
+        </p>
+      </div>
+
+      <!-- Address Fields -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <!-- Address -->
+        <div>
+          <label for="address" class="block mb-2 text-sm font-medium text-gray-900">Address <span class="text-red-500">*</span></label>
+          <input
+            id="address"
+            type="text"
+            formControlName="address"
+            placeholder="Street address"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            [class.border-red-500]="restaurantForm.get('address')?.invalid && restaurantForm.get('address')?.touched"
+            required
+          />
+          <p *ngIf="restaurantForm.get('address')?.invalid && restaurantForm.get('address')?.touched" class="text-red-500 text-sm mt-1">
+            Address is required.
+          </p>
+        </div>
+
+        <!-- Postal Code -->
+        <div>
+          <label for="postalCode" class="block mb-2 text-sm font-medium text-gray-900">Postal Code <span class="text-red-500">*</span></label>
+          <input
+            id="postalCode"
+            type="text"
+            formControlName="postalCode"
+            placeholder="Postal Code"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            [class.border-red-500]="restaurantForm.get('postalCode')?.invalid && restaurantForm.get('postalCode')?.touched"
+            required
+          />
+          <p *ngIf="restaurantForm.get('postalCode')?.invalid && restaurantForm.get('postalCode')?.touched" class="text-red-500 text-sm mt-1">
+            Postal Code is required.
+          </p>
+        </div>
+
+        <!-- City -->
+        <div>
+          <label for="city" class="block mb-2 text-sm font-medium text-gray-900">City <span class="text-red-500">*</span></label>
+          <input
+            id="city"
+            type="text"
+            formControlName="city"
+            placeholder="City"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            [class.border-red-500]="restaurantForm.get('city')?.invalid && restaurantForm.get('city')?.touched"
+            required
+          />
+          <p *ngIf="restaurantForm.get('city')?.invalid && restaurantForm.get('city')?.touched" class="text-red-500 text-sm mt-1">
+            City is required.
+          </p>
+        </div>
+
+        <!-- Country -->
+        <div>
+          <label for="country" class="block mb-2 text-sm font-medium text-gray-900">Country <span class="text-red-500">*</span></label>
+          <input
+            id="country"
+            type="text"
+            formControlName="country"
+            placeholder="Country"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            [class.border-red-500]="restaurantForm.get('country')?.invalid && restaurantForm.get('country')?.touched"
+            required
+          />
+          <p *ngIf="restaurantForm.get('country')?.invalid && restaurantForm.get('country')?.touched" class="text-red-500 text-sm mt-1">
+            Country is required.
+          </p>
+        </div>
+      </div>
+
+      <!-- Upload -->
+      <div>
+        <label class="block mb-2 text-sm font-medium text-gray-900">Upload Photos</label>
+        <label
+          for="dropzone-file"
+          class="flex flex-col items-center justify-center w-full h-48 bg-white border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition"
+        >
+          <div class="flex flex-col items-center justify-center pt-4 pb-4">
+            <svg class="w-10 h-10 mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <p class="mb-1 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+            <p class="text-xs text-gray-400">SVG, PNG, JPG or GIF (max. 10MB)</p>
+            <p *ngIf="selectedFiles.length > 0" class="mt-2 text-sm"
+              [ngClass]="{
+                'text-green-600 font-semibold': selectedFiles.length <= 5,
+                'text-red-500 font-semibold': selectedFiles.length > 5
+              }">
+              {{ selectedFiles.length }} file(s) selected
+            </p>
+          </div>
+          <input id="dropzone-file" type="file" multiple accept="image/*" class="hidden" (change)="onFilesSelected($event)" />
+        </label>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+        <button
+          type="button"
+          (click)="cancel()"
+          class="px-5 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="restaurantForm.invalid"
+          class="px-5 py-2 text-sm font-medium rounded-lg text-white bg-blue-700 hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Submit
+        </button>
+      </div>
+
+    </form>
   </div>
-
-  <div>
-    <label class="block mb-1 font-semibold text-gray-700" for="category">
-      Category
-    </label>
-    <input
-      id="category"
-      formControlName="category"
-      type="text"
-      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
-    />
-  </div>
-
-  <div>
-    <label class="block mb-1 font-semibold text-gray-700" for="foodType">
-      Food Type
-    </label>
-    <input
-      id="foodType"
-      formControlName="foodType"
-      type="text"
-      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
-    />
-  </div>
-
-  <div>
-    <label class="block mb-1 font-semibold text-gray-700" for="description">
-      Description
-    </label>
-    <textarea
-      id="description"
-      formControlName="description"
-      rows="4"
-      class="w-full rounded border border-gray-300 px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
-    ></textarea>
-  </div>
-
-  <div>
-    <label class="block mb-1 font-semibold text-gray-700" for="address">
-      Address
-    </label>
-    <input
-      id="address"
-      formControlName="address"
-      type="text"
-      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
-    />
-  </div>
-
-  <div>
-    <label class="block mb-1 font-semibold text-gray-700" for="postalCode">
-      Postal Code <span class="text-red-500">*</span>
-    </label>
-    <input
-      id="postalCode"
-      formControlName="postalCode"
-      type="number"
-      required
-      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
-      [class.border-red-500]="
-        restaurantForm.get('postalCode')?.invalid &&
-        restaurantForm.get('postalCode')?.touched
-      "
-    />
-    <small
-      *ngIf="
-        restaurantForm.get('postalCode')?.invalid &&
-        restaurantForm.get('postalCode')?.touched
-      "
-      class="text-red-500"
-    >
-      Postal Code is required.
-    </small>
-  </div>
-
-  <div>
-    <label class="block mb-1 font-semibold text-gray-700" for="city">
-      City
-    </label>
-    <input
-      id="city"
-      formControlName="city"
-      type="text"
-      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
-    />
-  </div>
-
-  <div>
-    <label class="block mb-1 font-semibold text-gray-700" for="country">
-      Country
-    </label>
-    <input
-      id="country"
-      formControlName="country"
-      type="text"
-      class="w-full rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-600"
-    />
-  </div>
-
- <div>
-  <label class="block mb-1 font-semibold text-gray-700" for="photos">
-    Upload Photos
-  </label>
-  <input
-    type="file"
-    id="photos"
-    (change)="onFilesSelected($event)"
-    multiple
-    accept="image/*"
-    class="w-full"
-  />
-</div>
-
-
-
-  <div class="flex justify-end gap-4 mt-6">
-    <button
-      type="button"
-      (click)="cancel()"
-      class="px-5 py-2 rounded-md border border-gray-400 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
-    >
-      Cancel
-    </button>
-    <button
-      type="submit"
-      [disabled]="restaurantForm.invalid"
-      class="px-5 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-400"
-    >
-      Submit
-    </button>
-  </div>
-</form>
 </div>

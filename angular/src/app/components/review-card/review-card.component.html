@@ -1,28 +1,39 @@
-<div class="card mb-3">
-  <div class="card-body">
-    <div *ngIf="review.photo" class="mt-3">
+<div class="flex flex-col md:flex-row bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 overflow-hidden min-h-[160px] max-h-[200px]">
+  <!-- Review Image -->
+  <div *ngIf="review.photo" class="w-full md:w-40 h-32 md:h-auto flex-shrink-0">
     <img
       [src]="review.photo"
       alt="Review photo"
-      class="img-fluid rounded"
-      style="max-height: 250px; object-fit: cover;"
+      class="object-cover w-full h-full"
     />
   </div>
-    <h5 class="card-title">
-      {{ review.user?.username || 'Anonymous' }}
-      <span class="badge bg-warning text-dark ms-2">★ {{ review.rating }}</span>
 
-       <button
+  <!-- Review Content -->
+  <div class="flex flex-col justify-between p-4 w-full overflow-hidden">
+    <div class="flex items-start justify-between">
+      <h5 class="text-base md:text-lg font-semibold text-gray-900 truncate">
+        {{ review.user?.username || 'Anonymous' }}
+        <span class="ml-2 text-yellow-500 font-medium">★ {{ review.rating }}</span>
+      </h5>
+
+      <!-- Delete Button -->
+      <button
         *ngIf="authService.getCurrentUser()?.id === review.userId || authService.getCurrentUser()?.role === 'admin'"
         (click)="onDelete()"
-        class="btn btn-sm btn-outline-danger float-end"
+        class="text-red-600 hover:text-red-800 text-xs md:text-sm"
       >
         Delete
       </button>
-    </h5>
-    <p class="card-text">{{ review.comment }}</p>
-    <p class="card-text">
-      <small class="text-muted">Reviewed on {{ review.createdAt | date:'mediumDate' }}</small>
+    </div>
+
+    <!-- Review Comment -->
+    <p class="text-gray-700 mt-2 text-sm line-clamp-2">
+      {{ review.comment }}
+    </p>
+
+    <!-- Date -->
+    <p class="text-gray-500 text-xs mt-1">
+      Reviewed on {{ review.createdAt | date: 'mediumDate' }}
     </p>
   </div>
 </div>

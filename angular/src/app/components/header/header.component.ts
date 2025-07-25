@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { AddRestaurantFormComponent } from '../add-restaurant-form/add-restaurant-form.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RestaurantService } from '../../services/restaurant.service';
 import { AuthenticationService } from '../../services/authentication.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-header',
@@ -22,7 +23,13 @@ export class HeaderComponent {
     private restaurantService: RestaurantService,
     public authService: AuthenticationService,
     private router: Router
-  ) {}
+  ) {
+    this.router.events
+    .pipe(filter(event => event instanceof NavigationEnd))
+    .subscribe(() => {
+      this.isMenuOpen = false; // close menu on route change
+    });
+  }
 
   toggleMap() {
     this.router.navigate(['/map']);

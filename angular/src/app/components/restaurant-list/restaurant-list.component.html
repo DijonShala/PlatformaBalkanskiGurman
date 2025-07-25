@@ -1,32 +1,48 @@
-<div *ngIf="loading" class="loading">
-  <mat-spinner></mat-spinner>
-</div>
+<div class="grid grid-cols-1 lg:grid-cols-[1fr_3fr] gap-4 min-h-[80vh]">
+  <!-- Sidebar -->
+  <app-sidebar class="order-1 lg:order-none lg:block"></app-sidebar>
 
-<div *ngIf="error" class="error">
-  {{ error }}
-</div>
+  <!-- Main Content -->
+  <div class="order-2 lg:order-none">
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="flex justify-center py-8">
+      <mat-spinner></mat-spinner>
+    </div>
 
-<div *ngIf="!loading && !error && restaurants?.length === 0" class="no-results">
-  No restaurants found.
-</div>
+    <!-- Error Message -->
+    <div *ngIf="error" class="text-red-600 text-center py-4">
+      {{ error }}
+    </div>
 
-<div class="restaurant-list" *ngIf="!loading && !error">
-  <a
-    *ngFor="let restaurant of restaurants"
-    [routerLink]="['/restaurants', restaurant.id]"
-    class="restaurant-card-link"
-  >
-    <app-restaurant-card
-      [restaurant]="restaurant"
-      class="restaurant-card"
-    ></app-restaurant-card>
-  </a>
-  <mat-paginator
-      [length]="totalItems"
-      [pageSize]="10"
-      [pageSizeOptions]="[]"
-      [pageIndex]="page - 1"
-      [showFirstLastButtons]="true"
-      (page)="onPageChange($event)">
-  </mat-paginator>
+    <!-- No Results -->
+    <div *ngIf="!loading && !error && restaurants?.length === 0" class="text-gray-500 text-center py-4">
+      No restaurants found.
+    </div>
+
+    <!-- Restaurant Cards -->
+    <div *ngIf="!loading && !error" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+      <a
+        *ngFor="let restaurant of restaurants"
+        [routerLink]="['/restaurants', restaurant.id]"
+        class="block"
+      >
+        <app-restaurant-card
+          [restaurant]="restaurant"
+          class="transition hover:shadow-md"
+        ></app-restaurant-card>
+      </a>
+    </div>
+
+    <!-- Paginator -->
+    <div class="mt-6 flex justify-center">
+      <mat-paginator
+        [length]="totalItems"
+        [pageSize]="limit"
+        [pageSizeOptions]="[]"
+        [pageIndex]="page - 1"
+        [showFirstLastButtons]="true"
+        (page)="onPageChange($event)"
+      ></mat-paginator>
+    </div>
+  </div>
 </div>

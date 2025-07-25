@@ -1,49 +1,67 @@
-<div class="login-container">
-  <h2>Login</h2>
-
-  <form (ngSubmit)="onLoginSubmit()" autocomplete="off" novalidate>
-    <div *ngIf="formError" class="alert alert-danger" role="alert">
-      {{ formError }}
+<div class="flex items-center justify-center min-h-screen bg-gray-50 px-4">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-md p-8 space-y-6">
+    
+    <!-- White image placeholder -->
+    <div class="flex justify-center">
+      <div class="w-20 h-20 bg-white border border-gray-300 rounded-full flex items-center justify-center">
+        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M5.121 17.804A10.97 10.97 0 0112 15c2.486 0 4.779.81 6.879 2.174M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input
-        id="username"
-        name="username"
-        type="text"
-        [(ngModel)]="credentials.username"
-        class="form-control"
-        placeholder="Enter your username"
-        required
-        aria-required="true"
-        aria-describedby="usernameHelp"
-      />
-      <small id="usernameHelp" class="form-text text-muted">Your unique username.</small>
-    </div>
+    <h2 class="text-2xl font-bold text-center text-gray-800">Log in to your account</h2>
 
-    <div class="form-group mt-3">
-      <label for="password">Password</label>
-      <input
-        id="password"
-        name="password"
-        type="password"
-        [(ngModel)]="credentials.password"
-        class="form-control"
-        placeholder="Enter your password"
-        required
-        aria-required="true"
-      />
-    </div>
+    <form (ngSubmit)="onLoginSubmit()" autocomplete="off" novalidate class="space-y-4">
 
-    <div class="form-group mt-4">
-         <button matButton="elevated">Log in</button>
-    </div>
-  </form>
+      <!-- Error message -->
+      <div *ngIf="formError" class="text-red-600 text-sm text-center">
+        {{ formError }}
+      </div>
 
-  <p class="mt-4 text-sm">
-  Don't have an account? 
-  <a routerLink="/register" class="text-blue-600 hover:underline">Register here</a>.
-  </p>
+      <!-- Username -->
+      <div>
+        <label for="username" class="block mb-1 text-sm font-medium text-gray-700">Username</label>
+        <input
+          id="username"
+          name="username"
+          type="text"
+          [(ngModel)]="credentials.username"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
+          placeholder="Enter your username"
+          required
+          aria-required="true"
+        />
+      </div>
 
+      <!-- Password -->
+      <div>
+        <label for="password" class="block mb-1 text-sm font-medium text-gray-700">Password</label>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          [(ngModel)]="credentials.password"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
+          placeholder="Enter your password"
+          required
+          aria-required="true"
+        />
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit"
+        class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+        Log in
+      </button>
+    </form>
+
+    <!-- Register Link -->
+    <p class="text-sm text-center text-gray-600">
+      Don't have an account?
+      <a routerLink="/register" class="text-blue-600 hover:underline">Register here</a>.
+    </p>
+  </div>
 </div>

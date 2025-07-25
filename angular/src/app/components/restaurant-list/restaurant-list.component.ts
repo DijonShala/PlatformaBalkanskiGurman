@@ -9,14 +9,21 @@ import { RestaurantCardComponent } from '../restaurant-card/restaurant-card.comp
 import { RestaurantService } from '../../services/restaurant.service';
 import { FilterService } from '../../services/filter.service';
 import { RestaurantCommunicationService } from '../../services/restaurant-communication.service';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {MatPaginatorModule} from '@angular/material/paginator';
-import { PageEvent } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
   selector: 'app-restaurant-list',
   standalone: true,
-  imports: [CommonModule, RestaurantCardComponent, RouterLink, MatProgressSpinnerModule, MatPaginatorModule],
+  imports: [
+    CommonModule,
+    RestaurantCardComponent,
+    RouterLink,
+    MatProgressSpinnerModule,
+    MatPaginatorModule,
+    SidebarComponent
+  ],
   templateUrl: './restaurant-list.component.html',
   styleUrls: ['./restaurant-list.component.scss']
 })
@@ -49,15 +56,14 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Load page from filterService (default to 1 if none)
     this.page = this.filterService.getPage() || 1;
-    
+
     this.router.events
-    .pipe(filter(event => event instanceof NavigationStart))
-    .subscribe(() => {
-      this.filterService.setPage(this.page);
-    });
-    // Load filters from filterService (if any)
+      .pipe(filter(event => event instanceof NavigationStart))
+      .subscribe(() => {
+        this.filterService.setPage(this.page);
+      });
+
     const savedFilters = this.filterService.getFilters();
     if (savedFilters && Object.values(savedFilters).some(val => !!val)) {
       this.lastFilters = savedFilters;
@@ -101,30 +107,25 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
     this.page = page;
-
-    // Store page in filterService
     this.filterService.setPage(page);
 
     let fetch$;
 
     switch (this.fetchMode) {
       case 'search':
-        fetch$ = this.restaurantService.searchRestaurantsByName(this.lastSearchName, this.page, this.limit);
+        fetch$ = this.restaurantService.searchRestaurantsByName(
+          this.lastSearchName, this.page, this.limit
+        );
         break;
-
       case 'filter':
-        if (!this.lastFilters || Object.keys(this.lastFilters).length === 0) {
-          this.fetchMode = 'all';
-          fetch$ = this.restaurantService.getRestaurants(this.page, this.limit);
-        } else {
-          fetch$ = this.restaurantService.filterRestaurants({
-            ...this.lastFilters,
-            page: this.page,
-            limit: this.limit
-          });
-        }
+        fetch$ = this.lastFilters && Object.keys(this.lastFilters).length
+          ? this.restaurantService.filterRestaurants({
+              ...this.lastFilters,
+              page: this.page,
+              limit: this.limit
+            })
+          : this.restaurantService.getRestaurants(this.page, this.limit);
         break;
-
       case 'nearby':
         fetch$ = this.restaurantService.getNearbyRestaurants(
           this.lastCoords.lat,
@@ -134,45 +135,43 @@ export class RestaurantListComponent implements OnInit, OnDestroy {
           this.limit
         );
         break;
-
       default:
         fetch$ = this.restaurantService.getRestaurants(this.page, this.limit);
         break;
     }
 
     fetch$.subscribe({
-  next: (res) => {
-    let rawData: any[] = [];
+      next: (res) => {
+        let rawData: any[] = [];
 
-    if (res?.data && Array.isArray(res.data)) {
-      rawData = res.data;
-      this.totalPages = res.totalPages || 1;
-      this.totalItems = res.totalItems || 0;
-      this.page = res.currentPage || this.page;
-    } else {
-      this.error = 'Unexpected response format.';
-      this.loading = false;
-      return;
-    }
+        if (res?.data && Array.isArray(res.data)) {
+          rawData = res.data;
+          this.totalPages = res.totalPages || 1;
+          this.totalItems = res.totalItems || 0;
+          this.page = res.currentPage || this.page;
+        } else {
+          this.error = 'Unexpected response format.';
+          this.loading = false;
+          return;
+        }
 
-    this.restaurants = rawData.map((r: any) => new Restaurant(r));
-    this.restaurantService.updateRestaurants(this.restaurants);
-    this.loading = false;
-    this.error = this.restaurants.length === 0 ? 'No restaurants found.' : '';
-  },
-  error: () => {
-    this.error = 'Failed to load restaurants.';
-    this.loading = false;
+        this.restaurants = rawData.map((r: any) => new Restaurant(r));
+        this.restaurantService.updateRestaurants(this.restaurants);
+        this.loading = false;
+        this.error = this.restaurants.length === 0 ? 'No restaurants found.' : '';
+      },
+      error: () => {
+        this.error = 'Failed to load restaurants.';
+        this.loading = false;
+      }
+    });
   }
-  });
-  }
-  
+
   onPageChange(event: PageEvent): void {
-  this.limit = event.pageSize;
-  this.page = event.pageIndex + 1;
-
-  this.filterService.setPage(this.page);
-  this.loadRestaurants(this.page);
+    this.limit = event.pageSize;
+    this.page = event.pageIndex + 1;
+    this.filterService.setPage(this.page);
+    this.loadRestaurants(this.page);
   }
 
   triggerSearch(name: string): void {

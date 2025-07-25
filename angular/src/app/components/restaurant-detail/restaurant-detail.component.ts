@@ -23,6 +23,8 @@ export class RestaurantDetailComponent implements OnInit {
   newReviewComment: string = '';
   newReviewRating: number = 5;
   selectedPhoto: File | null = null;
+  mainPhoto: string | null = null;
+
 
   constructor(
     private route: ActivatedRoute,
@@ -35,12 +37,18 @@ export class RestaurantDetailComponent implements OnInit {
     const id = +this.route.snapshot.paramMap.get('id')!;
     this.loadRestaurant(id);
     this.loadReviews(id);
+    if (this.restaurant?.photos?.length) {
+    this.mainPhoto = this.restaurant.photos[0];
+    }
   }
 
   isLoggedIn(): boolean {
   return this.authenticationService.isLoggedIn();
   }
 
+  onThumbnailClick(photo: string) {
+  this.mainPhoto = photo;
+  }
 
   loadRestaurant(id: number): void {
     this.restaurantService.getRestaurantById(id).subscribe({

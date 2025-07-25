@@ -1,6 +1,13 @@
-<div class="dashboard">
-  <app-left-sidebar></app-left-sidebar>
-  <main>
-    <router-outlet></router-outlet>
-  </main>
+<div class="min-h-screen bg-gray-50">
+  <div class="flex flex-col sm:flex-row sm:h-screen">
+    
+    <!-- Sidebar: Full width on mobile, fixed on desktop -->
+    <app-left-sidebar class="w-full sm:w-64 flex-shrink-0 border-b sm:border-b-0 sm:border-r"></app-left-sidebar>
+    
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-4">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
 </div>

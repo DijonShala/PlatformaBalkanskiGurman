@@ -17,11 +17,23 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RestaurantService } from '../../../services/restaurant.service';
 import { AuthenticationService } from '../../../services/authentication.service';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatOptionModule } from '@angular/material/core';
+import { MatInputModule } from '@angular/material/input';
+import { MatError } from '@angular/material/form-field';
 
 @Component({
   selector: 'app-user-restaurant-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatOptionModule,
+    MatInputModule,
+  ],
   templateUrl: './user-restaurant-detail.component.html',
   styleUrls: ['./user-restaurant-detail.component.scss'],
 })
@@ -34,6 +46,19 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
   error = '';
   internalRestaurant: any = null;
   selectedFiles: File[] = [];
+
+  CATEGORIES = [
+    "Cafe", "Casual Dining", "Fast Food", "Fine Dining", "Food Truck", "Bakery",
+    "Bar", "Bistro", "Buffet", "Canteen", "Coffee Shop", "Deli", "Drive-Thru",
+    "Family Style", "Gastropub", "Pop-Up", "Pub", "Quick Service", "Takeaway", "Tea House", "Pizzeria", "Restaurant"
+  ];
+
+  FOOD_TYPES = [
+    "Slovenian", "Croatian", "Bosnian", "Serbian", "Montenegrin", "Macedonian", "Kosovar",
+    "Balkan", "Yugoslav Fusion", "Bakery", "Barbecue", "Pizza", "Seafood", "Grill", "Mediterranean",
+    "Middle Eastern", "Greek", "Turkish", "Italian", "Fusion", "Vegan", "Vegetarian", "Asian", "American",
+    "French", "Chinese", "Indian", "Mexican"
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -51,7 +76,7 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
     } else if (this.restaurant) {
       this.initForm(this.restaurant);
     }
-    }
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['restaurant'] && this.restaurant) {
@@ -59,7 +84,6 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
     }
   }
 
-  
   loadRestaurant(id: number): void {
     this.loading = true;
     this.restaurantService.getRestaurantById(id).subscribe({
@@ -77,14 +101,18 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
 
   initForm(data: any): void {
     this.form = this.fb.group({
-      name: [data.name || '', Validators.required],
+      name: [data.name || '',],
       category: [data.category || ''],
-      foodType: [data.foodType || ''],
+      foodType: [
+        Array.isArray(data.foodType)
+          ? data.foodType
+          : (data.foodType || '').split(',').map((f: string) => f.trim())
+      ],
       description: [data.description || ''],
-      address: [data.address || '', Validators.required],
+      address: [data.address || ''],
       postalCode: [data.postalCode || ''],
-      city: [data.city || '', Validators.required],
-      country: [data.country || '', Validators.required],
+      city: [data.city || ''],
+      country: [data.country || ''],
       photos: [data.photos || []],
     });
     this.error = '';
@@ -109,27 +137,21 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
     }
 
     const formValues = this.form.value;
-    const foodTypeArray = formValues.foodType
-    ? formValues.foodType
-        .split(',')
-        .map((s: string) => s.trim())
-        .filter(Boolean)
-    : [];
 
     const formData = new FormData();
     formData.append('name', formValues.name);
     formData.append('category', formValues.category || '');
-    formData.append('foodType', formValues.foodType || '');
     formData.append('description', formValues.description || '');
     formData.append('address', formValues.address);
     formData.append('postalCode', formValues.postalCode || '');
     formData.append('city', formValues.city);
     formData.append('country', formValues.country);
 
-    for (const food of foodTypeArray) {
-    formData.append('foodType', food);
+    const foodTypes: string[] = formValues.foodType || [];
+    for (const food of foodTypes) {
+      formData.append('foodType', food);
     }
-    
+
     for (const file of this.selectedFiles) {
       formData.append('restaurant_photos', file);
     }

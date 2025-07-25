@@ -34,9 +34,9 @@ export interface CreateRestaurantPayload {
   category?: string;
   foodType?: string[];
   description?: string;
-  address: string;
+  address?: string;
   postalCode?: number;
-  city: string;
-  country: string;
+  city?: string;
+  country?: string;
   photos?: string[];
 }

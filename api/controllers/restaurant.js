@@ -515,7 +515,6 @@ const updateRestaurant = async (req, res) => {
     if (name !== undefined) updatedFields.name = name;
     if (category !== undefined) {
       updatedFields.category = category;
-      updatedFields.icon == CATEGORY_ICONS[category];
     }
     if (foodType !== undefined) {
       updatedFields.foodType = Array.isArray(foodType)

@@ -1,8 +1,10 @@
-<div class="bg-white p-6 rounded-lg shadow space-y-6">
+<!-- Restaurant Details Section -->
+<div class="bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200">
+  <!-- Restaurant Info -->
   <div class="space-y-2">
-    <h1 class="text-3xl font-bold">{{ restaurant?.name }}</h1>
+    <h1 class="text-3xl font-bold text-gray-900">{{ restaurant?.name }}</h1>
     <p class="text-gray-500">
-      {{ restaurant?.category }} · {{ restaurant?.foodType }}<br>
+      {{ restaurant?.category }} · {{ restaurant?.foodType }}<br />
       {{ restaurant?.city }}, {{ restaurant?.country }}
     </p>
     <p class="text-gray-500 italic">{{ restaurant?.address }}</p>
@@ -10,61 +12,90 @@
     <div class="text-yellow-500 font-semibold">★ {{ restaurant?.rating?.toFixed(1) }}</div>
   </div>
 
-  <div *ngIf="restaurant?.photos?.length" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div *ngIf="restaurant?.photos?.length" class="mt-6 grid gap-4">
+  <!-- Restaurant Image Gallery -->
+<div class="grid gap-4">
+  <!-- Main Large Image -->
+  <div class="w-full h-64 sm:h-80">
     <img
-      *ngFor="let photo of restaurant.photos"
-      [src]="photo"
-      class="rounded-lg object-cover w-full h-48"
-      alt="Photo"
+      class="w-full h-full rounded-lg object-contain bg-gray-100"
+      [src]="mainPhoto || restaurant?.photos?.[0]"
+      alt="Featured Restaurant Photo"
     />
   </div>
 
-  <div class="mt-8">
-    <h2 class="text-xl font-bold mb-4">Reviews</h2>
-
-    <!-- Leave a Review -->
-<div *ngIf="isLoggedIn(); else loginReminder" class="mt-6 space-y-2">
-  <h3 class="text-lg font-semibold">Leave a Review</h3>
-
-  <label class="block text-sm font-medium text-gray-700">Rating</label>
-  <select
-    [(ngModel)]="newReviewRating"
-    class="w-24 p-1 border rounded focus:outline-none focus:ring focus:border-blue-300"
-  >
-    <option *ngFor="let r of [5,4,3,2,1]" [value]="r">{{ r }}</option>
-  </select>
-
-  <label class="block text-sm font-medium text-gray-700 mt-2">Comment</label>
-  <textarea
-    [(ngModel)]="newReviewComment"
-    placeholder="Write your comment..."
-    rows="3"
-    class="w-full p-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-  ></textarea>
-
-  <label class="block text-sm font-medium text-gray-700 mt-2">Photo (optional)</label>
-<input
-  type="file"
-  (change)="onFileSelected($event)"
-  accept="image/*"
-  class="block mt-1"
-/>
-
-  <button
-    (click)="submitReview()"
-    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-  >
-    Submit Review
-  </button>
-  
+  <!-- Thumbnails Grid (Smaller Square Images with Margin) -->
+  <div class="flex flex-wrap gap-3 justify-start">
+    <div
+      *ngFor="let photo of restaurant?.photos?.slice(1, 5)"
+      class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden"
+    >
+      <img
+        class="w-full h-full object-contain cursor-pointer"
+        [src]="photo"
+        alt="Restaurant Photo Thumbnail"
+        (click)="onThumbnailClick(photo)"
+      />
+    </div>
+  </div>
 </div>
-<ng-template #loginReminder>
-  <p class="text-gray-600">
-    Please <a routerLink="/login" class="text-blue-600 underline">log in</a> to leave a review.
-  </p>
-</ng-template>
+
+
+</div>
+</div>
+
+<!-- Reviews Section -->
+<div class="bg-white mt-8 p-6 rounded-lg shadow space-y-6 border border-gray-200">
+  <h2 class="text-xl font-bold text-gray-900">Reviews</h2>
+
+  <!-- Leave a Review -->
+  <div *ngIf="isLoggedIn(); else loginReminder" class="space-y-2">
+    <h3 class="text-lg font-semibold text-gray-800">Leave a Review</h3>
+
+    <label class="block text-sm font-medium text-gray-700">Rating</label>
+    <select
+      [(ngModel)]="newReviewRating"
+      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-24 p-2.5"
+    >
+      <option *ngFor="let r of [5, 4, 3, 2, 1]" [value]="r">{{ r }}</option>
+    </select>
+
+    <label class="block text-sm font-medium text-gray-700 mt-2">Comment</label>
+    <textarea
+      [(ngModel)]="newReviewComment"
+      placeholder="Write your comment..."
+      rows="3"
+      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+    ></textarea>
+
+    <label class="block text-sm font-medium text-gray-700 mt-2">Photo (optional)</label>
+    <input
+      type="file"
+      (change)="onFileSelected($event)"
+      accept="image/*"
+      class="block mt-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5"
+    />
+
+    <button
+      (click)="submitReview()"
+      class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+    >
+      Submit Review
+    </button>
+  </div>
+
+  <!-- Login Prompt -->
+  <ng-template #loginReminder>
+    <p class="text-gray-600">
+      Please
+      <a routerLink="/login" class="text-blue-600 underline">log in</a>
+      to leave a review.
+    </p>
+  </ng-template>
+
+  <!-- Review List -->
+  <div *ngFor="let review of reviews">
     <app-review-card
-      *ngFor="let review of reviews"
       [review]="review"
       (deleteReview)="deleteReview($event)"
     ></app-review-card>
