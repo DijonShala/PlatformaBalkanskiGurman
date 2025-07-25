@@ -129,7 +129,7 @@ app.use(express.json());
 app.use(cors());
 
 /**
- * Odprava varnostnih pomanjkljivosti
+ * Safety
  */
 app.disable("x-powered-by");
 app.use((req, res, next) => {
@@ -150,14 +150,27 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  */
 app.use(passport.initialize());
 
+ /**
+  * Statc pages
+  */
+ app.use(express.static(join(__dirname, "angular", "build", "browser")));
+
 /**
  * Body parser (application/x-www-form-urlencoded)
  */
 app.use(bodyParser.urlencoded({ extended: false }));
+
 /**
  * API routing
  */
 app.use("/api", apiRouter);
+
+/**
+ * Angular routing
+ */
+app.get("*", (req, res) => {
+  res.sendFile(join(__dirname, "angular", "build", "browser", "index.html"));
+});
 
 /**
  * Swagger file and explorer
