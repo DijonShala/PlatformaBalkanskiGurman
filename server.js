@@ -236,7 +236,7 @@ if (process.env.HTTPS == "true") {
       cert: readFileSync("cert/localhost.pem"),
     },
     app
-  ).listen(port, () => {
+  ).listen(port, '0.0.0.0', () => {
     console.log(
       `Secure app started in '${
         process.env.NODE_ENV || "development"
