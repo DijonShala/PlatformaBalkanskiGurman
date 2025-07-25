@@ -190,7 +190,7 @@ app.use((err, req, res, next) => {
 async function createAdminUser() {
   let admin = await User.findOne({
     where: {
-      [Op.or]: [{ username: 'admin' }, { email: 'admin@example.com' }],
+      [Op.or]: [{ username: 'admin' }, { email: 'admin@admin.com' }],
     },
   });
   if (admin) {
@@ -227,7 +227,7 @@ if (process.env.HTTPS == 'true') {
       cert: readFileSync('cert/localhost.pem'),
     },
     app
-  ).listen(port, '0.0.0.0', () => {
+  ).listen(port, () => {
     console.log(
       `Secure app started in '${
         process.env.NODE_ENV || 'development'

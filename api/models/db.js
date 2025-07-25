@@ -10,7 +10,7 @@ let dbURI = '';
 if (process.env.NODE_ENV === 'production') {
   dbURI = process.env.RENDER_POSTGRES_URI || '';
 } else {
-  dbURI = `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`;
+  dbURI = `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`;
 }
 
 const pool = new Pool({
@@ -20,6 +20,8 @@ const pool = new Pool({
     rejectUnauthorized: false,
   },
 });
+
+console.log('DB URI:', dbURI);
 
 const sequelize = new Sequelize(dbURI, {
   dialect: 'postgres',
