@@ -12,7 +12,7 @@ export default async function initDB() {
     await sequelize.sync({ alter: true });
     console.log('Database synchronized');
 
-    await InitData.addInitialData();
+    // await InitData.addInitialData();
   } catch (err) {
     console.error('Error initializing database:', err);
   }

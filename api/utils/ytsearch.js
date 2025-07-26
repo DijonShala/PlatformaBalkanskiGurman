@@ -1,4 +1,3 @@
-// ytdata.js
 import { google } from 'googleapis';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -8,9 +7,9 @@ const youtube = google.youtube({
   auth: process.env.YOUTUBE_DATA_API_KEY,
 });
 
-const CORE_REVIEW_TERMS = ['restaurant', 'food tour'];
+const terms = ['restaurant', 'food tour'];
 
-const CITY_MAP = {
+const country_city = {
   Slovenia: ['ljubljana', 'maribor', 'celje', 'novo mesto'],
   Croatia: ['zagreb', 'split', 'rijeka'],
   'Bosnia and Herzegovina': ['sarajevo', 'mostar', 'banja luka'],
@@ -20,11 +19,11 @@ const CITY_MAP = {
   'North Macedonia': ['skopje', 'bitola', 'ohrid', 'tetovo'],
 };
 
-export async function searchVideosByCountry(country, { maxResults = 10 } = {}) {
-  const cities = CITY_MAP[country] || [country.toLowerCase()];
+export async function search_by_country(country, { maxResults = 10 } = {}) {
+  const cities = country_city[country] || [country.toLowerCase()];
   const publishedAfter = new Date(Date.now() - 7 * 86400 * 1000).toISOString(); // last week
 
-  const searchQueries = CORE_REVIEW_TERMS.flatMap((term) =>
+  const searchQueries = terms.flatMap((term) =>
     cities.map((city) => `${term} ${city}`)
   );
 
@@ -41,7 +40,7 @@ export async function searchVideosByCountry(country, { maxResults = 10 } = {}) {
         publishedAfter,
         //relevanceLanguage: 'en',
         safeSearch: 'moderate',
-        order: 'relevance', // 'relevance'
+        order: 'relevance', //'relevance'
       });
 
       for (const item of res.data.items || []) {

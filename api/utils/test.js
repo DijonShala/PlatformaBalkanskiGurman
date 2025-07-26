@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { analyzeVideo } from './review-videos.js';
+import { analyzeVideo } from './openai_analyse.js';
 import axios from 'axios';
 import Restaurant from '../models/Restaurant.js';
 
@@ -75,8 +75,8 @@ async function test(videoId) {
           foodType: Array.isArray(place.foodType)
             ? place.foodType
             : place.foodType
-              ? [place.foodType]
-              : [],
+            ? [place.foodType]
+            : [],
           description: place.description || null,
           address: place.address,
           postalCode: place.postalCode || null,

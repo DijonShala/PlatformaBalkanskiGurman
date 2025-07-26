@@ -9,7 +9,7 @@ const openai = new OpenAI({
   timeout: 20 * 1000,
 });
 
-const SYSTEM_PROMPT = `
+const system_prompt = `
     You extract structured restaurant data from YouTube video content.
 
     Only include restaurants located in one of these countries: Slovenia, Croatia, Bosnia and Herzegovina, Serbia, Montenegro, Kosovo, North Macedonia.
@@ -35,8 +35,8 @@ const SYSTEM_PROMPT = `
  * @returns {Promise<null | Array<Object>>}
  */
 export async function analyzeVideo({ title, description }) {
-  const userPrompt = `
-    Here is a YouTube video:
+  const user_prompt = `
+    Here is a YouTube video,
 
     Title: ${title}
     Description: ${description}
@@ -47,11 +47,11 @@ export async function analyzeVideo({ title, description }) {
     messages: [
       {
         role: 'system',
-        content: SYSTEM_PROMPT,
+        content: system_prompt,
       },
       {
         role: 'user',
-        content: userPrompt,
+        content: user_prompt,
       },
     ],
   });

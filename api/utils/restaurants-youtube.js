@@ -1,6 +1,5 @@
-// extract-restaurants.js
-import { searchVideosByCountry } from './ytdata.js';
-import { analyzeVideo } from './review-videos.js';
+import { search_by_country } from './ytsearch.js';
+import { analyzeVideo } from './openai_analyse.js';
 import Restaurant from '../models/Restaurant.js';
 import dotenv from 'dotenv';
 
@@ -26,9 +25,9 @@ function isValidCoordinate(value) {
   return typeof value === 'number' && !isNaN(value);
 }
 
-async function run(country = getTodayCountry()) {
+export async function run(country = getTodayCountry()) {
   console.log(`Country: ${country}`);
-  const videos = await searchVideosByCountry(country, { maxResults: 10 });
+  const videos = await search_by_country(country, { maxResults: 10 });
 
   for (const video of videos) {
     const restaurants = await analyzeVideo({
@@ -55,7 +54,7 @@ async function run(country = getTodayCountry()) {
           latitude,
           longitude,
         } = place;
-        //IF no name cat, addr skip dont save
+        //IF there is  no name, addr skip dont save
         if (!name || !category || !address || !city || !country) {
           continue;
         }
@@ -95,10 +94,4 @@ async function run(country = getTodayCountry()) {
       }
     }
   }
-
-  console.log(`Finished: ${country}`);
 }
-
-run().catch((err) => {
-  console.error('Error', err);
-});
