@@ -40,9 +40,7 @@
 
   <form [formGroup]="form" (ngSubmit)="updateRestaurant()" class="space-y-5">
     <div>
-      <label class="block mb-2 text-sm font-medium text-gray-900"
-        >Name <span class="text-red-500">*</span></label
-      >
+      <label class="block mb-2 text-sm font-medium text-gray-900">Name</label>
       <input
         formControlName="name"
         type="text"
@@ -67,7 +65,7 @@
     </div>
 
     <mat-form-field appearance="fill" class="w-full">
-      <mat-label>Food Type <span class="text-red-500">*</span></mat-label>
+      <mat-label>Food Type</mat-label>
       <mat-select formControlName="foodType" multiple required>
         <mat-option *ngFor="let food of FOOD_TYPES" [value]="food">{{
           food
@@ -93,7 +91,7 @@
 
     <div>
       <label class="block mb-2 text-sm font-medium text-gray-900"
-        >Address <span class="text-red-500">*</span></label
+        >Address</label
       >
       <input
         formControlName="address"
@@ -114,9 +112,7 @@
     </div>
 
     <div>
-      <label class="block mb-2 text-sm font-medium text-gray-900"
-        >City <span class="text-red-500">*</span></label
-      >
+      <label class="block mb-2 text-sm font-medium text-gray-900">City</label>
       <input
         formControlName="city"
         type="text"
@@ -126,7 +122,7 @@
 
     <div>
       <label class="block mb-2 text-sm font-medium text-gray-900"
-        >Country <span class="text-red-500">*</span></label
+        >Country</label
       >
       <input
         formControlName="country"

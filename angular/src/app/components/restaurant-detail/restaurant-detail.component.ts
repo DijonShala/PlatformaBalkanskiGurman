@@ -29,16 +29,13 @@ export class RestaurantDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private restaurantService: RestaurantService,
-    public authenticationService: AuthenticationService,
+    public authenticationService: AuthenticationService
   ) {}
 
   ngOnInit(): void {
     const id = +this.route.snapshot.paramMap.get('id')!;
     this.loadRestaurant(id);
     this.loadReviews(id);
-    if (this.restaurant?.photos?.length) {
-      this.mainPhoto = this.restaurant.photos[0];
-    }
   }
 
   isLoggedIn(): boolean {
@@ -54,6 +51,9 @@ export class RestaurantDetailComponent implements OnInit {
       next: (res) => {
         this.restaurant = res;
         this.loading = false;
+        if (this.restaurant.photos && this.restaurant.photos.length > 0) {
+          this.mainPhoto = this.restaurant.photos[0];
+        }
       },
       error: (err) => {
         this.error = 'Could not load restaurant details.';

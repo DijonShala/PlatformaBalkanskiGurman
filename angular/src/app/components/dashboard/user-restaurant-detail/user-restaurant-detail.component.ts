@@ -103,7 +103,7 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
     private restaurantService: RestaurantService,
     private route: ActivatedRoute,
     private router: Router,
-    private authService: AuthenticationService,
+    private authService: AuthenticationService
   ) {}
 
   ngOnInit(): void {
@@ -175,39 +175,34 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
     }
 
     const formValues = this.form.value;
+    const updatedData = this.getChangedFields(
+      formValues,
+      this.internalRestaurant
+    );
 
-    const formData = new FormData();
-    formData.append('name', formValues.name);
-    formData.append('category', formValues.category || '');
-    formData.append('description', formValues.description || '');
-    formData.append('address', formValues.address);
-    formData.append('postalCode', formValues.postalCode || '');
-    formData.append('city', formValues.city);
-    formData.append('country', formValues.country);
-
-    const foodTypes: string[] = formValues.foodType || [];
-    for (const food of foodTypes) {
-      formData.append('foodType', food);
-    }
-
-    for (const file of this.selectedFiles) {
-      formData.append('restaurant_photos', file);
+    if (updatedData.keys().next().done) {
+      // If no fields changed
+      this.alertType = 'info';
+      this.alertMessage = 'No changes to update.';
+      return;
     }
 
     this.loading = true;
-    this.restaurantService.updateRestaurant(restaurantId, formData).subscribe({
-      next: () => {
-        this.alertType = 'success';
-        this.alertMessage = 'Restaurant updated succesfully';
-        this.loading = false;
-        this.updated.emit();
-      },
-      error: (err) => {
-        this.alertType = 'error';
-        this.alertMessage = err.error?.message || 'Restaurant update failed';
-        this.loading = false;
-      },
-    });
+    this.restaurantService
+      .updateRestaurant(restaurantId, updatedData)
+      .subscribe({
+        next: () => {
+          this.alertType = 'success';
+          this.alertMessage = 'Restaurant updated successfully';
+          this.loading = false;
+          this.updated.emit();
+        },
+        error: (err) => {
+          this.alertType = 'error';
+          this.alertMessage = err.error?.message || 'Restaurant update failed';
+          this.loading = false;
+        },
+      });
   }
 
   deleteRestaurant(): void {
@@ -239,6 +234,54 @@ export class UserRestaurantDetailComponent implements OnInit, OnChanges {
         this.loading = false;
       },
     });
+  }
+
+  private getChangedFields(formValues: any, original: any): FormData {
+    const updatedData = new FormData();
+
+    // Simple fields
+    const simpleFields = [
+      'name',
+      'category',
+      'description',
+      'address',
+      'postalCode',
+      'city',
+      'country',
+    ];
+    simpleFields.forEach((field) => {
+      if (formValues[field] !== original[field]) {
+        updatedData.append(field, formValues[field] || '');
+      }
+    });
+
+    const originalFoodType = Array.isArray(original.foodType)
+      ? original.foodType
+      : (original.foodType || '').split(',').map((f: string) => f.trim());
+    const newFoodType = Array.isArray(formValues.foodType)
+      ? formValues.foodType
+      : [];
+
+    if (JSON.stringify(originalFoodType) !== JSON.stringify(newFoodType)) {
+      newFoodType.forEach((food: string) =>
+        updatedData.append('foodType', food)
+      );
+    }
+
+    if (this.selectedFiles.length > 0) {
+      this.selectedFiles.forEach((file) =>
+        updatedData.append('restaurant_photos', file)
+      );
+    } else if (
+      JSON.stringify(formValues.photos || []) !==
+      JSON.stringify(original.photos || [])
+    ) {
+      (formValues.photos || []).forEach((url: string) =>
+        updatedData.append('photos', url)
+      );
+    }
+
+    return updatedData;
   }
 
   clearAllPhotos(): void {

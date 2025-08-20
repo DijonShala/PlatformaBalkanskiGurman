@@ -14,6 +14,7 @@
 
   <div *ngIf="restaurant?.photos?.length" class="mt-6 grid gap-4">
     <div class="grid gap-4">
+      <!-- Main Photo -->
       <div class="w-full h-64 sm:h-80">
         <img
           class="w-full h-full rounded-lg object-contain bg-gray-100"
@@ -22,10 +23,15 @@
         />
       </div>
 
+      <!-- Thumbnails -->
       <div class="flex flex-wrap gap-3 justify-start">
         <div
-          *ngFor="let photo of restaurant?.photos?.slice(1, 5)"
-          class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden"
+          *ngFor="let photo of restaurant?.photos?.slice(0, 5)"
+          class="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden border-2"
+          [ngClass]="{
+            'border-blue-600': photo === mainPhoto,
+            'border-transparent': photo !== mainPhoto
+          }"
         >
           <img
             class="w-full h-full object-contain cursor-pointer"

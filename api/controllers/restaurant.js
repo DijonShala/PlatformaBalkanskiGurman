@@ -84,6 +84,8 @@ const allRestaurants = async (req, res) => {
  *   summary: Get paginated list of restaurants created by a specific user
  *   description: Retrieve a paginated list of restaurants created by the user with the given ID.
  *   tags: [Restaurants]
+ *   security:
+ *    - jwt: []
  *   parameters:
  *    - in: path
  *      name: id
@@ -366,8 +368,8 @@ const createRestaurant = async (req, res) => {
     const normalizedFoodType = Array.isArray(foodType)
       ? foodType
       : typeof foodType === 'string'
-        ? [foodType]
-        : [];
+      ? [foodType]
+      : [];
 
     const newRestaurant = await Restaurant.create({
       userId: req.auth.id,
@@ -482,8 +484,13 @@ const createRestaurant = async (req, res) => {
 
 const updateRestaurant = async (req, res) => {
   try {
-    if (req.body.postalCode && typeof req.body.postalCode === 'string') {
+    if (typeof req.body.postalCode === 'string') {
       req.body.postalCode = req.body.postalCode.trim();
+      if (req.body.postalCode === '') {
+        req.body.postalCode = null;
+      } else {
+        req.body.postalCode = Number(req.body.postalCode);
+      }
     }
 
     const { error, value } = updateRestaurantSchema.validate(req.body);
@@ -520,12 +527,13 @@ const updateRestaurant = async (req, res) => {
       updatedFields.foodType = Array.isArray(foodType)
         ? foodType
         : typeof foodType === 'string'
-          ? [foodType]
-          : [];
+        ? [foodType]
+        : [];
     }
     if (description !== undefined) updatedFields.description = description;
     if (address !== undefined) updatedFields.address = address;
-    if (postalCode !== undefined) updatedFields.postalCode = postalCode;
+    if (postalCode !== undefined && postalCode !== null)
+      updatedFields.postalCode = postalCode;
     if (city !== undefined) updatedFields.city = city;
     if (country !== undefined) updatedFields.country = country;
 
@@ -668,7 +676,7 @@ const deleteAllRestaurants = async (req, res) => {
  *  get:
  *   summary: Filter restaurants with pagination
  *   description: >
- *     Filter restaurants by category, food type (single cuisine), country, city, or name with pagination support.
+ *     Filter restaurants by category, food type (single cuisine), country, city, name, or photo availability with pagination support.
  *     Note: `foodType` matches any restaurant that includes the specified cuisine in its food type array.
  *   tags: [Restaurants]
  *   parameters:
@@ -694,6 +702,11 @@ const deleteAllRestaurants = async (req, res) => {
  *      schema:
  *       type: string
  *    - in: query
+ *      name: hasPhotos
+ *      schema:
+ *       type: boolean
+ *      description: If true, only return restaurants that have at least one photo
+ *    - in: query
  *      name: page
  *      schema:
  *       type: integer
@@ -708,24 +721,6 @@ const deleteAllRestaurants = async (req, res) => {
  *   responses:
  *    '200':
  *     description: <b>OK</b>, filtered restaurants returned.
- *     content:
- *      application/json:
- *       schema:
- *        type: object
- *        properties:
- *         currentPage:
- *          type: integer
- *          example: 1
- *         totalPages:
- *          type: integer
- *          example: 3
- *         totalItems:
- *          type: integer
- *          example: 25
- *         data:
- *          type: array
- *          items:
- *           $ref: '#/components/schemas/Restaurant'
  *    '404':
  *     description: <b>Not Found</b>, no matching restaurants.
  *    '500':
@@ -733,7 +728,7 @@ const deleteAllRestaurants = async (req, res) => {
  */
 const filterRestaurants = async (req, res) => {
   try {
-    const { category, foodType, country, city, name } = req.query;
+    const { category, foodType, country, city, name, hasPhotos } = req.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -749,8 +744,15 @@ const filterRestaurants = async (req, res) => {
     if (city) whereClause.city = city;
     if (name) whereClause.name = { [Op.iLike]: `%${name}%` };
 
+    if (hasPhotos === 'true') {
+      whereClause.photos = {
+        [Op.ne]: [],
+      };
+    }
+
     const { count, rows: results } = await Restaurant.findAndCountAll({
       where: whereClause,
+      distinct: true,
       limit,
       offset,
       order: [['createdAt', 'DESC']],
@@ -767,6 +769,7 @@ const filterRestaurants = async (req, res) => {
       data: results,
     });
   } catch (err) {
+    console.error('Filter error:', err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -820,7 +823,9 @@ const listCodelistValues = async (req, res) => {
 
   if (!allowedCodelists.includes(field)) {
     return res.status(400).json({
-      message: `Parameter 'codelist' must be one of: ${allowedCodelists.join(', ')}`,
+      message: `Parameter 'codelist' must be one of: ${allowedCodelists.join(
+        ', '
+      )}`,
     });
   }
 
@@ -1071,7 +1076,7 @@ const getRestaurantsInBounds = async (req, res) => {
   const maxLat = parseFloat(req.query.maxLat);
   const maxLng = parseFloat(req.query.maxLng);
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 50;
+  const limit = parseInt(req.query.limit) || 10;
   const offset = (page - 1) * limit;
 
   if ([minLat, minLng, maxLat, maxLng].some((v) => isNaN(v))) {
@@ -1140,123 +1145,6 @@ export const updateAverageRating = async (restaurantId) => {
   }
 };
 
-/**
- * @openapi
- * /restaurants/search:
- *  get:
- *   summary: Search for restaurants by name with pagination
- *   description: Retrieve a paginated list of restaurants whose names match the provided query (case-insensitive).
- *   tags: [Restaurants]
- *   parameters:
- *    - in: query
- *      name: name
- *      required: true
- *      schema:
- *       type: string
- *      description: Name or partial name of the restaurant to search for.
- *    - in: query
- *      name: page
- *      schema:
- *       type: integer
- *       default: 1
- *      description: Page number (1-based)
- *    - in: query
- *      name: limit
- *      schema:
- *       type: integer
- *       default: 10
- *      description: Number of items per page
- *   responses:
- *    '200':
- *     description: A paginated list of matching restaurants.
- *     content:
- *      application/json:
- *       schema:
- *        type: object
- *        properties:
- *         currentPage:
- *          type: integer
- *         totalPages:
- *          type: integer
- *         totalItems:
- *          type: integer
- *         data:
- *          type: array
- *          items:
- *           $ref: '#/components/schemas/Restaurant'
- *    '400':
- *     description: Missing required query parameter 'name'.
- *     content:
- *      application/json:
- *       schema:
- *        type: object
- *        properties:
- *         message:
- *          type: string
- *          example: "Query parameter 'name' is required."
- *    '404':
- *     description: No restaurants found with that name.
- *     content:
- *      application/json:
- *       schema:
- *        type: object
- *        properties:
- *         message:
- *          type: string
- *          example: "No restaurants found with that name."
- *    '500':
- *     description: Internal server error.
- *     content:
- *      application/json:
- *       schema:
- *        type: object
- *        properties:
- *         message:
- *          type: string
- *          example: "Server error."
- */
-const searchRestaurantByName = async (req, res) => {
-  try {
-    const { name } = req.query;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-
-    if (!name) {
-      return res
-        .status(400)
-        .json({ message: "Query parameter 'name' is required" });
-    }
-
-    const { count, rows: restaurants } = await Restaurant.findAndCountAll({
-      where: {
-        name: {
-          [Op.iLike]: `%${name}%`,
-        },
-      },
-      limit,
-      offset,
-      order: [['createdAt', 'DESC']],
-    });
-
-    if (restaurants.length === 0) {
-      return res
-        .status(404)
-        .json({ message: 'No restaurants found with that name' });
-    }
-
-    return res.status(200).json({
-      currentPage: page,
-      totalPages: Math.ceil(count / limit),
-      totalItems: count,
-      data: restaurants,
-    });
-  } catch (error) {
-    console.error('Search error:', error);
-    return res.status(500).json({ message: 'Server error' });
-  }
-};
-
 export default {
   allRestaurants,
   restaurantsByUserId,
@@ -1269,6 +1157,5 @@ export default {
   getRestaurantsByDistance,
   listCodelistValues,
   updateAverageRating,
-  searchRestaurantByName,
   getRestaurantsInBounds,
 };

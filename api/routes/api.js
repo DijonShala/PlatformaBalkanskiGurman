@@ -45,15 +45,9 @@ router.delete('/user/:id', auth, isOwnerOrAdmin(User), ctrlUsers.deleteProfile);
  */
 router.get('/restaurants/in-bounds', ctrlRestaurants.getRestaurantsInBounds);
 router.get('/restaurants', ctrlRestaurants.allRestaurants);
-router.get(
-  '/restaurants/user/:id',
-  auth,
-  isOwnerOrAdmin(Restaurant),
-  ctrlRestaurants.restaurantsByUserId
-);
+router.get('/restaurants/user/:id', ctrlRestaurants.restaurantsByUserId);
 router.get('/restaurants/distance', ctrlRestaurants.getRestaurantsByDistance);
 router.get('/restaurants/filter', ctrlRestaurants.filterRestaurants);
-router.get('/restaurants/search/', ctrlRestaurants.searchRestaurantByName);
 router.get('/restaurants/:id', ctrlRestaurants.oneRestaurant);
 router.get(
   '/restaurants/codelist/:codelist',

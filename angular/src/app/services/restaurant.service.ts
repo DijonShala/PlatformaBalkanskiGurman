@@ -20,7 +20,7 @@ export class RestaurantService {
 
   constructor(
     private http: HttpClient,
-    @Inject(BROWSER_STORAGE) private storage: Storage,
+    @Inject(BROWSER_STORAGE) private storage: Storage
   ) {}
 
   get reload$() {
@@ -46,8 +46,8 @@ export class RestaurantService {
               totalPages: res.totalPages,
               totalItems: res.totalItems,
               data: res.data.map((r) => new Restaurant(r)),
-            }),
-        ),
+            })
+        )
       );
   }
 
@@ -64,7 +64,7 @@ export class RestaurantService {
   }
 
   getCodelistValues(
-    field: 'category' | 'foodType' | 'city' | 'country',
+    field: 'category' | 'foodType' | 'city' | 'country'
   ): Observable<string[]> {
     return this.http
       .get<{
@@ -77,14 +77,14 @@ export class RestaurantService {
   searchRestaurantsByName(
     name: string,
     page = 1,
-    limit = 10,
+    limit = 10
   ): Observable<Pagination<Restaurant>> {
     const params = { name, page, limit };
 
     return this.http
-      .get<
-        Pagination<Restaurant>
-      >(`${this.apiUrl}/restaurants/search`, { params })
+      .get<Pagination<Restaurant>>(`${this.apiUrl}/restaurants/search`, {
+        params,
+      })
       .pipe(
         map(
           (res) =>
@@ -93,8 +93,8 @@ export class RestaurantService {
               totalPages: res.totalPages,
               totalItems: res.totalItems,
               data: res.data.map((r) => new Restaurant(r)),
-            }),
-        ),
+            })
+        )
       );
   }
 
@@ -102,7 +102,7 @@ export class RestaurantService {
     minLat: number,
     minLng: number,
     maxLat: number,
-    maxLng: number,
+    maxLng: number
   ): Observable<any> {
     return this.http.get(`${this.apiUrl}/restaurants/in-bounds`, {
       params: {
@@ -124,9 +124,9 @@ export class RestaurantService {
     limit?: number;
   }): Observable<Pagination<Restaurant>> {
     return this.http
-      .get<
-        Pagination<Restaurant>
-      >(`${this.apiUrl}/restaurants/filter`, { params: filters })
+      .get<Pagination<Restaurant>>(`${this.apiUrl}/restaurants/filter`, {
+        params: filters,
+      })
       .pipe(
         map(
           (res) =>
@@ -135,12 +135,12 @@ export class RestaurantService {
               totalPages: res.totalPages,
               totalItems: res.totalItems,
               data: res.data.map((r) => new Restaurant(r)),
-            }),
-        ),
+            })
+        )
       );
   }
 
-  updateRestaurants(restaurants: Restaurant[]) {
+  updateRestaurants(restaurants: Restaurant[]): void {
     this.restaurantsSubject.next(restaurants);
   }
 
@@ -149,7 +149,7 @@ export class RestaurantService {
 
     const headers = new HttpHeaders().set(
       'Authorization',
-      `Bearer ${this.storage.getItem('jwt-token')}`,
+      `Bearer ${this.storage.getItem('jwt-token')}`
     );
 
     return this.http.post<Restaurant>(url, formData, { headers });
@@ -160,7 +160,7 @@ export class RestaurantService {
     lng: number,
     maxDistance: number = 5000,
     page: number = 1,
-    limit: number = 10,
+    limit: number = 10
   ): Observable<Pagination<Restaurant>> {
     const params = new HttpParams()
       .set('lat', lat.toString())
@@ -170,9 +170,9 @@ export class RestaurantService {
       .set('limit', limit.toString());
 
     return this.http
-      .get<
-        Pagination<Restaurant>
-      >(`${this.apiUrl}/restaurants/distance`, { params })
+      .get<Pagination<Restaurant>>(`${this.apiUrl}/restaurants/distance`, {
+        params,
+      })
       .pipe(
         map(
           (res) =>
@@ -181,8 +181,8 @@ export class RestaurantService {
               totalPages: res.totalPages,
               totalItems: res.totalItems,
               data: res.data.map((r) => new Restaurant(r)),
-            }),
-        ),
+            })
+        )
       );
   }
 
@@ -190,7 +190,7 @@ export class RestaurantService {
     const url = `${this.apiUrl}/restaurants/${restaurantId}/reviews`;
     const headers = new HttpHeaders().set(
       'Authorization',
-      `Bearer ${this.storage.getItem('jwt-token')}`,
+      `Bearer ${this.storage.getItem('jwt-token')}`
     );
 
     return this.http
@@ -204,14 +204,14 @@ export class RestaurantService {
 
     return this.http.delete(
       `${this.apiUrl}/restaurants/${restaurantId}/reviews/${reviewId}`,
-      { headers },
+      { headers }
     );
   }
 
   getRestaurantsByUserId(
     userId: number,
     page: number = 1,
-    limit: number = 10,
+    limit: number = 10
   ): Observable<Pagination<Restaurant>> {
     const token = this.storage.getItem('jwt-token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
@@ -220,9 +220,10 @@ export class RestaurantService {
       .set('limit', limit.toString());
 
     return this.http
-      .get<
-        Pagination<Restaurant>
-      >(`${this.apiUrl}/restaurants/user/${userId}`, { headers, params })
+      .get<Pagination<Restaurant>>(
+        `${this.apiUrl}/restaurants/user/${userId}`,
+        { headers, params }
+      )
       .pipe(
         map(
           (res) =>
@@ -231,8 +232,8 @@ export class RestaurantService {
               totalPages: res.totalPages,
               totalItems: res.totalItems,
               data: res.data.map((r) => new Restaurant(r)),
-            }),
-        ),
+            })
+        )
       );
   }
 

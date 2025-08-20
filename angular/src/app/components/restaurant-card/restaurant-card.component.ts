@@ -42,6 +42,13 @@ export class RestaurantCardComponent {
     return `assets/${iconFile}`;
   }
 
+  getRestaurantImage(): string {
+    if (this.restaurant.photos && this.restaurant.photos.length > 0) {
+      return this.restaurant.photos[0];
+    }
+    return this.getCategoryIcon();
+  }
+
   formatRating(rating: any): string {
     const num = Number(rating);
     return !isNaN(num) ? num.toFixed(1) : 'N/A';

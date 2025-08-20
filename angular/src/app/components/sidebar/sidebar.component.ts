@@ -23,6 +23,9 @@ export class SidebarComponent implements OnInit {
   selectedFoodType = '';
   selectedCity = '';
   selectedCountry = '';
+
+  hasPhotos: boolean = false;
+
   error = '';
   loading = false;
   maxDistance: number = 5000;
@@ -31,7 +34,7 @@ export class SidebarComponent implements OnInit {
     private restaurantService: RestaurantService,
     private filterService: FilterService,
     private commService: RestaurantCommunicationService,
-    private geolocationService: GeolocationService,
+    private geolocationService: GeolocationService
   ) {}
 
   ngOnInit(): void {
@@ -47,8 +50,9 @@ export class SidebarComponent implements OnInit {
       this.selectedFoodType = savedFilters.foodType || '';
       this.selectedCity = savedFilters.city || '';
       this.selectedCountry = savedFilters.country || '';
+      this.hasPhotos = savedFilters.hasPhotos || false;
       const hasValidFilters = Object.values(savedFilters).some(
-        (val) => !!val && val !== 'nearby',
+        (val) => !!val && val !== 'nearby'
       );
 
       if (hasValidFilters) {
@@ -77,6 +81,7 @@ export class SidebarComponent implements OnInit {
       foodType: this.selectedFoodType,
       city: this.selectedCity,
       country: this.selectedCountry,
+      hasPhotos: this.hasPhotos,
     };
     this.filterService.setFilters(filters);
     this.commService.emitFiltersChanged(filters);
@@ -88,6 +93,7 @@ export class SidebarComponent implements OnInit {
     this.selectedFoodType = '';
     this.selectedCity = '';
     this.selectedCountry = '';
+    this.hasPhotos = false;
     this.maxDistance = 5000;
     this.filterService.clearFilters();
     this.commService.emitFiltersChanged({});
@@ -95,7 +101,7 @@ export class SidebarComponent implements OnInit {
 
   askForLocationPermission(): void {
     const confirmed = confirm(
-      'This app would like to access your location to show nearby restaurants. Allow?',
+      'This app would like to access your location to show nearby restaurants. Allow?'
     );
     if (confirmed) {
       localStorage.setItem('locationPermission', 'granted');

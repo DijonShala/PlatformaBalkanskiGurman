@@ -91,7 +91,7 @@ export const updateRestaurantSchema = Joi.object({
     .optional(),
   description: Joi.string().optional(),
   address: Joi.string().optional(),
-  postalCode: Joi.number().optional(),
+  postalCode: Joi.number().allow(null).optional(),
   city: Joi.string().optional(),
   country: Joi.string().optional(),
   latitude: Joi.string().optional(),

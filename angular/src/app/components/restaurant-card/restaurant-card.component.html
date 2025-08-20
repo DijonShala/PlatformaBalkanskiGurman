@@ -3,9 +3,9 @@
   class="bg-white rounded-xl shadow p-4 flex flex-col sm:flex-row gap-4 hover:shadow-md transition h-[250px] sm:h-[180px]"
 >
   <img
-    [src]="getCategoryIcon()"
-    alt="{{ restaurant.category || 'Category Icon' }}"
-    class="w-16 h-16 sm:w-24 sm:h-24 object-contain rounded-md mx-auto sm:mx-0"
+    [src]="getRestaurantImage()"
+    alt="{{ restaurant.name || 'Restaurant photo or Icon' }}"
+    class="w-16 h-16 sm:w-24 sm:h-24 object-cover rounded-md mx-auto sm:mx-0"
   />
 
   <div class="flex-1 flex flex-col justify-between">
