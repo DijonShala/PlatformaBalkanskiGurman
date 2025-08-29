@@ -100,14 +100,36 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      validate: {
+        len: {
+          args: [3, 255],
+          msg: 'Username must be between 3 and 50 characters',
+        },
+        is: {
+          args: /^[a-zA-Z0-9_]+$/i,
+          msg: 'Username can only contain letters, numbers, and underscores',
+        },
+      },
     },
     firstname: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        len: {
+          args: [1, 255],
+          msg: 'First name must be between 1 and 50 characters',
+        },
+      },
     },
     lastname: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        len: {
+          args: [1, 255],
+          msg: 'Last name must be between 1 and 50 characters',
+        },
+      },
     },
     role: {
       type: DataTypes.ENUM('admin', 'basic'),

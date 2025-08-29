@@ -104,7 +104,7 @@ import './api/config/passport.js';
  * Database synchronization
  */
 import initDB from './api/models/init.js';
-//import initializedb from './api/controllers/initdb.js';
+import initializedb from './api/controllers/initdb.js';
 
 /**
  * Create server
@@ -215,7 +215,7 @@ async function createAdminUser() {
 
 await initDB();
 await createAdminUser();
-//await initializedb.addInitialData();
+await initializedb.addInitialData();
 
 import './api/utils/daily_scheduel.js';
 /**

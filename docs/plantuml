@@ -1,0 +1,452 @@
+@startuml
+skinparam backgroundcolor transparent
+skinparam defaultTextAlignment center
+skinparam usecase {
+  backgroundColor white
+  borderColor #5FB8EC
+  arrowColor black
+}
+skinparam actorBorderColor black
+skinparam actorBackgroundColor white
+
+left to right direction
+
+actor "Prijavljen uporabnik" AS U
+actor "Neprijavljen uporabnik" AS N
+actor "Skrbnik" AS A
+actor "Youtube" AS Y
+actor "Cloudinary" AS C
+actor "OpenStreetMap" AS O
+actor "OpenAI" AS AI
+actor "Timer" AS T
+actor "GeoCode" AS G
+
+U <|-- A
+
+rectangle "Platforma Balkanski Gurman" {
+  usecase "Prijava v sistem" AS PU1
+   usecase "Avtentikacija" AS PU2
+  usecase "Registracija v sistem" AS PU3
+  usecase "Pregled uporabnikov" AS PU4
+  usecase "Posodobitev profilov uporabnikov" AS PU5
+  usecase "Posodobitev profila" AS PU28
+  usecase "Sprememba gesla" AS PU6
+  usecase "Izbris profila" as PU7
+  usecase "Izbris profilov uporabnikov" as PU29
+
+  usecase "Pregled restavracij" as PU8
+  usecase "Posodobitev seznama restavracij" as PU9
+  usecase "Iskanje in filtriranje restavracij" as PU10
+  usecase "Pregled restavracije" as PU11
+  usecase "Dodajanje restavracije" as PU12
+  usecase "Pridobivanje možnih kategorij, tipov hrane" as PU13
+  usecase "Posodobitev restavracije" as PU14
+  usecase "Posodobitev restavracij" as PU30
+  usecase "Izbris restavracije" as PU15
+  usecase "Izbris restavracij" as PU31
+  usecase "Pridobivanje zemljepisne širine in dolžine\niz naslova restavracije" as PU16
+  usecase "Shranjevanje slike v Cloudinary" as PU17
+  usecase "Pridobivanje začetnih podatkov" as PU18
+  usecase "Shranjevanje v CSV datoteki" AS PU19
+  usecase "Uvoz začetnih podatkov" AS PU20
+
+  usecase "Dopolnitev podatka o opisu restavracije" AS PU21
+
+  usecase "Pridobivanje določenih posnetkov iz Youtuba" as PU22
+  usecase "Analiziranje podatkov iz Youtube videoposnetka" as PU23
+  
+
+
+  usecase "Pregledovanje komentarjev\n za določeno restavracijo" as PU24
+  usecase "Dodajanje komentarja" as PU25
+  usecase "Izbris komentarja" as PU26
+  usecase "Izbris komentarje" as PU32
+  usecase "Osveževanje ocene restavracije" as PU27
+  
+
+
+}
+N --> (PU1)
+N --> PU3
+N ---> PU8
+N ---> PU11
+PU10 .> PU8 : <<extend>>
+PU10 .> PU9 : <<include>>
+PU10 .> PU13 : <<include>>
+PU1 ..> PU2 : <<include>>
+PU3 ..> PU2 : <<include>>
+
+U --> (PU28)
+U --> (PU6)
+U --> (PU7)
+U --> (PU8)
+U --> (PU11)
+U --> PU12
+U --> PU14
+U --> PU15
+U --> PU24
+U --> PU25
+U --> PU26
+PU12 ..> PU16 : <<include>>
+PU17 ..> PU12 : <<extend>>
+PU12 ..> PU9 : <<include>>
+PU25 ..> PU27 : <<include>>
+PU26 ..> PU27 : <<include>>
+
+A --> PU4
+PU5 ..> PU4 : <<extend>>
+A --> PU18
+PU18 ..> PU19 : <<include>>
+A  --> PU20
+PU21 ..> PU18 : <<extend>>
+A --> PU29
+A --> PU30
+A --> PU31
+A --> PU32
+
+T --> PU22
+PU22 .>  PU23 : <<include>>
+
+PU16 --> G
+PU17 ----> C
+PU18 ----> O
+PU21 ----> AI
+PU22 -----> Y
+PU23 ----> AI
+@enduml
+
+-------------------------------------------------------------
+NEPRIJAVLJEN
+@startuml
+skinparam backgroundcolor transparent
+skinparam defaultTextAlignment center
+skinparam usecase {
+  backgroundColor white
+  borderColor #5FB8EC
+  arrowColor black
+}
+skinparam actorBorderColor black
+skinparam actorBackgroundColor white
+
+left to right direction
+
+actor "Neprijavljen uporabnik" AS N
+
+
+
+rectangle "Platforma Balkanski Gurman" {
+  usecase "Prijava v sistem" AS PU1
+   usecase "Avtentikacija" AS PU2
+  usecase "Registracija v sistem" AS PU3
+
+  usecase "Pregled restavracij" as PU8
+  usecase "Posodobitev seznama restavracij" as PU9
+  usecase "Iskanje in filtriranje restavracij" as PU10
+  usecase "Pregled restavracije" as PU11
+  usecase "Pridobivanje možnih vrednosti\nkategorij, tipov hrane, mest in držav" as PU13
+ 
+  usecase "Pregledovanje komentarjev\n za določeno restavracijo" as PU24
+
+
+}
+N --> (PU1)
+N --> PU3
+N -> PU8
+N ---> PU11
+PU10 ..> PU8 : <<extend>>
+PU24 .> PU11 : <<extend>>
+PU10 .> PU9 : <<include>>
+PU10 .> PU13 : <<include>>
+PU1 ..> PU2 : <<include>>
+PU3 ..> PU2 : <<include>>
+@enduml
+
+____________________________________________________-
+PRIJAVLJEN
+@startuml
+skinparam backgroundcolor transparent
+skinparam defaultTextAlignment center
+skinparam usecase {
+  backgroundColor white
+  borderColor #5FB8EC
+  arrowColor black
+}
+skinparam actorBorderColor black
+skinparam actorBackgroundColor white
+
+left to right direction
+
+actor "Prijavljen uporabnik" AS U
+actor "Cloudinary" AS C
+actor "GeoCode" AS G
+
+
+rectangle "Platforma Balkanski Gurman" {
+  usecase "Posodobitev profila" AS PU28
+  usecase "Sprememba gesla" AS PU6
+  usecase "Izbris profila" as PU7
+
+  usecase "Pregled restavracij" as PU8
+  usecase "Posodobitev seznama restavracij" as PU9
+  usecase "Iskanje in filtriranje restavracij" as PU10
+  usecase "Pregled restavracije" as PU11
+  usecase "Dodajanje restavracije" as PU12
+  usecase "Pridobivanje možnih vrednosti\nkategorij, tipov hrane, mest in držav" as PU13
+  usecase "Posodobitev restavracije" as PU14
+  usecase "Izbris restavracije" as PU15
+  usecase "Pridobivanje zemljepisne širine in dolžine\niz naslova restavracije" as PU16
+  usecase "Shranjevanje slike v Cloudinary" as PU17
+  
+
+
+  usecase "Pregledovanje komentarjev\n za določeno restavracijo" as PU24
+  usecase "Dodajanje komentarja" as PU25
+  usecase "Izbris komentarja" as PU26
+  usecase "Osveževanje ocene restavracije" as PU27
+  
+
+
+}
+
+PU10 .> PU8 : <<extend>>
+PU10 ...> PU9 : <<include>>
+PU10 ...> PU13 : <<include>>
+
+U --> (PU28)
+U --> (PU6)
+U --> (PU7)
+U --> (PU8)
+U --> (PU11)
+U --> PU12
+U --> PU14
+U --> PU15
+U --> PU25
+U --> PU26
+PU12 .> PU16 : <<include>>
+PU17 .> PU12 : <<extend>>
+PU12 .> PU9 : <<include>>
+PU25 ..> PU27 : <<include>>
+PU26 ..> PU27 : <<include>>
+PU24 .up.> PU11 : <<extend>>
+
+
+PU16 --> G
+PU17 ----> C
+@enduml
+
+________________________________________________________________
+@startuml
+skinparam backgroundcolor transparent
+skinparam defaultTextAlignment center
+skinparam usecase {
+  backgroundColor white
+  borderColor #5FB8EC
+  arrowColor black
+}
+skinparam actorBorderColor black
+skinparam actorBackgroundColor white
+
+left to right direction
+
+actor "Skrbnik" AS A
+actor "Youtube" AS Y
+actor "OpenStreetMap" AS O
+actor "OpenAI" AS AI
+actor "Timer" AS T
+
+rectangle "Platforma Balkanski Gurman" {
+  usecase "Pregled uporabnikov" AS PU4
+  usecase "Posodobitev profilov uporabnikov" AS PU5
+  usecase "Izbris profilov uporabnikov" as PU29
+
+  usecase "Posodobitev restavracij" as PU30
+  usecase "Izbris restavracij" as PU31
+  usecase "Pridobivanje začetnih podatkov" as PU18
+  usecase "Shranjevanje v CSV datoteki" AS PU19
+  usecase "Uvoz začetnih podatkov" AS PU20
+
+  usecase "Dopolnitev podatka o opisu restavracije" AS PU21
+
+  usecase "Pridobivanje določenih videoposnetkov iz Youtuba" as PU22
+  usecase "Analiziranje podatkov iz Youtube videoposnetka" as PU23
+  
+
+
+
+  usecase "Izbris komentarjev" as PU32
+  usecase "Osveževanje ocene restavracije" as PU27
+  
+
+
+}
+
+
+
+
+
+
+A --> PU4
+PU5 ..> PU4 : <<extend>>
+PU29 ..> PU32 : <<include>>
+PU31 ..> PU32 : <<include>>
+A --> PU18
+PU18 ..> PU19 : <<include>>
+A --> PU20
+PU21 ...> PU18 : <<extend>>
+A --> PU29
+A --> PU30
+A --> PU31
+A --> PU32
+
+T --> PU22
+PU22 .>  PU23 : <<include>>
+PU32 ..> PU27 : <<inlcude>>
+
+PU18 ---> O
+PU21 -----> AI
+PU22 -----> Y
+PU23 ----> AI
+@enduml
+_____________________________________________________________
+PTIJAVLJEN UPDATED
+@startuml
+skinparam backgroundcolor transparent
+skinparam defaultTextAlignment center
+skinparam usecase {
+  backgroundColor white
+  borderColor #5FB8EC
+  arrowColor black
+}
+skinparam actorBorderColor black
+skinparam actorBackgroundColor white
+
+left to right direction
+
+actor "Prijavljen uporabnik" AS U
+actor "Cloudinary" AS C
+actor "GeoCode" AS G
+
+
+rectangle "Platforma Balkanski Gurman" {
+  usecase "Posodobitev profila" AS PU28
+  usecase "Sprememba gesla" AS PU6
+  usecase "Izbris profila" as PU7
+
+  usecase "Pregled restavracij" as PU8
+  usecase "Posodobitev seznama restavracij" as PU9
+  usecase "Iskanje in filtriranje restavracij" as PU10
+  usecase "Pregled restavracije" as PU11
+  usecase "Dodajanje restavracije" as PU12
+  usecase "Pridobivanje možnih vrednosti\nkategorij, tipov hrane, mest in držav" as PU13
+  usecase "Posodobitev restavracije" as PU14
+  usecase "Izbris restavracije" as PU15
+  usecase "Pridobivanje zemljepisne širine in dolžine\niz naslova restavracije" as PU16
+  usecase "Shranjevanje slike v Cloudinary" as PU17
+  
+
+
+  usecase "Pregledovanje komentarjev\n za določeno restavracijo" as PU24
+  usecase "Dodajanje komentarja" as PU25
+  usecase "Izbris komentarja" as PU26
+  usecase "Osveževanje ocene restavracije" as PU27
+  
+
+
+}
+
+PU10 .> PU8 : <<extend>>
+PU10 ...> PU9 : <<include>>
+PU10 ...> PU13 : <<include>>
+
+U --> (PU28)
+U --> (PU6)
+U --> (PU7)
+U --> (PU8)
+U --> (PU11)
+U --> PU12
+U --> PU14
+U --> PU15
+U --> PU25
+U --> PU26
+PU12 ..> PU16 : <<include>>
+PU17 ..> PU12 : <<extend>>
+PU17 ..> PU25 : <<extend>>
+PU17 ..> PU14 : <<extend>>
+PU12 ..> PU9 : <<include>>
+PU25 ..> PU27 : <<include>>
+PU26 ..> PU27 : <<include>>
+PU24 .up.> PU11 : <<extend>>
+
+PU7 .> PU26 : <<include>>
+PU15 .> PU26 : <<inlcude>>
+PU16 --> G
+PU17 ----> C
+@enduml
+____________________________________________
+ADMIN2
+
+@startuml
+skinparam backgroundcolor transparent
+skinparam defaultTextAlignment center
+skinparam usecase {
+  backgroundColor white
+  borderColor #5FB8EC
+  arrowColor black
+}
+skinparam actorBorderColor black
+skinparam actorBackgroundColor white
+
+left to right direction
+
+actor "Skrbnik" AS A
+actor "Youtube" AS Y
+actor "OpenStreetMap" AS O
+actor "OpenAI" AS AI
+actor "Cloudinary" AS C
+actor "GeoCode" AS G
+actor "Timer" AS T
+
+rectangle "Platforma Balkanski Gurman" {
+  usecase "Pregled uporabnikov" AS PU4
+  usecase "Posodobitev profilov uporabnikov" AS PU5
+  usecase "Izbris profilov uporabnikov" as PU29
+    usecase "Pridobivanje zemljepisne širine in dolžine\niz naslova restavracije" as PU16
+  usecase "Shranjevanje slike v Cloudinary" as PU17
+  usecase "Posodobitev restavracij" as PU30
+  usecase "Izbris restavracij" as PU31
+  usecase "Pridobivanje začetnih podatkov" as PU18
+  usecase "Shranjevanje v CSV datoteki" AS PU19
+  usecase "Uvoz začetnih podatkov" AS PU20
+
+  usecase "Dopolnitev podatka o opisu restavracije" AS PU21
+
+  usecase "Pridobivanje določenih videoposnetkov iz Youtuba" as PU22
+  usecase "Analiziranje podatkov iz Youtube videoposnetka" as PU23
+
+  usecase "Izbris komentarjev" as PU32
+  usecase "Osveževanje ocene restavracije" as PU27
+}
+  PU17 ..> PU30 : <<extend>>
+A -> PU4
+PU5 ..> PU4 : <<extend>>
+PU29 ..> PU32 : <<include>>
+PU31 ..> PU32 : <<include>>
+A --> PU18
+PU18 ..> PU19 : <<include>>
+A --> PU20
+PU21 ..> PU18 : <<extend>>
+A --> PU29
+A -> PU30
+A --> PU31
+A --> PU32
+PU16 ...> PU30 : <<extend>>
+T ---> PU22
+PU22 ...>  PU23 : <<include>>
+PU32 .up.> PU27 : <<inlcude>>
+PU16 ----> G
+PU17 ---> C
+PU18 ---> O
+PU21 ---> AI
+PU22 ----> Y
+PU23 --> AI
+@enduml

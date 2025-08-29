@@ -70,10 +70,18 @@ Review.init(
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      validate: {
+        isInt: { msg: 'User ID must be an integer' },
+        min: { args: [1], msg: 'User ID must be positive' },
+      },
     },
     restaurantId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      validate: {
+        isInt: { msg: 'Restaurant ID must be an integer' },
+        min: { args: [1], msg: 'Restaurant ID must be positive' },
+      },
     },
     rating: {
       type: DataTypes.INTEGER,
@@ -86,6 +94,12 @@ Review.init(
     comment: {
       type: DataTypes.TEXT,
       allowNull: true,
+      validate: {
+        len: {
+          args: [0, 1000],
+          msg: 'Comment cannot exceed 1000 characters',
+        },
+      },
     },
     photo: {
       type: DataTypes.STRING,
